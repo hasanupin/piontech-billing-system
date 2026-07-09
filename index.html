@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Piontech Billing System — Launching Soon</title>
+<meta name="description" content="Piontech Billing System launches August 6, 2026. Stay tuned." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💳</text></svg>" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <main class="wrap">
+    <header class="brand">
+      <span class="brand-mark">Piontech</span>
+      <span class="brand-sub">Billing System</span>
+    </header>
+
+    <section class="hero">
+      <p class="eyebrow">Launching</p>
+      <h1>Something new is<br class="br-mobile" /> almost ready.</h1>
+      <p class="lede">
+        We're putting the finishing touches on Piontech Billing System.
+        Mark your calendar — we go live on <strong>August 6, 2026</strong>.
+      </p>
+    </section>
+
+    <section class="countdown" aria-live="polite">
+      <div class="unit">
+        <span class="value" id="days">00</span>
+        <span class="label">Days</span>
+      </div>
+      <div class="unit">
+        <span class="value" id="hours">00</span>
+        <span class="label">Hours</span>
+      </div>
+      <div class="unit">
+        <span class="value" id="minutes">00</span>
+        <span class="label">Minutes</span>
+      </div>
+      <div class="unit">
+        <span class="value" id="seconds">00</span>
+        <span class="label">Seconds</span>
+      </div>
+    </section>
+
+    <p class="target-note" id="targetNote"></p>
+
+    <section class="notify" id="notifySection">
+      <form id="notifyForm" autocomplete="off">
+        <label for="email" class="sr-only">Email address</label>
+        <input type="email" id="email" name="email" placeholder="you@company.com" required />
+        <button type="submit">Notify me</button>
+      </form>
+      <p class="notify-msg" id="notifyMsg" role="status"></p>
+    </section>
+
+    <div class="launched" id="launchedBanner" hidden>
+      <p>🎉 Piontech Billing System is live!</p>
+      <a href="#" id="launchedCta">Enter the app</a>
+    </div>
+
+    <footer class="foot">
+      <p>&copy; <span id="year"></span> Piontech. All rights reserved.</p>
+    </footer>
+  </main>
+
+  <script src="js/countdown.js"></script>
+</body>
+</html>
