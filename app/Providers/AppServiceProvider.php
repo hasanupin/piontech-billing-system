@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use App\Services\BillingService;
 use App\Services\ScopeService;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Super admin (CEO) punya akses penuh ke semua fitur tanpa terkecuali.
+        // Return null agar role lain jatuh ke policy masing-masing.
+        Gate::before(fn (User $user) => $user->isSuperAdmin() ? true : null);
     }
 }
