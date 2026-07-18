@@ -63,6 +63,21 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(User::class, 'created_by');
     }
 
+    public function clusters(): HasMany
+    {
+        return $this->hasMany(Cluster::class, 'officer_id');
+    }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class, 'officer_id');
+    }
+
+    public function deposits(): HasMany
+    {
+        return $this->hasMany(OfficerDeposit::class, 'officer_id');
+    }
+
     // --- Role Helpers ---
 
     public function isRole(Role ...$roles): bool

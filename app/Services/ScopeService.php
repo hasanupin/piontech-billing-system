@@ -30,4 +30,22 @@ class ScopeService
             default => $query->whereRaw('1 = 0'),
         };
     }
+
+    /**
+     * Apply cluster-based scope to a Customer query based on the actor's role.
+     * Field officer hanya melihat pelanggan di cluster yang dia pegang.
+     */
+    public function scopeCustomersForUser(Builder $query, User $actor): Builder
+    {
+        return match ($actor->role) {
+            Role::SuperAdmin, Role::Admin => $query,
+
+            Role::FieldOfficer => $query->whereHas(
+                'cluster',
+                fn (Builder $q) => $q->where('officer_id', $actor->id),
+            ),
+
+            default => $query->whereRaw('1 = 0'),
+        };
+    }
 }
