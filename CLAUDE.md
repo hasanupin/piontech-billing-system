@@ -134,8 +134,11 @@ Konvensi resource:
 | Pelanggan — TASK-07 (CRUD 4 section, kolom setara Excel, WA/Maps clickable, quick action ISOLIR/Pulihkan admin-only, filter due_today, scope petugas) | ✅ | `app/Filament/Resources/Customers/`, `tests/Feature/CustomerModuleTest.php` |
 | Transaksi — TASK-08 (form reaktif prefill paket editable, metode per-role, officer hidden saat transfer, tolak duplikat, page Tagihan Bulan Ini) | ✅ | `app/Filament/Resources/Transactions/`, `app/Filament/Pages/MonthlyBilling.php`, `ScopeService::scopeTransactionsForUser`, `tests/Feature/TransactionModuleTest.php` |
 | Setoran Petugas — TASK-09 (form info-panel sisa real-time, officer_id terkunci utk petugas, received_by admin-only, widget ringkasan) | ✅ | `app/Filament/Resources/OfficerDeposits/`, `ScopeService::scopeDepositsForUser`, `tests/Feature/OfficerDepositModuleTest.php` |
+| Dashboard — TASK-10 (5 stat cards, doughnut chart, tabel setoran petugas sisa merah, due-today per cluster, filter periode global via HasFiltersForm, scope petugas) | ✅ | `app/Filament/Pages/Dashboard.php`, `app/Filament/Widgets/`, `BillingService::monthlySummary(±officerId)`, `tests/Feature/DashboardWidgetTest.php` |
+| Import Excel — TASK-11 (phpspreadsheet langsung — maatwebsite tidak support PHP 8.5; cleaning WA scientific→62xxx, paket×1000→harga, status fallback; header action admin-only) | ✅ | `app/Imports/CustomerImport.php`, `ListCustomers::getHeaderActions()`, `tests/fixtures/sample_pelanggan.xlsx`, `tests/Feature/CustomerImportTest.php` |
+| Laporan — TASK-12 (**Excel-only, PDF ditunda**; 3 laporan: rekap bulanan, setoran petugas, tunggakan/ISOLIR; angka dari BillingService; CEO+admin only) | ✅ | `app/Filament/Pages/ReportPage.php`, `app/Exports/`, `tests/Feature/ReportPageTest.php` |
 
-**Spesifikasi modul billing ada di `docs/files/PionTech_AI_Agent_Tasks/`** (PRD_CONTEXT.html + TASK-01..16). Kerjakan sesuai urutan task & dependency di TASK-00. Selanjutnya: TASK-10.
+**Spesifikasi modul billing ada di `docs/files/PionTech_AI_Agent_Tasks/`** (PRD_CONTEXT.html + TASK-01..16). Kerjakan sesuai urutan task & dependency di TASK-00. Selanjutnya: TASK-13.
 
 ## Checklist Modul Baru
 

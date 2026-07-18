@@ -107,5 +107,20 @@
     "Settled directly": "Langsung settled",
     "Cash collected − deposited": "Tunai terkumpul − disetor",
     "Payment Percentage": "Prosentase Pembayaran",
-    "Remaining": "Sisa"
+    "Remaining": "Sisa",
+    "Reports": "Laporan",
+    "Metric": "Metrik",
+    "This Period": "Periode Ini",
+    "Last Month": "Bulan Lalu",
+    "Paid Customers": "Pelanggan Lunas",
+    "Success Rate": "% Keberhasilan",
+    "Total Collected": "Total Terkumpul",
+    "Suspended Days": "Lama Isolir (hari)",
+    "Deposit History": "Riwayat Titip",
+    "Monthly Payment Recap": "Rekap Pembayaran Bulanan",
+    "Arrears / ISOLIR List": "Daftar Tunggakan / ISOLIR",
+    "Download Excel": "Download Excel",
+    "Billed, collected (cash/transfer), success rate, trend vs last month": "Ditagih, terbayar (tunai/transfer), % keberhasilan, tren vs bulan lalu",
+    "Per officer: cash collected, deposit history, remaining balance": "Per petugas: total tagih tunai, riwayat titip, sisa setoran",
+    "Unpaid & suspended customers with WhatsApp and cluster for follow-up": "Pelanggan belum bayar & ISOLIR dengan WA dan cluster untuk follow-up"
 }
