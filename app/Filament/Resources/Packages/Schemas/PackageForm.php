@@ -6,6 +6,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
+use Filament\Support\RawJs;
 
 class PackageForm
 {
@@ -20,8 +21,11 @@ class PackageForm
                 TextInput::make('default_price')
                     ->label(__('Default Price'))
                     ->required()
-                    ->numeric()
                     ->prefix('Rp')
+                    // Format ID: titik ribuan, koma desimal. Yang disimpan tetap angka murni.
+                    ->mask(RawJs::make("\$money(\$input, ',', '.')"))
+                    ->formatStateUsing(fn ($state) => filled($state) ? number_format((float) $state, 2, ',', '.') : $state)
+                    ->dehydrateStateUsing(fn ($state) => (float) str_replace(['.', ','], ['', '.'], (string) $state))
                     ->helperText(__('Reference price — can be overridden when recording a transaction')),
                 TextInput::make('speed_mbps')
                     ->label(__('Speed (Mbps)'))
