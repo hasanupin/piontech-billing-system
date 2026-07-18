@@ -127,8 +127,11 @@ Konvensi resource:
 | Auth (Filament login + is_active gate) | ✅ | `app/Models/User.php` |
 | Users (CRUD, role, soft delete) | ✅ | `app/Filament/Resources/Users/`, `app/Enums/Role.php`, `app/Services/ScopeService.php`, migration `2026_07_17_000003` |
 | DB Schema billing — TASK-02 (packages, clusters, customers, transactions, officer_deposits + factories, seeders) | ✅ | migrations `2026_07_18_00000{1..5}`, `app/Models/{Package,Cluster,Customer,Transaction,OfficerDeposit}.php`, `database/seeders/`, `tests/Feature/DatabaseStructureTest.php` |
+| Business rules — TASK-03 (enums status/payment, global scope cluster, auto-status + transfer nullify, BillingService) | ✅ | `app/Enums/{CustomerStatus,TransactionStatus,PaymentMethod}.php`, `app/Models/{Customer,Transaction}.php`, `app/Services/BillingService.php`, `ScopeService::scopeCustomersForUser`, `tests/Feature/{TransactionRules,CustomerScope,BillingService}Test.php` |
+| RBAC — TASK-04 (super_admin full access via `Gate::before`, 6 policies) | ✅ | `app/Policies/`, `app/Providers/AppServiceProvider.php`, `tests/Feature/RoleAccessTest.php` |
+| Master Paket — TASK-05 (CRUD, view-only nihil untuk super_admin/admin, petugas forbidden) | ✅ | `app/Filament/Resources/Packages/`, `app/Policies/PackagePolicy.php`, `tests/Feature/PackageModuleTest.php` |
 
-**Spesifikasi modul billing ada di `docs/files/PionTech_AI_Agent_Tasks/`** (PRD_CONTEXT.html + TASK-01..16). Kerjakan sesuai urutan task & dependency di TASK-00. Selanjutnya: TASK-03 (models business rules + BillingService).
+**Spesifikasi modul billing ada di `docs/files/PionTech_AI_Agent_Tasks/`** (PRD_CONTEXT.html + TASK-01..16). Kerjakan sesuai urutan task & dependency di TASK-00. Selanjutnya: TASK-06.
 
 ## Checklist Modul Baru
 

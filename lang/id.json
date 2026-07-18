@@ -27,5 +27,11 @@
     "Partial": "Sebagian",
     "Unpaid": "Belum Bayar",
     "Cash": "Tunai",
-    "Transfer": "Transfer"
+    "Transfer": "Transfer",
+    "Default Price": "Harga Default",
+    "Speed (Mbps)": "Kecepatan (Mbps)",
+    "Description": "Keterangan",
+    "Used By": "Dipakai Oleh",
+    "Example: Package 110": "Contoh: Paket 110",
+    "Reference price — can be overridden when recording a transaction": "Harga referensi — bisa dioverride saat input transaksi"
 }
