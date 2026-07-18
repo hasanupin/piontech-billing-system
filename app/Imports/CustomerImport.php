@@ -28,6 +28,27 @@ class CustomerImport
     }
 
     /**
+     * Template xlsx untuk diisi user: heading + baris contoh
+     * (format sama persis dengan yang dibaca import()).
+     */
+    public static function templateContent(): string
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $spreadsheet->getActiveSheet()->fromArray([
+            ['NAMA', 'WA', 'PAKET', 'ALAMAT', 'KET.', 'MAPS'],
+            ['Budi', '081234567890', 110, 'PADI 1', 'AKTIF', 'https://maps.app.goo.gl/contoh'],
+            ['Sari', '6281234567891', 100, 'KAPAS 2', 'ISOLIR', ''],
+        ], null, 'A1');
+
+        $tmp = tempnam(sys_get_temp_dir(), 'tpl');
+        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($tmp);
+        $content = file_get_contents($tmp);
+        unlink($tmp);
+
+        return $content;
+    }
+
+    /**
      * Baca file xlsx: baris pertama = heading, sisanya data.
      */
     public function import(string $path): void
