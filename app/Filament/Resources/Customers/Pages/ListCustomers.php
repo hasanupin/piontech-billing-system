@@ -21,6 +21,16 @@ class ListCustomers extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('downloadTemplate')
+                ->label(__('Download Template'))
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('gray')
+                ->visible(fn (): bool => auth()->user()?->isRole(Role::SuperAdmin, Role::Admin) ?? false)
+                ->action(fn () => response()->streamDownload(
+                    fn () => print (CustomerImport::templateContent()),
+                    'template_pelanggan.xlsx',
+                    ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+                )),
             Action::make('import')
                 ->label(__('Import Excel'))
                 ->icon('heroicon-o-arrow-up-tray')

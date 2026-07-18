@@ -1,0 +1,42 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    timeout-minutes: 15
+
+    steps:
+      - name: Pull latest code
+        run: |
+          cd /var/www/html/piontech-billing-system
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Install Composer dependencies (jika composer.lock berubah)
+        run: |
+          cd /var/www/html/piontech-billing-system
+          if git diff HEAD~1 HEAD --name-only 2>/dev/null | grep -q "composer.lock"; then
+            echo "composer.lock berubah, menjalankan composer install..."
+            composer install --no-dev --optimize-autoloader --no-interaction
+          else
+            echo "Tidak ada perubahan composer.lock, skip."
+          fi
+
+      - name: Run migrations (jika ada file migrasi baru)
+        run: |
+          cd /var/www/html/piontech-billing-system
+          if git diff HEAD~1 HEAD --name-only 2>/dev/null | grep -q "^database/migrations/"; then
+            echo "Ada migrasi baru, menjalankan migrate..."
+            php artisan migrate --force
+          else
+            echo "Tidak ada migrasi baru, skip."
+          fi
+
+      - name: Optimize application
+        run: |
+          cd /var/www/html/piontech-billing-system
+          sudo php artisan optimize

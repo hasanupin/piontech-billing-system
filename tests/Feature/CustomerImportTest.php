@@ -81,6 +81,33 @@ class CustomerImportTest extends TestCase
         $this->assertSame(0, Customer::where('whatsapp_number', 'like', '%E%')->count());
     }
 
+    public function testAdminCanDownloadImportTemplate(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+
+        Livewire::test(\App\Filament\Resources\Customers\Pages\ListCustomers::class)
+            ->callAction('downloadTemplate')
+            ->assertFileDownloaded('template_pelanggan.xlsx');
+    }
+
+    public function testTemplateHeadingsMatchImportExpectation(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+        Package::factory()->create(['default_price' => 110_000]);
+        $cluster = Cluster::factory()->create();
+
+        // Template yang diunduh harus bisa langsung di-import kembali.
+        $path = tempnam(sys_get_temp_dir(), 'tpl').'.xlsx';
+        file_put_contents($path, \App\Imports\CustomerImport::templateContent());
+
+        $import = new CustomerImport($cluster->id);
+        $import->import($path);
+        unlink($path);
+
+        $this->assertGreaterThan(0, $import->imported);
+        $this->assertSame([], $import->failures);
+    }
+
     public function testAdminSeesImportActionPetugasNot(): void
     {
         $this->actingAs(User::factory()->admin()->create());

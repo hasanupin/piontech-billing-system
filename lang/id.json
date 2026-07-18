@@ -99,6 +99,7 @@
     "Excel File": "File Excel",
     "Target Cluster": "Cluster Tujuan",
     "Import Finished": "Import Selesai",
+    "Download Template": "Download Template",
     ":success succeeded, :failed failed": ":success berhasil, :failed gagal",
     "Row :line: :message": "Baris :line: :message",
     "Billed Customers": "Pelanggan Ditagih",
