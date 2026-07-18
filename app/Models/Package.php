@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'speed_mbps',
     'description',
     'is_active',
+    'is_custom',
 ])]
 class Package extends Model
 {
@@ -29,6 +30,7 @@ class Package extends Model
         return [
             'default_price' => 'decimal:2',
             'is_active' => 'boolean',
+            'is_custom' => 'boolean',
         ];
     }
 

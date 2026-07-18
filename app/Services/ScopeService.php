@@ -48,4 +48,34 @@ class ScopeService
             default => $query->whereRaw('1 = 0'),
         };
     }
+
+    /**
+     * Apply scope to a Transaction query based on the actor's role.
+     * Field officer hanya melihat transaksi yang dia catat sebagai petugas.
+     */
+    public function scopeTransactionsForUser(Builder $query, User $actor): Builder
+    {
+        return match ($actor->role) {
+            Role::SuperAdmin, Role::Admin => $query,
+
+            Role::FieldOfficer => $query->where('officer_id', $actor->id),
+
+            default => $query->whereRaw('1 = 0'),
+        };
+    }
+
+    /**
+     * Apply scope to an OfficerDeposit query based on the actor's role.
+     * Field officer hanya melihat setoran miliknya sendiri.
+     */
+    public function scopeDepositsForUser(Builder $query, User $actor): Builder
+    {
+        return match ($actor->role) {
+            Role::SuperAdmin, Role::Admin => $query,
+
+            Role::FieldOfficer => $query->where('officer_id', $actor->id),
+
+            default => $query->whereRaw('1 = 0'),
+        };
+    }
 }

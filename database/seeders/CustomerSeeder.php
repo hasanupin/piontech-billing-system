@@ -16,15 +16,19 @@ class CustomerSeeder extends Seeder
         }
 
         $clusters = Cluster::pluck('id');
-        $packages = Package::pluck('id');
+        // Paket berharga saja untuk seed — billing_amount ikut harga paketnya.
+        $packages = Package::where('is_custom', false)->get(['id', 'default_price']);
 
         // 50 pelanggan dummy: ~45 active + 5 suspended, tersebar rata di 3 cluster.
         foreach (range(0, 49) as $i) {
+            $package = $packages->random();
+
             Customer::factory()
                 ->when($i < 5, fn ($factory) => $factory->suspended())
                 ->create([
                     'cluster_id' => $clusters[$i % $clusters->count()],
-                    'package_id' => $packages->random(),
+                    'package_id' => $package->id,
+                    'billing_amount' => $package->default_price,
                 ]);
         }
     }

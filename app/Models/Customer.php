@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'whatsapp_number',
     'cluster_id',
     'package_id',
+    'billing_amount',
     'address',
     'maps_url',
     'house_photo_url',
@@ -54,6 +55,7 @@ class Customer extends Model
     {
         return [
             'status' => CustomerStatus::class,
+            'billing_amount' => 'decimal:2',
             'billing_day' => 'integer',
             'suspended_at' => 'date',
             'registered_at' => 'date',

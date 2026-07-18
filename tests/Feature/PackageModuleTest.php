@@ -29,6 +29,24 @@ class PackageModuleTest extends TestCase
         $this->assertTrue(Package::where('name', 'Package 110')->exists());
     }
 
+    public function testAdminCanCreateCustomPackageWithoutPrice(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+
+        Livewire::test(CreatePackage::class)
+            ->fillForm([
+                'name' => 'Custom',
+                'is_custom' => true,
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $package = Package::where('name', 'Custom')->first();
+        $this->assertNotNull($package);
+        $this->assertTrue($package->is_custom);
+        $this->assertNull($package->default_price);
+    }
+
     public function testFieldOfficerCannotAccessPackageResource(): void
     {
         $this->actingAs(User::factory()->fieldOfficer()->create());

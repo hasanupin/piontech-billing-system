@@ -13,6 +13,8 @@ class PackageSeeder extends Seeder
             ['name' => 'Package 100', 'default_price' => 100_000, 'speed_mbps' => 10],
             ['name' => 'Package 110', 'default_price' => 110_000, 'speed_mbps' => 20],
             ['name' => 'Package 115', 'default_price' => 115_000, 'speed_mbps' => 30],
+            // Paket custom: harga diisi per pelanggan.
+            ['name' => 'Custom', 'default_price' => null, 'speed_mbps' => null, 'is_custom' => true],
         ];
 
         foreach ($packages as $package) {

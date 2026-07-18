@@ -130,8 +130,12 @@ Konvensi resource:
 | Business rules — TASK-03 (enums status/payment, global scope cluster, auto-status + transfer nullify, BillingService) | ✅ | `app/Enums/{CustomerStatus,TransactionStatus,PaymentMethod}.php`, `app/Models/{Customer,Transaction}.php`, `app/Services/BillingService.php`, `ScopeService::scopeCustomersForUser`, `tests/Feature/{TransactionRules,CustomerScope,BillingService}Test.php` |
 | RBAC — TASK-04 (super_admin full access via `Gate::before`, 6 policies) | ✅ | `app/Policies/`, `app/Providers/AppServiceProvider.php`, `tests/Feature/RoleAccessTest.php` |
 | Master Paket — TASK-05 (CRUD, view-only nihil untuk super_admin/admin, petugas forbidden) | ✅ | `app/Filament/Resources/Packages/`, `app/Policies/PackagePolicy.php`, `tests/Feature/PackageModuleTest.php` |
+| Master Cluster — TASK-06 (CRUD admin-only, officer PIC select, customers_count, CustomerRelationManager view-only, ganti PIC → scope pelanggan ikut) | ✅ | `app/Filament/Resources/Clusters/`, `tests/Feature/ClusterModuleTest.php` |
+| Pelanggan — TASK-07 (CRUD 4 section, kolom setara Excel, WA/Maps clickable, quick action ISOLIR/Pulihkan admin-only, filter due_today, scope petugas) | ✅ | `app/Filament/Resources/Customers/`, `tests/Feature/CustomerModuleTest.php` |
+| Transaksi — TASK-08 (form reaktif prefill paket editable, metode per-role, officer hidden saat transfer, tolak duplikat, page Tagihan Bulan Ini) | ✅ | `app/Filament/Resources/Transactions/`, `app/Filament/Pages/MonthlyBilling.php`, `ScopeService::scopeTransactionsForUser`, `tests/Feature/TransactionModuleTest.php` |
+| Setoran Petugas — TASK-09 (form info-panel sisa real-time, officer_id terkunci utk petugas, received_by admin-only, widget ringkasan) | ✅ | `app/Filament/Resources/OfficerDeposits/`, `ScopeService::scopeDepositsForUser`, `tests/Feature/OfficerDepositModuleTest.php` |
 
-**Spesifikasi modul billing ada di `docs/files/PionTech_AI_Agent_Tasks/`** (PRD_CONTEXT.html + TASK-01..16). Kerjakan sesuai urutan task & dependency di TASK-00. Selanjutnya: TASK-06.
+**Spesifikasi modul billing ada di `docs/files/PionTech_AI_Agent_Tasks/`** (PRD_CONTEXT.html + TASK-01..16). Kerjakan sesuai urutan task & dependency di TASK-00. Selanjutnya: TASK-10.
 
 ## Checklist Modul Baru
 

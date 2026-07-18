@@ -30,7 +30,7 @@ class DatabaseStructureTest extends TestCase
         $this->seed();
 
         $this->assertSame(5, User::count());
-        $this->assertSame(3, Package::count());
+        $this->assertSame(4, Package::count()); // 3 berharga + 1 custom
         $this->assertSame(3, Cluster::count());
         $this->assertSame(50, Customer::count());
         $this->assertGreaterThan(0, Customer::count());

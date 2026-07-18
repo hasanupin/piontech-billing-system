@@ -22,6 +22,17 @@ class PackageFactory extends Factory
             'default_price' => $price,
             'speed_mbps' => fake()->randomElement([10, 20, 30, 50]),
             'is_active' => true,
+            'is_custom' => false,
         ];
+    }
+
+    public function custom(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'name' => 'Custom',
+            'default_price' => null,
+            'speed_mbps' => null,
+            'is_custom' => true,
+        ]);
     }
 }

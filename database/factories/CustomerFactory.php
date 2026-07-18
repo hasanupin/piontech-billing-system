@@ -23,6 +23,7 @@ class CustomerFactory extends Factory
             'whatsapp_number' => '628'.fake()->unique()->numerify('#########'),
             'cluster_id' => Cluster::factory(),
             'package_id' => Package::factory(),
+            'billing_amount' => fake()->randomElement([100_000, 110_000, 115_000]),
             'address' => fake()->streetName(),
             'billing_day' => fake()->numberBetween(1, 28),
             'status' => 'active',

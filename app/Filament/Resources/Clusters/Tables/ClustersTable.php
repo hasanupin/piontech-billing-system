@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Packages\Tables;
+namespace App\Filament\Resources\Clusters\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -11,7 +11,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
-class PackagesTable
+class ClustersTable
 {
     public static function configure(Table $table): Table
     {
@@ -21,31 +21,16 @@ class PackagesTable
                     ->label(__('Name'))
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('default_price')
-                    ->label(__('Default Price'))
-                    ->money('IDR')
-                    ->placeholder(__('Custom'))
+                TextColumn::make('officer.name')
+                    ->label(__('Officer PIC'))
+                    ->searchable(),
+                TextColumn::make('customers_count')
+                    ->label(__('Customers'))
+                    ->counts('customers')
                     ->sortable(),
-                IconColumn::make('is_custom')
-                    ->label(__('Custom Package'))
-                    ->boolean()
-                    ->toggleable(),
-                TextColumn::make('speed_mbps')
-                    ->label(__('Speed (Mbps)'))
-                    ->numeric()
-                    ->sortable()
-                    ->toggleable(),
                 IconColumn::make('is_active')
                     ->label(__('Active'))
                     ->boolean(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 TernaryFilter::make('is_active')

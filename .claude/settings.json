@@ -3,7 +3,13 @@
     "allow": [
       "Bash(gh api *)",
       "Bash(grep -E \"\\\\.css$|tailwind.config\")",
-      "Bash(grep -E \"\\\\.css$|tailwind\")"
+      "Bash(grep -E \"\\\\.css$|tailwind\")",
+      "Bash(grep -v '^[[:space:]]*$')",
+      "Bash(grep -rln 'protected $policies' /Users/hasanupin/www/freelance/piontech-billing-system/app/)",
+      "Bash(awk -F: '$1<1524{p=$0} END{print p}')"
+    ],
+    "additionalDirectories": [
+      "/Users/hasanupin/www/freelance/piontech-billing-system/docs/files/PionTech_AI_Agent_Tasks"
     ]
   },
   "enabledPlugins": {
