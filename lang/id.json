@@ -100,5 +100,12 @@
     "Target Cluster": "Cluster Tujuan",
     "Import Finished": "Import Selesai",
     ":success succeeded, :failed failed": ":success berhasil, :failed gagal",
-    "Row :line: :message": "Baris :line: :message"
+    "Row :line: :message": "Baris :line: :message",
+    "Billed Customers": "Pelanggan Ditagih",
+    "Aktif: :active | ISOLIR: :suspended": "Aktif: :active | ISOLIR: :suspended",
+    "Via Transfer": "Masuk via Transfer",
+    "Settled directly": "Langsung settled",
+    "Cash collected − deposited": "Tunai terkumpul − disetor",
+    "Payment Percentage": "Prosentase Pembayaran",
+    "Remaining": "Sisa"
 }

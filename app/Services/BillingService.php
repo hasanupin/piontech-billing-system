@@ -14,17 +14,25 @@ use Carbon\Carbon;
 class BillingService
 {
     /**
+     * Ringkasan keuangan bulanan; $officerId membatasi ke satu petugas
+     * (dipakai dashboard petugas — transfer jadi 0 karena officer_id null).
+     *
      * @return array{cash: float, transfer: float, total_collected: float, total_deposited: float, held_by_officers: float}
      */
-    public function monthlySummary(Carbon $period): array
+    public function monthlySummary(Carbon $period, ?int $officerId = null): array
     {
         $p = $period->copy()->startOfMonth();
 
-        $cash = (float) Transaction::forPeriod($p)->cash()->sum('paid_amount');
+        $cash = (float) Transaction::forPeriod($p)->cash()
+            ->when($officerId, fn ($q) => $q->where('officer_id', $officerId))
+            ->sum('paid_amount');
         $transfer = (float) Transaction::forPeriod($p)
             ->where('payment_method', PaymentMethod::Transfer)
+            ->when($officerId, fn ($q) => $q->where('officer_id', $officerId))
             ->sum('paid_amount');
-        $deposited = (float) OfficerDeposit::whereDate('period', $p)->sum('amount');
+        $deposited = (float) OfficerDeposit::whereDate('period', $p)
+            ->when($officerId, fn ($q) => $q->where('officer_id', $officerId))
+            ->sum('amount');
 
         return [
             'cash' => $cash,
