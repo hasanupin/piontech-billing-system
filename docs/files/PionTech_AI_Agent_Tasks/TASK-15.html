@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TASK-15 — Testing Layer 3 — E2E via Chrome (Claude Code) | PionTech Billing</title>
+<style>
+:root{--blue:#1A4F8A;--blue-dark:#10335A;--blue-lite:#E8F0FB;--amber:#F0A500;--amber-lt:#FEF3CD;
+--gray:#2D3748;--gray-mid:#718096;--gray-lite:#EDF2F7;--gray-line:#CBD5E0;--green:#276749;--green-lt:#C6F6D5;
+--red:#C53030;--red-lt:#FFF5F5;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f7fafc;color:var(--gray);line-height:1.65;font-size:15px}
+.container{max-width:920px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,var(--blue-dark),var(--blue));color:#fff;padding:28px 32px;border-radius:14px;margin-bottom:24px}
+header .meta{font-size:12px;color:#8AADE0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+header h1{font-size:26px;font-weight:800;margin-bottom:8px}
+header .sub{font-size:14px;color:#BDD4EC}
+.badges{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.badge{background:rgba(255,255,255,.14);color:#BDD4EC;font-size:12px;padding:3px 12px;border-radius:999px;font-weight:600}
+.badge.amber{background:rgba(240,165,0,.25);color:#FEF3CD}
+section{background:#fff;border:1px solid var(--gray-line);border-radius:12px;margin-bottom:18px;overflow:hidden}
+section>.sec-title{padding:12px 20px;background:var(--blue-lite);border-bottom:1px solid var(--gray-line);font-weight:700;font-size:15px;color:var(--blue)}
+section>.sec-body{padding:20px}
+pre{background:#1e2433;color:#e2e8f0;padding:16px;border-radius:8px;font-size:13px;overflow-x:auto;line-height:1.7;margin:10px 0}
+code{font-family:'Cascadia Code','Fira Code',monospace}
+p code,li code,td code{background:var(--gray-lite);padding:1px 6px;border-radius:4px;font-size:13px;color:var(--blue)}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}
+th{background:var(--blue);color:#fff;padding:9px 12px;text-align:left;font-weight:700}
+td{padding:8px 12px;border-bottom:1px solid var(--gray-line);vertical-align:top}
+tr:nth-child(even) td{background:var(--gray-lite)}
+ul,ol{padding-left:24px;margin:8px 0}
+li{margin:5px 0}
+.note{border-radius:8px;padding:12px 16px;font-size:13px;margin:12px 0;line-height:1.6}
+.note.warn{background:var(--amber-lt);border:1px solid #fde68a;color:#92400e}
+.note.info{background:var(--blue-lite);border:1px solid #c5d8f5;color:var(--blue)}
+.note.ok{background:var(--green-lt);border:1px solid #9ae6b4;color:var(--green)}
+.note.danger{background:var(--red-lt);border:1px solid #fecaca;color:var(--red)}
+.checklist{list-style:none;padding-left:4px}
+.checklist li{padding-left:30px;position:relative;margin:8px 0}
+.checklist li::before{content:'☐';position:absolute;left:0;font-size:18px;color:var(--gray-mid)}
+.dep{display:inline-block;background:var(--gray-lite);border:1px solid var(--gray-line);border-radius:6px;padding:2px 10px;font-size:12px;font-weight:600;color:var(--gray-mid);margin:2px}
+footer{text-align:center;font-size:12px;color:var(--gray-mid);padding:20px 0;border-top:1px solid var(--gray-line);margin-top:12px}
+.agent-prompt{background:#0f172a;border-radius:10px;padding:18px;margin-top:8px}
+.agent-prompt .ap-label{color:#F0A500;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.agent-prompt pre{background:transparent;padding:0;margin:0;color:#cbd5e0;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="prd-banner">📖 Sebelum mengerjakan task ini, baca dulu <a href="PRD_CONTEXT.html">PRD_CONTEXT.html</a> — konteks bisnis lengkap & peta task ↔ PRD.</div>
+<header>
+  <div class="meta">PionTech Billing System — Task Spec untuk AI Agent</div>
+  <h1>TASK-15 — Testing Layer 3 — E2E via Chrome (Claude Code)</h1>
+  <div class="sub">Browser testing nyata via Claude in Chrome: visual, interaksi JS, alur multi-role</div>
+  <div class="badges">
+    <span class="badge">Module: Quality Assurance</span>
+    <span class="badge">Estimasi: 3-4 jam</span>
+    <span class="badge amber">Prioritas: P2</span>
+  </div>
+</header>
+
+<section>
+  <div class="sec-title">📌 Dependencies (kerjakan setelah task berikut selesai)</div>
+  <div class="sec-body"><span class="dep">TASK-14</span></div>
+</section>
+
+<section><div class="sec-title">🎯 Objective</div><div class="sec-body"><p>Layer terakhir: test di browser sungguhan menggunakan <strong>Claude Code + Claude in Chrome extension</strong>. Berbeda dari feature test, layer ini memverifikasi hal yang hanya terlihat di browser: reaktivitas Livewire (pre-fill nominal), hidden/show field, badge warna, dan alur klik nyata.</p>
+<div class="note info">ℹ️ Alternatif tanpa Claude in Chrome: Laravel Dusk. Namun instruksi di bawah dioptimalkan untuk Claude Code mengoperasikan Chrome langsung.</div></div></section>
+<section><div class="sec-title">📋 Persiapan Environment</div><div class="sec-body"><pre><code># 1. Pastikan app jalan di URL yang bisa diakses Chrome
+docker-compose exec app php artisan serve (atau langsung akses http://localhost karena sudah expose port)
+# atau gunakan URL dev VPS: https://piontech.albiruni.dev
+
+# 2. Seed data test yang deterministik
+docker-compose exec app php artisan migrate:fresh --seed --env=testing
+
+# 3. Kredensial test (dari seeder):
+#    ceo@test.local / password    (super_admin)
+#    admin@test.local / password  (admin)
+#    budi@test.local / password   (field_officer, Cluster A)</code></pre></div></section>
+<section><div class="sec-title">📋 Skenario E2E — Checklist untuk Claude in Chrome</div><div class="sec-body">
+<table>
+<tr><th>#</th><th>Skenario</th><th>Verifikasi Visual/Interaksi</th></tr>
+<tr><td>E1</td><td>Login 3 role bergantian</td><td>Menu sidebar berbeda per role: petugas TIDAK melihat Master Data & User</td></tr>
+<tr><td>E2</td><td>Admin buat pelanggan</td><td>Isi form 4 section, upload foto, submit → muncul di tabel dengan badge hijau AKTIF</td></tr>
+<tr><td>E3</td><td>Pre-fill reaktif transaksi</td><td>Pilih pelanggan → field nominal terisi otomatis dari paket → edit manual ke angka lain → submit sukses dengan angka override</td></tr>
+<tr><td>E4</td><td>Toggle metode transfer</td><td>Pilih 'Transfer' → field petugas MENGHILANG dari form (reaktivitas Livewire)</td></tr>
+<tr><td>E5</td><td>Login petugas — opsi transfer</td><td>Dropdown metode HANYA berisi 'Tunai'</td></tr>
+<tr><td>E6</td><td>Quick action ISOLIR</td><td>Klik 'Tandai ISOLIR' → modal konfirmasi → confirm → badge berubah kuning ISOLIR</td></tr>
+<tr><td>E7</td><td>Info panel setoran live</td><td>Form setoran: pilih petugas → placeholder 'Sisa Belum Disetor' menampilkan angka; ganti periode → angka berubah</td></tr>
+<tr><td>E8</td><td>Link WA & Maps</td><td>Klik nomor WA di tabel → tab baru wa.me; klik Maps → tab baru Google Maps</td></tr>
+<tr><td>E9</td><td>Dashboard rekonsiliasi</td><td>Catat 2 transaksi tunai (300rb) + 1 transfer (110rb) + 1 titip (100rb) → verifikasi stat: terkumpul 410rb, via transfer 110rb, di petugas 200rb</td></tr>
+<tr><td>E10</td><td>Download laporan</td><td>Halaman laporan → pilih periode → klik Download PDF → file terunduh dan berisi angka sama dengan dashboard</td></tr>
+</table></div></section>
+<section><div class="sec-title">📋 Format Laporan Hasil E2E</div><div class="sec-body"><pre><code># Setelah semua skenario, Claude Code membuat file:
+# tests/e2e/E2E_REPORT_YYYY-MM-DD.md berisi:
+- Tanggal & environment (URL, browser)
+- Tabel hasil: E1–E10 PASS/FAIL + screenshot path
+- Bug yang ditemukan dengan langkah reproduksi
+- Rekomendasi perbaikan</code></pre></div></section>
+
+
+<section>
+  <div class="sec-title">✅ Acceptance Criteria — Definition of Done</div>
+  <div class="sec-body"><ul class="checklist"><li>Semua 10 skenario E1–E10 dijalankan di Chrome nyata</li><li>Setiap skenario ada screenshot bukti</li><li>E9 (rekonsiliasi angka) menggunakan nilai eksplisit dan cocok</li><li>Laporan E2E_REPORT tersimpan di repo</li><li>Bug (jika ada) tercatat dengan langkah reproduksi</li></ul></div>
+</section>
+
+<section>
+  <div class="sec-title">🤖 Prompt untuk Claude Code</div>
+  <div class="sec-body">
+    <div class="agent-prompt"><div class="ap-label">Copy-paste prompt ini ke Claude Code:</div><pre>Kerjakan TASK-15 PionTech (setelah TASK-14) — E2E testing via Chrome.
+Prasyarat: app berjalan (docker-compose exec app php artisan serve atau langsung http://localhost, atau URL dev VPS), database di-seed fresh dengan kredensial test dari file task.
+Gunakan Claude in Chrome untuk mengeksekusi 10 skenario E1-E10 sesuai tabel file task. Fokus pada hal yang tidak tercover feature test: reaktivitas Livewire (pre-fill, hidden field), badge warna, link eksternal, modal konfirmasi, dan rekonsiliasi angka dashboard (E9 gunakan nominal eksplisit: tunai 300rb + transfer 110rb + titip 100rb → di petugas HARUS 200rb).
+Ambil screenshot setiap skenario. Tulis laporan tests/e2e/E2E_REPORT_&lt;tanggal&gt;.md: tabel PASS/FAIL, screenshot, bug + repro steps.
+Commit &#x27;test: e2e report (TASK-15)&#x27;.</pre></div>
+  </div>
+</section>
+
+<footer>PionTech Billing System — Albiruni Software House · Laravel 13 + Filament v5 · Task generated Juli 2026</footer>
+</div>
+</body>
+</html>

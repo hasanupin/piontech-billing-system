@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TASK-08 — Transaksi Resource (Tunai + Transfer) | PionTech Billing</title>
+<style>
+:root{--blue:#1A4F8A;--blue-dark:#10335A;--blue-lite:#E8F0FB;--amber:#F0A500;--amber-lt:#FEF3CD;
+--gray:#2D3748;--gray-mid:#718096;--gray-lite:#EDF2F7;--gray-line:#CBD5E0;--green:#276749;--green-lt:#C6F6D5;
+--red:#C53030;--red-lt:#FFF5F5;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f7fafc;color:var(--gray);line-height:1.65;font-size:15px}
+.container{max-width:920px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,var(--blue-dark),var(--blue));color:#fff;padding:28px 32px;border-radius:14px;margin-bottom:24px}
+header .meta{font-size:12px;color:#8AADE0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+header h1{font-size:26px;font-weight:800;margin-bottom:8px}
+header .sub{font-size:14px;color:#BDD4EC}
+.badges{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.badge{background:rgba(255,255,255,.14);color:#BDD4EC;font-size:12px;padding:3px 12px;border-radius:999px;font-weight:600}
+.badge.amber{background:rgba(240,165,0,.25);color:#FEF3CD}
+section{background:#fff;border:1px solid var(--gray-line);border-radius:12px;margin-bottom:18px;overflow:hidden}
+section>.sec-title{padding:12px 20px;background:var(--blue-lite);border-bottom:1px solid var(--gray-line);font-weight:700;font-size:15px;color:var(--blue)}
+section>.sec-body{padding:20px}
+pre{background:#1e2433;color:#e2e8f0;padding:16px;border-radius:8px;font-size:13px;overflow-x:auto;line-height:1.7;margin:10px 0}
+code{font-family:'Cascadia Code','Fira Code',monospace}
+p code,li code,td code{background:var(--gray-lite);padding:1px 6px;border-radius:4px;font-size:13px;color:var(--blue)}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}
+th{background:var(--blue);color:#fff;padding:9px 12px;text-align:left;font-weight:700}
+td{padding:8px 12px;border-bottom:1px solid var(--gray-line);vertical-align:top}
+tr:nth-child(even) td{background:var(--gray-lite)}
+ul,ol{padding-left:24px;margin:8px 0}
+li{margin:5px 0}
+.note{border-radius:8px;padding:12px 16px;font-size:13px;margin:12px 0;line-height:1.6}
+.note.warn{background:var(--amber-lt);border:1px solid #fde68a;color:#92400e}
+.note.info{background:var(--blue-lite);border:1px solid #c5d8f5;color:var(--blue)}
+.note.ok{background:var(--green-lt);border:1px solid #9ae6b4;color:var(--green)}
+.note.danger{background:var(--red-lt);border:1px solid #fecaca;color:var(--red)}
+.checklist{list-style:none;padding-left:4px}
+.checklist li{padding-left:30px;position:relative;margin:8px 0}
+.checklist li::before{content:'☐';position:absolute;left:0;font-size:18px;color:var(--gray-mid)}
+.dep{display:inline-block;background:var(--gray-lite);border:1px solid var(--gray-line);border-radius:6px;padding:2px 10px;font-size:12px;font-weight:600;color:var(--gray-mid);margin:2px}
+footer{text-align:center;font-size:12px;color:var(--gray-mid);padding:20px 0;border-top:1px solid var(--gray-line);margin-top:12px}
+.agent-prompt{background:#0f172a;border-radius:10px;padding:18px;margin-top:8px}
+.agent-prompt .ap-label{color:#F0A500;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.agent-prompt pre{background:transparent;padding:0;margin:0;color:#cbd5e0;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="prd-banner">📖 Sebelum mengerjakan task ini, baca dulu <a href="PRD_CONTEXT.html">PRD_CONTEXT.html</a> — konteks bisnis lengkap & peta task ↔ PRD.</div>
+<header>
+  <div class="meta">PionTech Billing System — Task Spec untuk AI Agent</div>
+  <h1>TASK-08 — Transaksi Resource (Tunai + Transfer)</h1>
+  <div class="sub">Input pembayaran dengan pre-fill harga editable, metode tunai/transfer, auto-status</div>
+  <div class="badges">
+    <span class="badge">Module: Core Feature</span>
+    <span class="badge">Estimasi: 4-5 jam</span>
+    <span class="badge amber">Prioritas: P0</span>
+  </div>
+</header>
+
+<section>
+  <div class="sec-title">📌 Dependencies (kerjakan setelah task berikut selesai)</div>
+  <div class="sec-body"><span class="dep">TASK-07</span></div>
+</section>
+
+<section><div class="sec-title">🎯 Objective</div><div class="sec-body"><p>Resource pencatatan pembayaran — pengganti kolom BAYAR di Excel. Dua alur: tunai via petugas (masuk hitungan uang petugas) dan transfer langsung (settled, tanpa petugas).</p></div></section>
+<section><div class="sec-title">📋 Form dengan Logic Reaktif</div><div class="sec-body"><pre><code>Select::make('customer_id')
+    ->relationship('customers','name',
+        fn($q)=>$q->billable())         // hanya AKTIF + ISOLIR
+    ->searchable()->required()->live()
+    ->afterStateUpdated(function($state,Set $set) {
+        // Pre-fill nominal dari paket — EDITABLE
+        $p = Customer::find($state);
+        $set('billed_amount', $p?->paket?->default_price);
+    }),
+
+Select::make('payment_method')->live()
+    ->options(fn() => auth()->user()->isRole(Role::Admin)
+        ? ['cash'=>'Tunai (via Petugas)','transfer'=>'Transfer Langsung']
+        : ['cash'=>'Tunai'])          // petugas tidak lihat transfer
+    ->default('cash')->required(),
+
+Select::make('officer_id')
+    ->relationship('petugas','name', fn($q)=>$q->role('field_officer'))
+    ->hidden(fn(Get $get)=>$get('payment_method')==='transfer')
+    ->default(fn()=>auth()->user()->isRole(Role::FieldOfficer)
+        ? auth()->id() : null),
+
+DatePicker::make('period')->displayFormat('F Y')
+    ->default(now()->startOfMonth())->required(),
+
+TextInput::make('billed_amount')->numeric()->prefix('Rp')->required()
+    ->helperText('Pre-fill dari paket — BISA DIEDIT'),
+TextInput::make('paid_amount')->numeric()->prefix('Rp')->required(),
+DateTimePicker::make('paid_at')->default(now())->required(),</code></pre>
+<div class="note info">ℹ️ Status (lunas/parsial) TIDAK ada di form — auto-set oleh Model::saving() dari TASK-03.</div></div></section>
+<section><div class="sec-title">📋 Halaman &#x27;Tagihan Bulan Ini&#x27;</div><div class="sec-body"><pre><code>// Custom page: daftar semua pelanggan billable() bulan ini
+// dengan status bayar mereka — setara tampilan sheet Excel.
+// Kolom: nama, cluster, tgl tagih, nominal, STATUS BAYAR (badge),
+//        tombol cepat 'Catat Pembayaran' per baris.
+
+// Filter tambahan: 'Belum Bayar Saja' untuk petugas
+// mengetahui siapa yang harus dikunjungi.</code></pre></div></section>
+<section><div class="sec-title">🧪 Testing — Feature Tests</div><div class="sec-body"><pre><code>it('prefills nominal from paket but allows override', function () {
+    $paket = Package::factory()->create(['default_price'=>110000]);
+    $p = Customer::factory()->create(['package_id'=>$paket->id]);
+    // Simulate form: pilih pelanggan → nominal terisi 110000
+    // → override ke 100000 → submit → tersimpan 100000
+    ...
+    expect($transaksi->billed_amount)->toBe('100000.00');
+});
+
+it('hides transfer option from petugas', function () { ... });
+
+it('transfer transaction has null petugas and excluded from uang petugas',
+    function () {
+    $t = Transaction::factory()->create(['payment_method'=>'transfer']);
+    expect($t->officer_id)->toBeNull();
+    $r = BillingService::monthlySummary(now());
+    expect($r['di_petugas'])->toBe(0.0); // transfer tidak masuk
+});
+
+it('prevents duplicate transaksi same pelanggan same periode',
+    function () { ... }); // unique constraint dari TASK-02</code></pre></div></section>
+
+
+<section>
+  <div class="sec-title">✅ Acceptance Criteria — Definition of Done</div>
+  <div class="sec-body"><ul class="checklist"><li>Pre-fill nominal dari paket berfungsi dan tetap editable</li><li>Petugas tidak melihat opsi metode transfer</li><li>Pilih transfer → field petugas hilang; simpan → officer_id NULL</li><li>Duplicate transaksi (pelanggan+periode sama) ditolak dengan pesan jelas</li><li>Halaman Tagihan Bulan Ini menampilkan status bayar semua pelanggan ditagih</li><li>Filter &#x27;Belum Bayar Saja&#x27; berfungsi</li><li>Feature test hijau min 6 cases</li></ul></div>
+</section>
+
+<section>
+  <div class="sec-title">🤖 Prompt untuk Claude Code</div>
+  <div class="sec-body">
+    <div class="agent-prompt"><div class="ap-label">Copy-paste prompt ini ke Claude Code:</div><pre>Kerjakan TASK-08 PionTech (setelah TASK-07).
+Buat TransactionResource: form reaktif sesuai spec file task — pelanggan select (scope ditagih), pre-fill nominal dari paket via afterStateUpdated (editable), payment_method dinamis per role (petugas tidak lihat transfer), officer_id hidden saat transfer.
+Buat custom page &#x27;Tagihan Bulan Ini&#x27;: semua pelanggan ditagih + status bayar + quick action catat pembayaran + filter belum-bayar.
+Feature test min 6 cases termasuk: prefill+override, transfer null petugas, transfer excluded dari di_petugas, unique constraint.
+Commit &#x27;feat: transaksi resource tunai+transfer (TASK-08)&#x27;.</pre></div>
+  </div>
+</section>
+
+<footer>PionTech Billing System — Albiruni Software House · Laravel 13 + Filament v5 · Task generated Juli 2026</footer>
+</div>
+</body>
+</html>

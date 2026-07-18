@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TASK-01 — Setup Project & Tech Stack (Docker) | PionTech Billing</title>
+<style>
+:root{--blue:#1A4F8A;--blue-dark:#10335A;--blue-lite:#E8F0FB;--amber:#F0A500;--amber-lt:#FEF3CD;
+--gray:#2D3748;--gray-mid:#718096;--gray-lite:#EDF2F7;--gray-line:#CBD5E0;--green:#276749;--green-lt:#C6F6D5;
+--red:#C53030;--red-lt:#FFF5F5;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f7fafc;color:var(--gray);line-height:1.65;font-size:15px}
+.container{max-width:920px;margin:0 auto;padding:24px}
+.prd-banner{background:var(--blue-dark);color:#fff;padding:12px 20px;border-radius:10px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px}
+.prd-banner a{color:var(--amber);font-weight:700;text-decoration:none}
+.prd-banner a:hover{text-decoration:underline}
+header{background:linear-gradient(135deg,var(--blue-dark),var(--blue));color:#fff;padding:28px 32px;border-radius:14px;margin-bottom:24px}
+header .meta{font-size:12px;color:#8AADE0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+header h1{font-size:26px;font-weight:800;margin-bottom:8px}
+header .sub{font-size:14px;color:#BDD4EC}
+.badges{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.badge{background:rgba(255,255,255,.14);color:#BDD4EC;font-size:12px;padding:3px 12px;border-radius:999px;font-weight:600}
+.badge.amber{background:rgba(240,165,0,.25);color:#FEF3CD}
+section{background:#fff;border:1px solid var(--gray-line);border-radius:12px;margin-bottom:18px;overflow:hidden}
+section>.sec-title{padding:12px 20px;background:var(--blue-lite);border-bottom:1px solid var(--gray-line);font-weight:700;font-size:15px;color:var(--blue)}
+section>.sec-body{padding:20px}
+pre{background:#1e2433;color:#e2e8f0;padding:16px;border-radius:8px;font-size:13px;overflow-x:auto;line-height:1.7;margin:10px 0}
+code{font-family:'Cascadia Code','Fira Code',monospace}
+p code,li code,td code{background:var(--gray-lite);padding:1px 6px;border-radius:4px;font-size:13px;color:var(--blue)}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}
+th{background:var(--blue);color:#fff;padding:9px 12px;text-align:left;font-weight:700}
+td{padding:8px 12px;border-bottom:1px solid var(--gray-line);vertical-align:top}
+tr:nth-child(even) td{background:var(--gray-lite)}
+ul,ol{padding-left:24px;margin:8px 0}
+li{margin:5px 0}
+.note{border-radius:8px;padding:12px 16px;font-size:13px;margin:12px 0;line-height:1.6}
+.note.warn{background:var(--amber-lt);border:1px solid #fde68a;color:#92400e}
+.note.info{background:var(--blue-lite);border:1px solid #c5d8f5;color:var(--blue)}
+.note.ok{background:var(--green-lt);border:1px solid #9ae6b4;color:var(--green)}
+.note.danger{background:var(--red-lt);border:1px solid #fecaca;color:var(--red)}
+.checklist{list-style:none;padding-left:4px}
+.checklist li{padding-left:30px;position:relative;margin:8px 0}
+.checklist li::before{content:'☐';position:absolute;left:0;font-size:18px;color:var(--gray-mid)}
+.dep{display:inline-block;background:var(--gray-lite);border:1px solid var(--gray-line);border-radius:6px;padding:2px 10px;font-size:12px;font-weight:600;color:var(--gray-mid);margin:2px}
+footer{text-align:center;font-size:12px;color:var(--gray-mid);padding:20px 0;border-top:1px solid var(--gray-line);margin-top:12px}
+.agent-prompt{background:#0f172a;border-radius:10px;padding:18px;margin-top:8px}
+.agent-prompt .ap-label{color:#F0A500;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.agent-prompt pre{background:transparent;padding:0;margin:0;color:#cbd5e0;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="prd-banner">📖 Sebelum mengerjakan task ini, baca dulu <a href="PRD_CONTEXT.html">PRD_CONTEXT.html</a> — konteks bisnis lengkap & peta task ↔ PRD.</div>
+
+<header>
+  <div class="meta">PionTech Billing System — Task Spec untuk AI Agent</div>
+  <h1>TASK-01 — Setup Project & Tech Stack (Docker)</h1>
+  <div class="sub">Laravel terbaru + Filament v5 + Tailwind, dijalankan via Docker Compose untuk local development & testing yang konsisten</div>
+  <div class="badges">
+    <span class="badge">Module: Infrastructure</span>
+    <span class="badge">Estimasi: 2-3 jam</span>
+    <span class="badge amber">Prioritas: P0 — Blocker</span>
+  </div>
+</header>
+
+<section>
+  <div class="sec-title">📌 Dependencies</div>
+  <div class="sec-body"><span class="dep">Tidak ada — task pertama yang dikerjakan</span></div>
+</section>
+
+<section>
+  <div class="sec-title">🎯 Objective</div>
+  <div class="sec-body">
+    <p>Menyiapkan project Laravel (versi terbaru stable) dengan Filament v5 sebagai admin panel dan Tailwind CSS untuk styling, seluruhnya berjalan di dalam <strong>Docker</strong> menggunakan docker-compose. Semua checking dan testing dilakukan lewat container lokal ini — bukan langsung di mesin host — supaya environment konsisten untuk siapa pun (developer atau AI agent) yang menjalankan project ini.</p>
+    <div class="note info">ℹ️ Docker Compose dipakai KHUSUS untuk local development & testing. Deployment production tetap ke server fisik milik Pion Tech Solution (lihat TASK-16) — bukan dalam container.</div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-title">📋 Prasyarat di Mesin Host</div>
+  <div class="sec-body">
+    <ul>
+      <li>Docker Desktop (atau Docker Engine + Docker Compose di Linux) sudah terinstall dan berjalan</li>
+      <li>Git terinstall</li>
+      <li>Port host 8002 (app), 3309 (MySQL), 6382 (Redis) tidak dipakai service lain</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="sec-title">📋 Langkah 1 — Jalankan Project via Docker Compose</div>
+  <div class="sec-body">
+    <p>Project sudah menyertakan <code>Dockerfile</code> (php:8.4-apache) dan <code>docker-compose.yml</code> custom — cukup build & jalankan, tidak perlu PHP/Composer di mesin host.</p>
+    <pre><code>git clone &lt;repo&gt; piontech-billing
+cd piontech-billing
+docker-compose up -d --build</code></pre>
+    <div class="note ok">✅ docker-compose.yml mendefinisikan 3 service: <strong>app</strong> (Laravel + Apache, host port 8002), <strong>db</strong> (MySQL 8, host port 3309), <strong>redis</strong> (host port 6382).</div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-title">📋 Langkah 2 — Menjalankan Command di dalam Container</div>
+  <div class="sec-body">
+    <p>Semua command Artisan/Composer/NPM dijalankan LEWAT container <code>app</code>:</p>
+<pre><code>docker-compose exec app php artisan --version
+docker-compose exec app composer --version
+docker-compose exec app npm --version</code></pre>
+    <div class="note info">ℹ️ Host memakai PHP 8.5, jadi <code>php artisan</code> juga bisa dijalankan langsung di host (terhubung ke MySQL/Redis docker via port 3309/6382). Untuk konsistensi, contoh di bawah memakai <code>docker-compose exec app</code>.</div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-title">📋 Langkah 3 — Install Filament v5 (di dalam container)</div>
+  <div class="sec-body">
+<pre><code>docker-compose exec app composer require filament/filament:"^5.0" -W
+docker-compose exec app php artisan filament:install --panels
+# Panel ID: admin
+
+# Buat user admin pertama untuk login
+docker-compose exec app php artisan make:filament-user</code></pre>
+    <div class="note info">ℹ️ Filament v5 sudah menggunakan Tailwind CSS secara built-in untuk seluruh admin panel — tidak perlu setup Tailwind terpisah untuk halaman admin. Tailwind config Filament otomatis ter-compile saat build asset.</div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-title">📋 Langkah 4 — Package Pendukung</div>
+  <div class="sec-body">
+<pre><code># RBAC pakai enum Role + ScopeService (tanpa spatie/laravel-permission)
+docker-compose exec app composer require maatwebsite/excel
+docker-compose exec app composer require barryvdh/laravel-dompdf
+
+# Testing: PHPUnit sudah bawaan Laravel — tidak perlu instalasi tambahan</code></pre>
+    <div class="note info">ℹ️ Tanpa <code>spatie/laravel-permission</code>: role diwakili <code>App\Enums\Role</code> (backed enum) + semua scoping terpusat di <code>App\Services\ScopeService</code>. Lihat CLAUDE.md bagian "Roles &amp; Scoping".</div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-title">📋 Langkah 5 — Build Asset Tailwind (Admin Panel)</div>
+  <div class="sec-body">
+<pre><code>docker-compose exec app npm install
+docker-compose exec app npm run build
+
+# Untuk development dengan hot-reload:
+docker-compose exec app npm run dev</code></pre>
+    <div class="note warn">⚠️ Jika mengubah tema/warna Filament (branding biru #1A4F8A sesuai proposal), edit resources/css/filament/admin/theme.css lalu jalankan ulang npm run build.</div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-title">📋 Langkah 6 — Konfigurasi .env</div>
+  <div class="sec-body">
+<pre><code>APP_NAME="PionTech Billing"
+APP_ENV=local
+APP_URL=http://localhost
+APP_TIMEZONE=Asia/Jakarta
+APP_LOCALE=id
+
+# Di dalam container app, DB_HOST=db & DB_PORT=3306 di-override
+# oleh docker-compose.yml. Nilai di bawah dipakai saat `php artisan`
+# dijalankan dari host (akses MySQL docker via port 3309).
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3309
+DB_DATABASE=piontech_billing
+DB_USERNAME=laravel_user
+DB_PASSWORD=laravel_password
+
+FILESYSTEM_DISK=public</code></pre>
+    <div class="note warn">⚠️ Timezone WAJIB Asia/Jakarta dan locale id — seluruh timestamp tagihan & setoran mengikuti WIB, dan format tanggal Filament tampil dalam Bahasa Indonesia.</div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-title">📋 Langkah 7 — Migrate & Git Init</div>
+  <div class="sec-body">
+<pre><code>docker-compose exec app php artisan migrate
+
+git init
+git add .
+git commit -m "chore: initial Laravel + Filament v5 + Docker setup (TASK-01)"</code></pre>
+  </div>
+</section>
+
+<section>
+  <div class="sec-title">🧪 Testing Requirement</div>
+  <div class="sec-body">
+    <ul>
+      <li><strong>Container check:</strong> <code>docker-compose ps</code> → semua service (app, db, redis) status "Up"</li>
+      <li><strong>Smoke test:</strong> buka <code>http://localhost:8002</code> → root redirect ke <code>/admin</code></li>
+      <li><strong>Filament test:</strong> buka <code>http://localhost:8002/admin</code> → halaman login Filament muncul dengan styling Tailwind rapi</li>
+      <li><strong>Login test:</strong> user admin yang dibuat di Langkah 3 bisa login</li>
+      <li><strong>PHPUnit test:</strong> <code>docker-compose exec app php artisan test</code> → default test pass</li>
+      <li><strong>Timezone check:</strong> <code>docker-compose exec app php artisan tinker</code> → <code>now()</code> → pastikan offset +07:00</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="sec-title">✅ Acceptance Criteria — Definition of Done</div>
+  <div class="sec-body">
+    <ul class="checklist">
+      <li>Project berjalan sepenuhnya via Docker Compose — tidak bergantung pada PHP/Composer di host</li>
+      <li>docker-compose up -d berhasil, docker-compose ps menunjukkan semua service Up</li>
+      <li>Laravel versi terbaru stable terpasang (cek via docker-compose exec app php artisan --version)</li>
+      <li>Filament v5 terpasang, panel /admin bisa diakses dan menampilkan Tailwind styling dengan benar</li>
+      <li>User admin pertama berhasil dibuat dan bisa login</li>
+      <li>Package pendukung (maatwebsite/excel, barryvdh/laravel-dompdf) terpasang tanpa conflict; RBAC pakai enum Role + ScopeService (tanpa spatie)</li>
+      <li>docker-compose exec app php artisan test berjalan hijau</li>
+      <li>.env terkonfigurasi: timezone Asia/Jakarta, locale id, koneksi MySQL docker</li>
+      <li>Git repository terinisialisasi, .env TIDAK ter-commit (cek .gitignore)</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="sec-title">🤖 Prompt untuk Claude Code</div>
+  <div class="sec-body">
+    <div class="agent-prompt"><div class="ap-label">Copy-paste prompt ini ke Claude Code:</div><pre>Baca dulu PRD_CONTEXT.html (bagian §7 Tech Stack) untuk konteks lengkap, lalu kerjakan TASK-01 PionTech Billing System.
+
+Jalankan project piontech-billing lewat Docker Compose custom (Dockerfile php:8.4-apache + docker-compose.yml, service app/db/redis), BUKAN Laravel Sail. Gunakan Laravel versi terbaru stable.
+
+Di dalam container app (via `docker-compose exec app`):
+1. Install Filament v5 (panel id: admin) — Tailwind sudah built-in, tidak perlu setup terpisah
+2. RBAC pakai enum Role + ScopeService (tanpa spatie); install maatwebsite/excel, barryvdh/laravel-dompdf
+3. Testing pakai PHPUnit bawaan Laravel (tanpa Pest)
+4. Build asset: docker-compose exec app npm install && docker-compose exec app npm run build
+5. Konfigurasi .env: APP_TIMEZONE=Asia/Jakarta, APP_LOCALE=id, koneksi MySQL docker (host port 3309, user laravel_user)
+6. Migrate database, buat 1 filament user admin
+7. Git init dengan commit pertama
+
+Verifikasi: docker-compose ps semua Up, http://localhost:8002/admin menampilkan login Filament dengan Tailwind styling, login admin berhasil, docker-compose exec app php artisan test hijau, timezone Asia/Jakarta terkonfirmasi via tinker.
+
+Jangan lanjut ke migration skema PionTech (cluster/pelanggan/dst) — itu TASK-02.</pre></div>
+  </div>
+</section>
+
+<footer>PionTech Billing System — Albiruni Software House · Laravel (Docker Compose) + Filament v5 + Tailwind · Task generated Juli 2026</footer>
+</div>
+</body>
+</html>

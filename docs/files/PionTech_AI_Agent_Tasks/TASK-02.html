@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TASK-02 — Database Migrations &amp; Seeders | PionTech Billing</title>
+<style>
+:root{--blue:#1A4F8A;--blue-dark:#10335A;--blue-lite:#E8F0FB;--amber:#F0A500;--amber-lt:#FEF3CD;
+--gray:#2D3748;--gray-mid:#718096;--gray-lite:#EDF2F7;--gray-line:#CBD5E0;--green:#276749;--green-lt:#C6F6D5;
+--red:#C53030;--red-lt:#FFF5F5;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f7fafc;color:var(--gray);line-height:1.65;font-size:15px}
+.container{max-width:920px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,var(--blue-dark),var(--blue));color:#fff;padding:28px 32px;border-radius:14px;margin-bottom:24px}
+header .meta{font-size:12px;color:#8AADE0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+header h1{font-size:26px;font-weight:800;margin-bottom:8px}
+header .sub{font-size:14px;color:#BDD4EC}
+.badges{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.badge{background:rgba(255,255,255,.14);color:#BDD4EC;font-size:12px;padding:3px 12px;border-radius:999px;font-weight:600}
+.badge.amber{background:rgba(240,165,0,.25);color:#FEF3CD}
+section{background:#fff;border:1px solid var(--gray-line);border-radius:12px;margin-bottom:18px;overflow:hidden}
+section>.sec-title{padding:12px 20px;background:var(--blue-lite);border-bottom:1px solid var(--gray-line);font-weight:700;font-size:15px;color:var(--blue)}
+section>.sec-body{padding:20px}
+pre{background:#1e2433;color:#e2e8f0;padding:16px;border-radius:8px;font-size:13px;overflow-x:auto;line-height:1.7;margin:10px 0}
+code{font-family:'Cascadia Code','Fira Code',monospace}
+p code,li code,td code{background:var(--gray-lite);padding:1px 6px;border-radius:4px;font-size:13px;color:var(--blue)}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}
+th{background:var(--blue);color:#fff;padding:9px 12px;text-align:left;font-weight:700}
+td{padding:8px 12px;border-bottom:1px solid var(--gray-line);vertical-align:top}
+tr:nth-child(even) td{background:var(--gray-lite)}
+ul,ol{padding-left:24px;margin:8px 0}
+li{margin:5px 0}
+.note{border-radius:8px;padding:12px 16px;font-size:13px;margin:12px 0;line-height:1.6}
+.note.warn{background:var(--amber-lt);border:1px solid #fde68a;color:#92400e}
+.note.info{background:var(--blue-lite);border:1px solid #c5d8f5;color:var(--blue)}
+.note.ok{background:var(--green-lt);border:1px solid #9ae6b4;color:var(--green)}
+.note.danger{background:var(--red-lt);border:1px solid #fecaca;color:var(--red)}
+.checklist{list-style:none;padding-left:4px}
+.checklist li{padding-left:30px;position:relative;margin:8px 0}
+.checklist li::before{content:'☐';position:absolute;left:0;font-size:18px;color:var(--gray-mid)}
+.dep{display:inline-block;background:var(--gray-lite);border:1px solid var(--gray-line);border-radius:6px;padding:2px 10px;font-size:12px;font-weight:600;color:var(--gray-mid);margin:2px}
+footer{text-align:center;font-size:12px;color:var(--gray-mid);padding:20px 0;border-top:1px solid var(--gray-line);margin-top:12px}
+.agent-prompt{background:#0f172a;border-radius:10px;padding:18px;margin-top:8px}
+.agent-prompt .ap-label{color:#F0A500;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.agent-prompt pre{background:transparent;padding:0;margin:0;color:#cbd5e0;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="prd-banner">📖 Sebelum mengerjakan task ini, baca dulu <a href="PRD_CONTEXT.html">PRD_CONTEXT.html</a> — konteks bisnis lengkap & peta task ↔ PRD.</div>
+<header>
+  <div class="meta">PionTech Billing System — Task Spec untuk AI Agent</div>
+  <h1>TASK-02 — Database Migrations &amp; Seeders</h1>
+  <div class="sub">Semua tabel inti: packages, clusters, customers, transactions, officer_deposits + seeder awal</div>
+  <div class="badges">
+    <span class="badge">Module: Database</span>
+    <span class="badge">Estimasi: 3-4 jam</span>
+    <span class="badge amber">Prioritas: P0 — Blocker</span>
+  </div>
+</header>
+
+<section>
+  <div class="sec-title">📌 Dependencies (kerjakan setelah task berikut selesai)</div>
+  <div class="sec-body"><span class="dep">TASK-01</span></div>
+</section>
+
+<section><div class="sec-title">🎯 Objective</div><div class="sec-body"><p>Membuat seluruh struktur database sesuai PRD v2.1. Urutan pembuatan PENTING karena ada foreign key dependency: <code>packages</code> → <code>clusters</code> → <code>customers</code> → <code>transactions</code> → <code>officer_deposits</code>.</p></div></section>
+<section><div class="sec-title">📋 Migration: packages</div><div class="sec-body"><pre><code>Schema::create('packages', function (Blueprint $table) {
+    $table->ulid('id')->primary();
+    $table->string('name', 100);              // Label referensi: 'Paket 110'
+    $table->decimal('default_price', 12, 2);  // Pre-fill saja — BUKAN constraint
+    $table->tinyInteger('speed_mbps')->nullable();
+    $table->text('description')->nullable();
+    $table->boolean('is_active')->default(true);
+    $table->timestamps();
+});</code></pre>
+<div class="note info">ℹ️ Paket hanya referensi harga. Nominal transaksi diinput manual oleh admin (pre-fill dari default_price, tapi editable).</div></div></section>
+<section><div class="sec-title">📋 Migration: clusters</div><div class="sec-body"><pre><code>Schema::create('clusters', function (Blueprint $table) {
+    $table->ulid('id')->primary();
+    $table->string('name', 100);              // 'Cluster A - Budi'
+    $table->foreignId('officer_id')           // Petugas PIC
+          ->constrained('users')->restrictOnDelete();
+    $table->text('description')->nullable();
+    $table->boolean('is_active')->default(true);
+    $table->timestamps();
+});</code></pre>
+<div class="note warn">⚠️ Cluster adalah ACUAN penugasan pelanggan → petugas. BUKAN alamat. Ganti petugas = update officer_id di cluster, semua pelanggan ikut.</div></div></section>
+<section><div class="sec-title">📋 Migration: customers</div><div class="sec-body"><pre><code>Schema::create('customers', function (Blueprint $table) {
+    $table->ulid('id')->primary();
+    $table->string('name', 150);
+    $table->string('full_name')->nullable();
+    $table->string('whatsapp_number', 20)->nullable();      // VARCHAR! Bukan INT (fix scientific notation Excel)
+    $table->foreignUlid('cluster_id')
+          ->constrained('clusters')->restrictOnDelete();
+    $table->foreignUlid('package_id')->nullable()   // Nullable — referensi saja
+          ->constrained('packages')->nullOnDelete();
+    $table->string('address')->nullable();          // Referensi geografis (PADI, TALANG...)
+    $table->text('maps_url')->nullable();
+    $table->text('house_photo_url')->nullable();
+    $table->tinyInteger('billing_day');        // 1-31, beda per pelanggan
+    $table->enum('status', ['active','suspended','terminated'])->default('active');
+    $table->date('suspended_at')->nullable();
+    $table->date('registered_at');
+    $table->text('notes')->nullable();
+    $table->softDeletes();
+    $table->timestamps();
+    $table->index(['status','billing_day']);
+});</code></pre></div></section>
+<section><div class="sec-title">📋 Migration: transactions</div><div class="sec-body"><pre><code>Schema::create('transactions', function (Blueprint $table) {
+    $table->ulid('id')->primary();
+    $table->foreignUlid('customer_id')->constrained('customers')->cascadeOnDelete();
+    $table->foreignId('officer_id')->nullable()   // NULL saat payment_method=transfer
+          ->constrained('users')->nullOnDelete();
+    $table->date('period');                       // YYYY-MM-01
+    $table->decimal('billed_amount', 12, 2);     // Input manual (pre-fill editable)
+    $table->decimal('paid_amount', 12, 2);
+    $table->enum('status', ['paid','partial','unpaid'])->default('paid');
+    $table->enum('payment_method', ['cash','transfer'])->default('cash');
+    $table->foreignId('recorded_by')->constrained('users');
+    $table->dateTime('paid_at');
+    $table->text('notes')->nullable();
+    $table->timestamps();
+    $table->unique(['customer_id','period']);    // 1 pelanggan 1 transaksi per bulan
+    $table->index(['officer_id','period','payment_method']);
+});</code></pre></div></section>
+<section><div class="sec-title">📋 Migration: officer_deposits</div><div class="sec-body"><pre><code>Schema::create('officer_deposits', function (Blueprint $table) {
+    $table->ulid('id')->primary();
+    $table->foreignId('officer_id')->constrained('users')->restrictOnDelete();
+    $table->date('period');
+    $table->decimal('amount', 12, 2);             // TITIP 1=1jt, TITIP 2=500rb...
+    $table->foreignId('received_by')->constrained('users')->restrictOnDelete();
+    $table->dateTime('deposited_at');
+    $table->text('notes')->nullable();
+    $table->timestamps();
+    $table->index(['officer_id','period']);
+});</code></pre></div></section>
+<section><div class="sec-title">📋 Seeders</div><div class="sec-body"><pre><code>// Tidak ada RoleSeeder: 3 role didefinisikan sebagai backed enum
+// App\Enums\Role (super_admin/admin/field_officer) — bukan baris tabel.
+// Kolom users.role di-cast ke Role::class.
+
+// UserSeeder — 1 CEO, 1 admin, 3 petugas (dummy dev)
+//   contoh: User::factory()->create(['role' => Role::Admin]);
+// PackageSeeder — Paket 100 (100rb), Paket 110 (110rb), Paket 115 (115rb)
+// ClusterSeeder — Cluster A/B/C masing-masing 1 petugas
+// CustomerSeeder — factory 50 pelanggan dummy tersebar 3 cluster,
+//   billing_day random 1-28, status mayoritas aktif + beberapa isolir</code></pre></div></section>
+<section><div class="sec-title">🧪 Testing Requirement</div><div class="sec-body">
+<ul>
+<li><strong>Unit:</strong> test bahwa migrate:fresh --seed berjalan tanpa error</li>
+<li><strong>Unit:</strong> test constraint unique (customer_id, periode) — insert duplikat harus gagal</li>
+<li><strong>Unit:</strong> test FK restrictOnDelete — hapus cluster yang punya pelanggan harus gagal</li>
+</ul>
+<pre><code>// tests/Feature/DatabaseStructureTest.php (PHPUnit)
+it('runs all migrations and seeders', function () {
+    $this->artisan('migrate:fresh --seed')->assertSuccessful();
+    expect(Customer::count())->toBeGreaterThan(0);
+});
+
+it('prevents duplicate transaksi per pelanggan per periode', function () {
+    $t = Transaction::factory()->create();
+    expect(fn() => Transaction::factory()->create([
+        'customer_id' => $t->customer_id,
+        'period' => $t->periode,
+    ]))->toThrow(QueryException::class);
+});</code></pre></div></section>
+
+
+<section>
+  <div class="sec-title">✅ Acceptance Criteria — Definition of Done</div>
+  <div class="sec-body"><ul class="checklist"><li>docker-compose exec app php artisan migrate:fresh --seed berjalan tanpa error</li><li>5 tabel inti terbentuk dengan FK dan index sesuai spec</li><li>Unique constraint (customer_id, periode) di transaksi berfungsi</li><li>Seeder menghasilkan: 3 role, 5 user, 3 paket, 3 cluster, 50 pelanggan dummy</li><li>whatsapp_number bertipe VARCHAR(20) — dikonfirmasi via describe table</li><li>PHPUnit test DatabaseStructureTest hijau</li></ul></div>
+</section>
+
+<section>
+  <div class="sec-title">🤖 Prompt untuk Claude Code</div>
+  <div class="sec-body">
+    <div class="agent-prompt"><div class="ap-label">Copy-paste prompt ini ke Claude Code:</div><pre>Kerjakan TASK-02 PionTech Billing System (setelah TASK-01 selesai).
+Buat migrations dalam urutan: packages → cluster → pelanggan → transaksi → officer_deposits.
+Spec detail ada di file HTML task ini — ikuti persis termasuk tipe kolom, enum values, FK behavior (restrictOnDelete/nullOnDelete/cascadeOnDelete), unique constraint (customer_id,periode), dan semua index.
+Buat factory + seeder: 3 role (enum Role), 5 user (1 super_admin, 1 admin, 3 field_officer), 3 paket (100rb/110rb/115rb), 3 cluster, 50 pelanggan dummy.
+Buat PHPUnit test DatabaseStructureTest yang memverifikasi migrate:fresh --seed, unique constraint, dan FK restrict.
+Commit dengan message &#x27;feat: database schema + seeders (TASK-02)&#x27;.</pre></div>
+  </div>
+</section>
+
+<footer>PionTech Billing System — Albiruni Software House · Laravel 13 + Filament v5 · Task generated Juli 2026</footer>
+</div>
+</body>
+</html>

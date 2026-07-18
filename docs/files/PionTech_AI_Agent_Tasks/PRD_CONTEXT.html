@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PRD CONTEXT — PionTech Billing System (Full Reference for AI Agents)</title>
+<style>
+:root{--blue:#1A4F8A;--blue-dark:#10335A;--blue-lite:#E8F0FB;--amber:#F0A500;--amber-lt:#FEF3CD;
+--gray:#2D3748;--gray-mid:#718096;--gray-lite:#EDF2F7;--gray-line:#CBD5E0;--green:#276749;--green-lt:#C6F6D5;
+--red:#C53030;--red-lt:#FFF5F5;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f7fafc;color:var(--gray);line-height:1.65;font-size:15px}
+.container{max-width:960px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,var(--blue-dark),var(--blue));color:#fff;padding:32px 36px;border-radius:14px;margin-bottom:24px}
+header .meta{font-size:12px;color:#8AADE0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+header h1{font-size:28px;font-weight:800;margin-bottom:8px}
+header .sub{font-size:14px;color:#BDD4EC}
+.badges{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.badge{background:rgba(255,255,255,.14);color:#BDD4EC;font-size:12px;padding:3px 12px;border-radius:999px;font-weight:600}
+.badge.amber{background:rgba(240,165,0,.25);color:#FEF3CD}
+nav.toc{background:#fff;border:1px solid var(--gray-line);border-radius:12px;padding:18px 22px;margin-bottom:22px}
+nav.toc .toc-title{font-weight:700;color:var(--blue);font-size:13px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+nav.toc ol{columns:2;padding-left:20px}
+nav.toc a{color:var(--gray);text-decoration:none;font-size:13px}
+nav.toc a:hover{color:var(--blue);text-decoration:underline}
+section{background:#fff;border:1px solid var(--gray-line);border-radius:12px;margin-bottom:18px;overflow:hidden;scroll-margin-top:20px}
+section>.sec-title{padding:12px 20px;background:var(--blue-lite);border-bottom:1px solid var(--gray-line);font-weight:700;font-size:16px;color:var(--blue)}
+section>.sec-body{padding:22px}
+h3{font-size:15px;color:var(--blue);margin:16px 0 8px;font-weight:700}
+h3:first-child{margin-top:0}
+pre{background:#1e2433;color:#e2e8f0;padding:16px;border-radius:8px;font-size:13px;overflow-x:auto;line-height:1.7;margin:10px 0}
+code{font-family:'Cascadia Code','Fira Code',monospace}
+p code,li code,td code{background:var(--gray-lite);padding:1px 6px;border-radius:4px;font-size:13px;color:var(--blue)}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}
+th{background:var(--blue);color:#fff;padding:9px 12px;text-align:left;font-weight:700}
+td{padding:8px 12px;border-bottom:1px solid var(--gray-line);vertical-align:top}
+tr:nth-child(even) td{background:var(--gray-lite)}
+ul,ol{padding-left:24px;margin:8px 0}
+li{margin:5px 0}
+.note{border-radius:8px;padding:12px 16px;font-size:13px;margin:12px 0;line-height:1.6}
+.note.warn{background:var(--amber-lt);border:1px solid #fde68a;color:#92400e}
+.note.info{background:var(--blue-lite);border:1px solid #c5d8f5;color:var(--blue)}
+.note.ok{background:var(--green-lt);border:1px solid #9ae6b4;color:var(--green)}
+.note.danger{background:var(--red-lt);border:1px solid #fecaca;color:var(--red)}
+footer{text-align:center;font-size:12px;color:var(--gray-mid);padding:20px 0;border-top:1px solid var(--gray-line);margin-top:12px}
+.backlink{display:inline-block;margin-top:10px;font-size:12px;color:var(--blue);text-decoration:none;font-weight:600}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="meta">📖 Wajib Dibaca Sebelum Mengerjakan Task Mana Pun</div>
+  <h1>PRD Context — PionTech Billing System</h1>
+  <div class="sub">Referensi lengkap: profil bisnis, klarifikasi logika, database schema, modul, role, stack, dan timeline. Semua file TASK-XX.html merujuk ke dokumen ini.</div>
+  <div class="badges">
+    <span class="badge">PRD v2.1</span>
+    <span class="badge">Pion Tech Solution</span>
+    <span class="badge amber">Sumber Kebenaran Tunggal (Single Source of Truth)</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="toc-title">Daftar Isi</div>
+  <ol><li><a href="#company">1. Profil Perusahaan & Masalah Bisnis</a></li><li><a href="#clarify-paket">2.1 Klarifikasi — Master Paket</a></li><li><a href="#clarify-cluster">2.2 Klarifikasi — Cluster Petugas</a></li><li><a href="#clarify-isolir">2.3 Klarifikasi — Status ISOLIR</a></li><li><a href="#clarify-tanggal">2.4 Klarifikasi — Tanggal Tagihan</a></li><li><a href="#clarify-uang">2.5 Klarifikasi — Alur Uang 3-State</a></li><li><a href="#alur-bisnis">3. Alur Bisnis Lengkap</a></li><li><a href="#formula">3.3 Formula Keuangan Utama</a></li><li><a href="#schema">4. Database Schema Final</a></li><li><a href="#modul">5. Spesifikasi Modul</a></li><li><a href="#roles">6. Matrix Role & Akses</a></li><li><a href="#stack">7. Tech Stack & Environment</a></li><li><a href="#timeline">8. Timeline Proyek</a></li><li><a href="#task-map">9. Peta Task → Bagian PRD</a></li></ol>
+</nav>
+
+<section id="company"><div class="sec-title">1. Profil Perusahaan & Masalah Bisnis</div><div class="sec-body">
+<h3>Profil Klien</h3>
+<table>
+<tr><td><strong>Nama</strong></td><td>Pion Tech Solution</td></tr>
+<tr><td><strong>Jenis Usaha</strong></td><td>Internet Service Provider (ISP)</td></tr>
+<tr><td><strong>Wilayah Layanan</strong></td><td>Turen, Gondanglegi, Kepanjen, Wajak — Kabupaten Malang</td></tr>
+<tr><td><strong>Pelanggan Aktif</strong></td><td>~900 pelanggan</td></tr>
+<tr><td><strong>Tim</strong></td><td>1 CEO (Bapak Rishvian Ainul Yaqin), 2 Admin Penagihan, 3 Petugas Lapangan</td></tr>
+</table>
+
+<h3>Masalah yang Dipecahkan Sistem Ini</h3>
+<ul>
+<li>Rekap transaksi manual — tidak tersistem, rawan salah</li>
+<li>Setiap pelanggan tanggal tagihan berbeda — sulit dipantau</li>
+<li>Manajemen wilayah petugas dilakukan manual</li>
+<li>Setoran petugas ke admin sering parsial, tidak tercatat rapi</li>
+<li>Laporan rapat bulanan sulit disusun karena data tersebar di banyak sheet Excel</li>
+</ul>
+
+<h3>Data Eksisting — Struktur Excel Klien (Sumber Analisis)</h3>
+<p>Setiap sheet = 1 petugas per bulan, terdiri dari header (BULAN, TITIP 1-4, KEKURANGAN SETOR, KOMISI) dan tabel pelanggan (nama, Paket, Alamat, MAPS, PHOTO RUMAH, WA, KET., BAYAR). Ditemukan masalah teknis: nomor WA tersimpan scientific notation (6.28226E+12), kolom Paket hanya angka tanpa label jelas, alamat hanya nama kampung, tidak ada timestamp pada setoran.</p>
+</div></section>
+
+
+<section id="clarify-paket"><div class="sec-title">2.1 Klarifikasi — Master Paket</div><div class="sec-body">
+<div class="note info"><strong>Keputusan Final:</strong> Angka di kolom Paket (110, 100, 115) adalah harga dalam ribuan (Rp 110.000, dst.). Namun nama paket hanya LABEL REFERENSI untuk admin — harga bisa diinput manual per transaksi, TIDAK harus definitif mengikuti master paket.</div>
+<p><strong>Implikasi teknis:</strong> <code>package_id</code> di tabel pelanggan bersifat NULLABLE (referensi saja). Kolom <code>billed_amount</code> di transaksi diisi manual oleh admin/petugas — pre-fill dari <code>default_price</code> paket tapi tetap EDITABLE, bukan readonly/auto-lock.</p>
+</div></section>
+
+
+<section id="clarify-cluster"><div class="sec-title">2.2 Klarifikasi — Cluster Petugas</div><div class="sec-body">
+<div class="note info"><strong>Keputusan Final:</strong> Alamat (PADI, TALANG, KEDOK, dll.) hanya menjadi REFERENSI untuk mempermudah pencarian lokasi. Acuan resmi penugasan pelanggan ke petugas menggunakan konsep <strong>CLUSTER</strong> — bukan alamat/wilayah geografis.</div>
+<p><strong>Implikasi teknis:</strong> Tabel baru <code>clusters</code> dibuat sebagai acuan utama. Satu cluster = satu petugas PIC (<code>officer_id</code>). Pelanggan ter-assign via <code>cluster_id</code>, bukan langsung ke petugas. Jika petugas ganti, admin cukup update <code>officer_id</code> di tabel cluster — semua pelanggan dalam cluster tersebut otomatis ikut berpindah tanpa perlu update satu-satu.</p>
+</div></section>
+
+
+<section id="clarify-isolir"><div class="sec-title">2.3 Klarifikasi — Status ISOLIR</div><div class="sec-body">
+<div class="note warn"><strong>Keputusan Final:</strong> ISOLIR BUKAN status berhenti berlangganan. ISOLIR = pelanggan sudah menerima tagihan dan MELEWATI jatuh tempo tanpa membayar, sehingga sambungan internetnya sementara diblokir. Status ini di-UPDATE MANUAL oleh admin (bukan otomatis oleh sistem).</div>
+<p><strong>Alur status:</strong></p>
+<p><code>AKTIF</code> → (jatuh tempo terlewat, belum bayar) → admin klik "Tandai ISOLIR" → <code>ISOLIR</code> → (pelanggan akhirnya bayar) → admin klik "Pulihkan ke Aktif" → kembali <code>AKTIF</code></p>
+<p><code>OFF</code> adalah status TERPISAH — hanya untuk pelanggan yang benar-benar berhenti berlangganan permanen, TIDAK ditagih lagi.</p>
+<p><strong>Aturan penting:</strong> Pelanggan berstatus ISOLIR TETAP muncul di daftar tagihan bulan berjalan dan HARUS tetap dibayar. Bedanya dengan OFF: OFF tidak muncul di tagihan sama sekali.</p>
+</div></section>
+
+
+<section id="clarify-tanggal"><div class="sec-title">2.4 Klarifikasi — Tanggal Tagihan Berbeda per Pelanggan</div><div class="sec-body">
+<div class="note info"><strong>Keputusan Final:</strong> Setiap pelanggan punya tanggal tagihan sendiri-sendiri (misal pelanggan A tanggal 5, pelanggan B tanggal 15), namun semua masih dalam SATU periode bulan yang sama.</div>
+<p>Inilah alasan mengapa mekanisme <strong>titip/setoran parsial</strong> ada: karena petugas menagih bertahap sepanjang bulan sesuai jatuh tempo masing-masing pelanggan, uang yang terkumpul di tangan petugas juga masuk bertahap — bukan sekaligus di akhir bulan.</p>
+<p><strong>Contoh:</strong> Tgl 5 petugas menagih 10 pelanggan → dapat Rp 1.100.000 → titip ke admin Rp 1.000.000 (sisa Rp 100rb di tangan). Tgl 10, menagih 8 pelanggan lagi → dapat Rp 880.000 → titip lagi Rp 500.000. Dan seterusnya sepanjang bulan.</p>
+</div></section>
+
+
+<section id="clarify-uang"><div class="sec-title">2.5 Klarifikasi — Alur Uang 3-State (PALING KRITIS)</div><div class="sec-body">
+<div class="note danger"><strong>Ini adalah klarifikasi paling signifikan yang mengubah desain sistem.</strong> Uang dari pelanggan punya TIGA kemungkinan state yang harus dipantau terpisah:</div>
+<table>
+<tr><th>State</th><th>Kondisi</th><th>Cara Sistem Mencatat</th></tr>
+<tr><td><strong>1. Tunai di Petugas</strong></td><td>Petugas berhasil menagih, uang tunai ada di tangan petugas, BELUM ada setoran sama sekali ke admin bulan ini</td><td>Transaksi dicatat LUNAS oleh petugas (<code>payment_method=cash</code>). Setoran belum ada → ini "uang beredar di petugas"</td></tr>
+<tr><td><strong>2. Disetor Sebagian (Titip)</strong></td><td>Petugas sudah menyetor sebagian ke admin. Sisa masih di tangan petugas</td><td>Dicatat di tabel <code>officer_deposits</code>. Sistem hitung: total tagih tunai − total disetor = sisa di petugas</td></tr>
+<tr><td><strong>3. Transfer Langsung</strong></td><td>Pelanggan bayar via transfer bank LANGSUNG ke rekening Pion Tech — petugas TIDAK PERLU mendatangi pelanggan ini sama sekali</td><td>Admin catat transaksi dengan <code>payment_method=transfer</code>. <code>officer_id</code> = NULL. TIDAK masuk hitungan uang di petugas — otomatis dianggap settled</td></tr>
+</table>
+<div class="note warn"><strong>Formula kunci yang harus konsisten di seluruh sistem (dashboard, laporan, widget):</strong><br>
+<code>Uang di Petugas = Total Tunai Terkumpul − Total Sudah Disetor</code><br>
+Transfer TIDAK PERNAH masuk ke sisi manapun formula ini — dia berdiri sendiri sebagai "sudah settled langsung".</div>
+</div></section>
+
+
+<section id="alur-bisnis"><div class="sec-title">3. Alur Bisnis Lengkap</div><div class="sec-body">
+<h3>3.1 Alur Penagihan Bulanan (Step by Step)</h3>
+<table>
+<tr><th>Step</th><th>Aktor</th><th>Aktivitas</th></tr>
+<tr><td>1</td><td>Admin</td><td>Awal bulan: sistem tampilkan daftar pelanggan per tanggal tagihan. Admin pastikan cluster & petugas sudah benar.</td></tr>
+<tr><td>2</td><td>Petugas</td><td>Setiap hari, cek pelanggan cluster sendiri yang jatuh tempo hari itu (atau sudah lewat). Datangi & tagih.</td></tr>
+<tr><td>3A</td><td>Petugas</td><td>Bayar TUNAI → petugas input transaksi. Uang ada di petugas.</td></tr>
+<tr><td>3B</td><td>Admin</td><td>Bayar TRANSFER langsung → admin input dengan payment_method=transfer. Settled langsung, tidak lewat petugas.</td></tr>
+<tr><td>4</td><td>Admin</td><td>Pelanggan lewat jatuh tempo belum bayar → admin update manual status ke ISOLIR.</td></tr>
+<tr><td>5</td><td>Petugas</td><td>Kapan saja sepanjang bulan: setor sebagian uang ke admin (titip). Admin konfirmasi & catat.</td></tr>
+<tr><td>6</td><td>CEO/Admin</td><td>Dashboard menampilkan real-time: tagihan terkumpul, sudah disetor, sisa di petugas, % pembayaran.</td></tr>
+<tr><td>7</td><td>Admin</td><td>Akhir bulan: rekonsiliasi — total tagih = total setor + sisa yang diakui petugas.</td></tr>
+</table>
+
+<h3>3.2 Skenario Status Pelanggan</h3>
+<table>
+<tr><th>Status</th><th>Arti</th><th>Aturan Sistem</th></tr>
+<tr><td>AKTIF</td><td>Berlangganan normal</td><td>Muncul di tagihan aktif, dihitung pendapatan potensial</td></tr>
+<tr><td>ISOLIR</td><td>Jatuh tempo, belum bayar, diblokir sementara</td><td>TETAP muncul di tagihan (masih harus bayar). Ditandai merah/kuning di dashboard</td></tr>
+<tr><td>OFF</td><td>Berhenti permanen</td><td>TIDAK muncul di tagihan, tidak dihitung pendapatan</td></tr>
+</table>
+</div></section>
+
+
+<section id="formula"><div class="sec-title">3.3 Formula Keuangan Utama</div><div class="sec-body">
+<table>
+<tr><th>Variabel</th><th>Formula</th></tr>
+<tr><td>Total Tagihan Bulan Ini</td><td>SUM(billed_amount) dari transaksi pelanggan AKTIF + ISOLIR periode ini</td></tr>
+<tr><td>Total Terkumpul Tunai</td><td>SUM(paid_amount) WHERE payment_method=cash</td></tr>
+<tr><td>Total Terkumpul Transfer</td><td>SUM(paid_amount) WHERE payment_method=transfer</td></tr>
+<tr><td>Total Terkumpul Semua</td><td>Tunai + Transfer</td></tr>
+<tr><td>Total Disetor ke Admin</td><td>SUM(nominal) dari officer_deposits periode ini</td></tr>
+<tr><td><strong>Uang di Petugas</strong></td><td><strong>Total Terkumpul Tunai − Total Disetor ke Admin</strong> (transfer TIDAK masuk)</td></tr>
+<tr><td>Kekurangan Setor (per petugas)</td><td>Total tagih tunai cluster petugas − Total disetor petugas tsb</td></tr>
+</table>
+</div></section>
+
+
+<section id="schema"><div class="sec-title">4. Database Schema Final</div><div class="sec-body">
+<h3>Entitas Utama & Relasi</h3>
+<pre>cluster (1) ──< pelanggan (banyak)
+petugas/user (1) ──< cluster (1, PIC)
+packages (1) ──< pelanggan (banyak, NULLABLE — referensi saja)
+pelanggan (1) ──< transaksi (banyak, per periode)
+user/petugas (1) ──< transaksi (banyak, NULLABLE jika transfer)
+user/petugas (1) ──< officer_deposits (banyak)</pre>
+
+<h3>Tabel: clusters (BARU)</h3>
+<table>
+<tr><th>Kolom</th><th>Tipe</th><th>Ket.</th></tr>
+<tr><td>id</td><td>ULID</td><td>PK</td></tr>
+<tr><td>name</td><td>VARCHAR(100)</td><td>'Cluster A - Budi'</td></tr>
+<tr><td>officer_id</td><td>FK users</td><td>PIC cluster ini</td></tr>
+<tr><td>description</td><td>TEXT</td><td>nullable</td></tr>
+<tr><td>is_active</td><td>BOOLEAN</td><td>default true</td></tr>
+</table>
+
+<h3>Tabel: customers</h3>
+<table>
+<tr><th>Kolom</th><th>Tipe</th><th>Ket.</th></tr>
+<tr><td>id</td><td>ULID</td><td>PK</td></tr>
+<tr><td>name, full_name</td><td>VARCHAR</td><td>full_name nullable</td></tr>
+<tr><td>whatsapp_number</td><td>VARCHAR(20)</td><td>STRING bukan INT — fix scientific notation</td></tr>
+<tr><td>cluster_id</td><td>FK cluster</td><td>NOT NULL — acuan penugasan utama</td></tr>
+<tr><td>package_id</td><td>FK packages</td><td>NULLABLE — referensi saja</td></tr>
+<tr><td>address</td><td>VARCHAR</td><td>Referensi geografis saja (PADI, TALANG...)</td></tr>
+<tr><td>maps_url, house_photo_url</td><td>TEXT</td><td>nullable</td></tr>
+<tr><td>billing_day</td><td>TINYINT (1-31)</td><td>Beda per pelanggan</td></tr>
+<tr><td>status</td><td>ENUM(active,suspended,terminated)</td><td>default aktif</td></tr>
+<tr><td>suspended_at</td><td>DATE</td><td>nullable — diisi saat ISOLIR</td></tr>
+<tr><td>registered_at</td><td>DATE</td><td></td></tr>
+<tr><td>deleted_at</td><td>TIMESTAMP</td><td>soft delete</td></tr>
+</table>
+
+<h3>Tabel: transactions</h3>
+<table>
+<tr><th>Kolom</th><th>Tipe</th><th>Ket.</th></tr>
+<tr><td>id</td><td>ULID</td><td>PK</td></tr>
+<tr><td>customer_id</td><td>FK pelanggan</td><td>NOT NULL, cascadeOnDelete</td></tr>
+<tr><td>officer_id</td><td>FK users</td><td>NULLABLE — NULL jika transfer</td></tr>
+<tr><td>period</td><td>DATE (YYYY-MM-01)</td><td>Periode bulan tagihan</td></tr>
+<tr><td>billed_amount</td><td>DECIMAL(12,2)</td><td>INPUT MANUAL — pre-fill dari paket tapi editable</td></tr>
+<tr><td>paid_amount</td><td>DECIMAL(12,2)</td><td></td></tr>
+<tr><td>status</td><td>ENUM(paid,partial,unpaid)</td><td>Auto-set dari model event</td></tr>
+<tr><td>payment_method</td><td>ENUM(cash,transfer)</td><td>default tunai</td></tr>
+<tr><td>recorded_by</td><td>FK users</td><td></td></tr>
+<tr><td>paid_at</td><td>DATETIME</td><td></td></tr>
+</table>
+<div class="note warn">Unique constraint: (customer_id, periode) — satu pelanggan hanya boleh 1 transaksi per bulan.</div>
+
+<h3>Tabel: officer_deposits</h3>
+<table>
+<tr><th>Kolom</th><th>Tipe</th><th>Ket.</th></tr>
+<tr><td>id</td><td>ULID</td><td>PK</td></tr>
+<tr><td>officer_id</td><td>FK users</td><td></td></tr>
+<tr><td>period</td><td>DATE</td><td></td></tr>
+<tr><td>amount</td><td>DECIMAL(12,2)</td><td>Setara TITIP 1, 2, 3... di Excel</td></tr>
+<tr><td>received_by</td><td>FK users (admin)</td><td></td></tr>
+<tr><td>deposited_at</td><td>DATETIME</td><td>BARU — tidak ada di Excel lama</td></tr>
+</table>
+
+<h3>Tabel: packages</h3>
+<table>
+<tr><th>Kolom</th><th>Tipe</th><th>Ket.</th></tr>
+<tr><td>id</td><td>ULID</td><td>PK</td></tr>
+<tr><td>name</td><td>VARCHAR(100)</td><td>Label referensi: 'Paket 110'</td></tr>
+<tr><td>default_price</td><td>DECIMAL(12,2)</td><td>Pre-fill saja, BUKAN constraint</td></tr>
+<tr><td>speed_mbps</td><td>TINYINT</td><td>nullable</td></tr>
+<tr><td>is_active</td><td>BOOLEAN</td><td>default true</td></tr>
+</table>
+</div></section>
+
+
+<section id="modul"><div class="sec-title">5. Spesifikasi Modul (Ringkasan)</div><div class="sec-body">
+<table>
+<tr><th>Modul</th><th>Fitur Kunci</th></tr>
+<tr><td>Dashboard</td><td>Stats (ditagih, sudah/belum bayar, via transfer, uang di petugas), chart doughnut, tabel setoran per petugas, tagihan jatuh tempo hari ini</td></tr>
+<tr><td>Pelanggan</td><td>CRUD lengkap, quick action Tandai ISOLIR / Pulihkan Aktif, filter jatuh tempo, import Excel</td></tr>
+<tr><td>Transaksi</td><td>Input tunai (pre-fill nominal editable) & transfer (petugas hidden), auto-status lunas/parsial/belum</td></tr>
+<tr><td>Setoran Petugas</td><td>Catat titip, info panel sisa real-time, riwayat per petugas</td></tr>
+<tr><td>Master Data</td><td>Cluster (assign petugas PIC), Paket (harga referensi), User (role management)</td></tr>
+<tr><td>Laporan</td><td>Rekap pembayaran bulanan, setoran per petugas, daftar tunggakan/ISOLIR — export PDF & Excel</td></tr>
+</table>
+</div></section>
+
+
+<section id="roles"><div class="sec-title">6. Matrix Role & Hak Akses</div><div class="sec-body">
+<table>
+<tr><th>Fitur</th><th>super_admin (CEO)</th><th>admin</th><th>field_officer</th></tr>
+<tr><td>Dashboard</td><td>Full</td><td>Full</td><td>Cluster sendiri</td></tr>
+<tr><td>Input Transaksi Tunai</td><td>—</td><td>✓</td><td>✓ Cluster sendiri</td></tr>
+<tr><td>Input Transaksi Transfer</td><td>—</td><td>✓</td><td>—</td></tr>
+<tr><td>Tandai ISOLIR/Pulihkan</td><td>—</td><td>✓</td><td>—</td></tr>
+<tr><td>Catat Setoran</td><td>—</td><td>Konfirmasi</td><td>Inisiasi</td></tr>
+<tr><td>CRUD Pelanggan</td><td>—</td><td>✓</td><td>—</td></tr>
+<tr><td>CRUD Cluster/Paket</td><td>View</td><td>✓</td><td>—</td></tr>
+<tr><td>Manajemen User</td><td>✓</td><td>—</td><td>—</td></tr>
+<tr><td>Ekspor Laporan</td><td>✓</td><td>✓</td><td>—</td></tr>
+</table>
+</div></section>
+
+
+<section id="stack"><div class="sec-title">7. Tech Stack & Environment</div><div class="sec-body">
+<table>
+<tr><th>Layer</th><th>Pilihan</th></tr>
+<tr><td>Backend</td><td>Laravel 13 (PHP 8.3+)</td></tr>
+<tr><td>Admin Panel</td><td>Filament v5 (Tailwind-based, built-in)</td></tr>
+<tr><td>Styling Admin</td><td>Tailwind CSS (bawaan Filament)</td></tr>
+<tr><td>RBAC</td><td>enum <code>App\Enums\Role</code> + <code>App\Services\ScopeService</code> (tanpa spatie/laravel-permission)</td></tr>
+<tr><td>Database</td><td>MySQL 8 (docker, host port 3309)</td></tr>
+<tr><td>Local Dev</td><td><strong>Docker Compose custom</strong> (Dockerfile php:8.4-apache + docker-compose.yml; service app/db/redis, port 8002/3309/6382) — bukan Laravel Sail</td></tr>
+<tr><td>Dev Remote</td><td>VPS Albiruni Studio (sementara, selama proses development)</td></tr>
+<tr><td>Production</td><td>Server sendiri milik Pion Tech Solution</td></tr>
+<tr><td>Domain</td><td>piontechsolution.com (sudah dibeli, lunas)</td></tr>
+<tr><td>Testing</td><td>PHPUnit (unit + feature), Claude Code + Chrome (E2E)</td></tr>
+</table>
+<div class="note info">Docker digunakan untuk local development & testing agar environment konsisten antara developer/agent yang berbeda, terlepas dari OS masing-masing. Deployment production tetap ke server fisik Pion Tech (bukan Docker) sesuai keputusan klien.</div>
+</div></section>
+
+
+<section id="timeline"><div class="sec-title">8. Timeline Proyek</div><div class="sec-body">
+<table>
+<tr><th>Periode</th><th>Fase</th></tr>
+<tr><td>6–12 Juli 2026</td><td>Fase 1: Setup, migration, models, auth (TASK 01-04)</td></tr>
+<tr><td>13–19 Juli 2026</td><td>Fase 2: Master data & Pelanggan (TASK 05-07)</td></tr>
+<tr><td>20–26 Juli 2026</td><td>Fase 3: Transaksi, setoran, import (TASK 08-09, 11)</td></tr>
+<tr><td>27 Jul–6 Agt 2026</td><td>Fase 4: Dashboard, laporan, testing (TASK 10, 12-15)</td></tr>
+<tr><td>6 Agustus 2026</td><td>Penyelesaian pekerjaan + UAT</td></tr>
+<tr><td>10 Agustus 2026</td><td>Go-Live Production (TASK-16)</td></tr>
+</table>
+</div></section>
+
+
+<section id="task-map"><div class="sec-title">9. Peta Task → Bagian PRD Ini</div><div class="sec-body">
+<table>
+<tr><th>Task</th><th>Bagian PRD yang Relevan</th></tr>
+<tr><td>TASK-01</td><td>§7 Tech Stack — Docker, Laravel terbaru, Filament, Tailwind</td></tr>
+<tr><td>TASK-02</td><td>§4 Database Schema Final</td></tr>
+<tr><td>TASK-03</td><td>§2.1-2.5 Semua Klarifikasi + §3.3 Formula Keuangan</td></tr>
+<tr><td>TASK-04</td><td>§6 Matrix Role & Akses</td></tr>
+<tr><td>TASK-05</td><td>§2.1 Klarifikasi Paket</td></tr>
+<tr><td>TASK-06</td><td>§2.2 Klarifikasi Cluster</td></tr>
+<tr><td>TASK-07</td><td>§2.3 Klarifikasi ISOLIR + §3.2 Skenario Status</td></tr>
+<tr><td>TASK-08</td><td>§2.1 Paket + §2.5 Alur Uang 3-State</td></tr>
+<tr><td>TASK-09</td><td>§2.4 Tanggal Tagihan + §2.5 Alur Uang</td></tr>
+<tr><td>TASK-10</td><td>§3.3 Formula Keuangan (semua widget bersumber dari sini)</td></tr>
+<tr><td>TASK-11</td><td>§1 Data Eksisting Excel (masalah teknis & cleaning rules)</td></tr>
+<tr><td>TASK-12</td><td>§3.3 Formula Keuangan (laporan harus konsisten dengan dashboard)</td></tr>
+<tr><td>TASK-13,14,15</td><td>Seluruh PRD — testing memverifikasi SEMUA business rule di atas</td></tr>
+<tr><td>TASK-16</td><td>§7 Tech Stack — deployment ke server sendiri Pion Tech, bukan Docker</td></tr>
+</table>
+<div class="note ok">✅ Setiap kali mengerjakan sebuah task, cek kembali bagian PRD terkait di atas untuk memastikan implementasi sesuai keputusan bisnis final, bukan asumsi.</div>
+</div></section>
+
+
+<footer>PRD Context v2.1 — PionTech Billing System — Albiruni Software House · Dokumen acuan tunggal untuk semua AI agent task · Juli 2026</footer>
+</div>
+</body>
+</html>

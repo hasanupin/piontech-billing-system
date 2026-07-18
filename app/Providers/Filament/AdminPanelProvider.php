@@ -29,8 +29,39 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->brandName('Piontech Billing System')
+            ->font('Outfit')
+            // Palet warna mengadopsi design tokens TailAdmin (tailadmin.com, free version).
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => [
+                    50 => '#ecf3ff',
+                    100 => '#dde9ff',
+                    200 => '#c2d6ff',
+                    300 => '#9cb9ff',
+                    400 => '#7592ff',
+                    500 => '#465fff',
+                    600 => '#3641f5',
+                    700 => '#2a31d8',
+                    800 => '#252dae',
+                    900 => '#262e89',
+                    950 => '#161950',
+                ],
+                'gray' => [
+                    50 => '#f9fafb',
+                    100 => '#f2f4f7',
+                    200 => '#e4e7ec',
+                    300 => '#d0d5dd',
+                    400 => '#98a2b3',
+                    500 => '#667085',
+                    600 => '#475467',
+                    700 => '#344054',
+                    800 => '#1d2939',
+                    900 => '#101828',
+                    950 => '#0c111d',
+                ],
+                'success' => Color::hex('#12b76a'),
+                'danger' => Color::hex('#f04438'),
+                'warning' => Color::hex('#f79009'),
+                'info' => Color::hex('#0ba5ec'),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

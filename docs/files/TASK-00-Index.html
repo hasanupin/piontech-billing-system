@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TASK-00 — Index — Peta Jalan Development | PionTech Billing</title>
+<style>
+:root{--blue:#1A4F8A;--blue-dark:#10335A;--blue-lite:#E8F0FB;--amber:#F0A500;--amber-lt:#FEF3CD;
+--gray:#2D3748;--gray-mid:#718096;--gray-lite:#EDF2F7;--gray-line:#CBD5E0;--green:#276749;--green-lt:#C6F6D5;
+--red:#C53030;--red-lt:#FFF5F5;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f7fafc;color:var(--gray);line-height:1.65;font-size:15px}
+.container{max-width:920px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,var(--blue-dark),var(--blue));color:#fff;padding:28px 32px;border-radius:14px;margin-bottom:24px}
+header .meta{font-size:12px;color:#8AADE0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+header h1{font-size:26px;font-weight:800;margin-bottom:8px}
+header .sub{font-size:14px;color:#BDD4EC}
+.badges{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.badge{background:rgba(255,255,255,.14);color:#BDD4EC;font-size:12px;padding:3px 12px;border-radius:999px;font-weight:600}
+.badge.amber{background:rgba(240,165,0,.25);color:#FEF3CD}
+section{background:#fff;border:1px solid var(--gray-line);border-radius:12px;margin-bottom:18px;overflow:hidden}
+section>.sec-title{padding:12px 20px;background:var(--blue-lite);border-bottom:1px solid var(--gray-line);font-weight:700;font-size:15px;color:var(--blue)}
+section>.sec-body{padding:20px}
+pre{background:#1e2433;color:#e2e8f0;padding:16px;border-radius:8px;font-size:13px;overflow-x:auto;line-height:1.7;margin:10px 0}
+code{font-family:'Cascadia Code','Fira Code',monospace}
+p code,li code,td code{background:var(--gray-lite);padding:1px 6px;border-radius:4px;font-size:13px;color:var(--blue)}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}
+th{background:var(--blue);color:#fff;padding:9px 12px;text-align:left;font-weight:700}
+td{padding:8px 12px;border-bottom:1px solid var(--gray-line);vertical-align:top}
+tr:nth-child(even) td{background:var(--gray-lite)}
+ul,ol{padding-left:24px;margin:8px 0}
+li{margin:5px 0}
+.note{border-radius:8px;padding:12px 16px;font-size:13px;margin:12px 0;line-height:1.6}
+.note.warn{background:var(--amber-lt);border:1px solid #fde68a;color:#92400e}
+.note.info{background:var(--blue-lite);border:1px solid #c5d8f5;color:var(--blue)}
+.note.ok{background:var(--green-lt);border:1px solid #9ae6b4;color:var(--green)}
+.note.danger{background:var(--red-lt);border:1px solid #fecaca;color:var(--red)}
+.checklist{list-style:none;padding-left:4px}
+.checklist li{padding-left:30px;position:relative;margin:8px 0}
+.checklist li::before{content:'☐';position:absolute;left:0;font-size:18px;color:var(--gray-mid)}
+.dep{display:inline-block;background:var(--gray-lite);border:1px solid var(--gray-line);border-radius:6px;padding:2px 10px;font-size:12px;font-weight:600;color:var(--gray-mid);margin:2px}
+footer{text-align:center;font-size:12px;color:var(--gray-mid);padding:20px 0;border-top:1px solid var(--gray-line);margin-top:12px}
+.agent-prompt{background:#0f172a;border-radius:10px;padding:18px;margin-top:8px}
+.agent-prompt .ap-label{color:#F0A500;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.agent-prompt pre{background:transparent;padding:0;margin:0;color:#cbd5e0;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="prd-banner">📖 Sebelum mengerjakan task ini, baca dulu <a href="PRD_CONTEXT.html">PRD_CONTEXT.html</a> — konteks bisnis lengkap & peta task ↔ PRD.</div>
+<header>
+  <div class="meta">PionTech Billing System — Task Spec untuk AI Agent</div>
+  <h1>TASK-00 — Index — Peta Jalan Development</h1>
+  <div class="sub">Urutan pengerjaan, dependency graph, dan cara pakai file-file task ini</div>
+  <div class="badges">
+    <span class="badge">Module: Meta</span>
+    <span class="badge">Estimasi: —</span>
+    <span class="badge amber">Prioritas: Baca Dulu</span>
+  </div>
+</header>
+
+<section>
+  <div class="sec-title">📌 Dependencies (kerjakan setelah task berikut selesai)</div>
+  <div class="sec-body"><span class="dep">Tidak ada — bisa dikerjakan pertama</span></div>
+</section>
+
+<section><div class="sec-title">🎯 Cara Menggunakan Task Files Ini</div><div class="sec-body">
+<ol>
+<li>Setiap file HTML = 1 task mandiri yang bisa dikerjakan oleh AI agent (Claude Code)</li>
+<li>Buka file task → copy <strong>Prompt untuk Claude Code</strong> di bagian bawah → paste ke Claude Code</li>
+<li>Claude Code juga bisa membaca file HTML-nya langsung: <code>claude "baca TASK-05.html lalu kerjakan"</code></li>
+<li>Kerjakan sesuai urutan dependency — jangan loncat</li>
+<li>Setiap task selesai = commit dengan message yang tercantum + semua acceptance criteria tercentang</li>
+</ol></div></section>
+<section><div class="sec-title">📋 Urutan Pengerjaan &amp; Dependency</div><div class="sec-body">
+<table>
+<tr><th>Fase</th><th>Task</th><th>Deps</th><th>Estimasi</th></tr>
+<tr><td rowspan="4">Fondasi<br>(Minggu 1)</td><td>TASK-01 Setup Tech Stack</td><td>—</td><td>2-3 jam</td></tr>
+<tr><td>TASK-02 Database & Seeders</td><td>01</td><td>3-4 jam</td></tr>
+<tr><td>TASK-03 Models & Business Rules</td><td>02</td><td>3-4 jam</td></tr>
+<tr><td>TASK-04 Auth, Roles & Policies</td><td>03</td><td>2-3 jam</td></tr>
+<tr><td rowspan="3">Master & Core<br>(Minggu 2)</td><td>TASK-05 Master Paket</td><td>04</td><td>1-2 jam</td></tr>
+<tr><td>TASK-06 Master Cluster</td><td>04</td><td>2 jam</td></tr>
+<tr><td>TASK-07 Pelanggan + ISOLIR</td><td>05, 06</td><td>4-5 jam</td></tr>
+<tr><td rowspan="3">Transaksi<br>(Minggu 3)</td><td>TASK-08 Transaksi Tunai+Transfer</td><td>07</td><td>4-5 jam</td></tr>
+<tr><td>TASK-09 Setoran Petugas</td><td>08</td><td>3 jam</td></tr>
+<tr><td>TASK-11 Import Excel (paralel OK)</td><td>07</td><td>4 jam</td></tr>
+<tr><td rowspan="5">Dashboard, QA & Ship<br>(Minggu 4)</td><td>TASK-10 Dashboard Widgets</td><td>09</td><td>4 jam</td></tr>
+<tr><td>TASK-12 Laporan & Export</td><td>10</td><td>3-4 jam</td></tr>
+<tr><td>TASK-13 Unit Test Konsolidasi</td><td>12</td><td>3 jam</td></tr>
+<tr><td>TASK-14 Feature Test Journeys</td><td>13</td><td>4 jam</td></tr>
+<tr><td>TASK-15 E2E via Chrome</td><td>14</td><td>3-4 jam</td></tr>
+<tr><td>Go-Live</td><td>TASK-16 Deployment Production</td><td>15 + UAT</td><td>3-4 jam</td></tr>
+</table>
+<div class="note ok">✅ Total estimasi: ~48-58 jam kerja efektif — pas untuk timeline 4 minggu (6 Juli – 6 Agustus 2026, go-live 10 Agustus).</div></div></section>
+<section><div class="sec-title">📋 Testing Pyramid</div><div class="sec-body">
+<table>
+<tr><th>Layer</th><th>Task</th><th>Tool</th><th>Yang Diuji</th></tr>
+<tr><td>Unit (banyak, cepat)</td><td>03, 13</td><td>PHPUnit</td><td>Business logic murni: status auto-set, formula keuangan, scopes, cleaning import</td></tr>
+<tr><td>Feature (sedang)</td><td>05-12, 14</td><td>PHPUnit + Livewire</td><td>Alur per-fitur & journey per-role tanpa browser</td></tr>
+<tr><td>E2E (sedikit, lambat)</td><td>15</td><td>Claude Code + Chrome</td><td>Reaktivitas Livewire di browser nyata, visual, link eksternal, rekonsiliasi angka</td></tr>
+</table></div></section>
+<section><div class="sec-title">📋 Konteks Bisnis Kunci (Ringkasan PRD v2.1)</div><div class="sec-body">
+<ul>
+<li><strong>Cluster</strong> = acuan penugasan pelanggan→petugas (bukan alamat). Alamat hanya referensi.</li>
+<li><strong>Paket</strong> = label referensi. default_price di-prefill ke transaksi tapi editable.</li>
+<li><strong>ISOLIR</strong> = jatuh tempo belum bayar → admin blokir manual → tetap ditagih → bayar → pulih aktif.</li>
+<li><strong>Alur uang 3-state:</strong> tunai di petugas → titip parsial ke admin → ATAU transfer langsung (settled, tanpa petugas).</li>
+<li><strong>Formula kunci:</strong> Uang di Petugas = Total Tunai − Total Disetor. Transfer TIDAK masuk.</li>
+<li><strong>Tanggal tagihan</strong> beda per pelanggan (1–31) dalam satu periode bulan.</li>
+</ul></div></section>
+
+
+<section>
+  <div class="sec-title">✅ Acceptance Criteria — Definition of Done</div>
+  <div class="sec-body"><ul class="checklist"><li>Sudah membaca konteks bisnis kunci sebelum mengerjakan task apa pun</li><li>Mengerjakan task sesuai urutan dependency</li><li>Setiap task selesai dengan semua acceptance criteria tercentang dan commit message sesuai</li></ul></div>
+</section>
+
+<section>
+  <div class="sec-title">🤖 Prompt untuk Claude Code</div>
+  <div class="sec-body">
+    <div class="agent-prompt"><div class="ap-label">Copy-paste prompt ini ke Claude Code:</div><pre>Ini adalah file index. Baca dulu &#x27;Konteks Bisnis Kunci&#x27; di file ini sebelum mengerjakan task mana pun.
+Mulai dari TASK-01 dan ikuti urutan dependency di tabel. Setiap file TASK-XX.html berisi spec lengkap + prompt siap pakai.</pre></div>
+  </div>
+</section>
+
+<footer>PionTech Billing System — Albiruni Software House · Laravel 13 + Filament v5 · Task generated Juli 2026</footer>
+</div>
+</body>
+</html>

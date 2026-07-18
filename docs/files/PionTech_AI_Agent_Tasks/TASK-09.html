@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TASK-09 — Setoran Petugas (Titip) Resource | PionTech Billing</title>
+<style>
+:root{--blue:#1A4F8A;--blue-dark:#10335A;--blue-lite:#E8F0FB;--amber:#F0A500;--amber-lt:#FEF3CD;
+--gray:#2D3748;--gray-mid:#718096;--gray-lite:#EDF2F7;--gray-line:#CBD5E0;--green:#276749;--green-lt:#C6F6D5;
+--red:#C53030;--red-lt:#FFF5F5;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f7fafc;color:var(--gray);line-height:1.65;font-size:15px}
+.container{max-width:920px;margin:0 auto;padding:24px}
+header{background:linear-gradient(135deg,var(--blue-dark),var(--blue));color:#fff;padding:28px 32px;border-radius:14px;margin-bottom:24px}
+header .meta{font-size:12px;color:#8AADE0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+header h1{font-size:26px;font-weight:800;margin-bottom:8px}
+header .sub{font-size:14px;color:#BDD4EC}
+.badges{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.badge{background:rgba(255,255,255,.14);color:#BDD4EC;font-size:12px;padding:3px 12px;border-radius:999px;font-weight:600}
+.badge.amber{background:rgba(240,165,0,.25);color:#FEF3CD}
+section{background:#fff;border:1px solid var(--gray-line);border-radius:12px;margin-bottom:18px;overflow:hidden}
+section>.sec-title{padding:12px 20px;background:var(--blue-lite);border-bottom:1px solid var(--gray-line);font-weight:700;font-size:15px;color:var(--blue)}
+section>.sec-body{padding:20px}
+pre{background:#1e2433;color:#e2e8f0;padding:16px;border-radius:8px;font-size:13px;overflow-x:auto;line-height:1.7;margin:10px 0}
+code{font-family:'Cascadia Code','Fira Code',monospace}
+p code,li code,td code{background:var(--gray-lite);padding:1px 6px;border-radius:4px;font-size:13px;color:var(--blue)}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}
+th{background:var(--blue);color:#fff;padding:9px 12px;text-align:left;font-weight:700}
+td{padding:8px 12px;border-bottom:1px solid var(--gray-line);vertical-align:top}
+tr:nth-child(even) td{background:var(--gray-lite)}
+ul,ol{padding-left:24px;margin:8px 0}
+li{margin:5px 0}
+.note{border-radius:8px;padding:12px 16px;font-size:13px;margin:12px 0;line-height:1.6}
+.note.warn{background:var(--amber-lt);border:1px solid #fde68a;color:#92400e}
+.note.info{background:var(--blue-lite);border:1px solid #c5d8f5;color:var(--blue)}
+.note.ok{background:var(--green-lt);border:1px solid #9ae6b4;color:var(--green)}
+.note.danger{background:var(--red-lt);border:1px solid #fecaca;color:var(--red)}
+.checklist{list-style:none;padding-left:4px}
+.checklist li{padding-left:30px;position:relative;margin:8px 0}
+.checklist li::before{content:'☐';position:absolute;left:0;font-size:18px;color:var(--gray-mid)}
+.dep{display:inline-block;background:var(--gray-lite);border:1px solid var(--gray-line);border-radius:6px;padding:2px 10px;font-size:12px;font-weight:600;color:var(--gray-mid);margin:2px}
+footer{text-align:center;font-size:12px;color:var(--gray-mid);padding:20px 0;border-top:1px solid var(--gray-line);margin-top:12px}
+.agent-prompt{background:#0f172a;border-radius:10px;padding:18px;margin-top:8px}
+.agent-prompt .ap-label{color:#F0A500;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.agent-prompt pre{background:transparent;padding:0;margin:0;color:#cbd5e0;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="prd-banner">📖 Sebelum mengerjakan task ini, baca dulu <a href="PRD_CONTEXT.html">PRD_CONTEXT.html</a> — konteks bisnis lengkap & peta task ↔ PRD.</div>
+<header>
+  <div class="meta">PionTech Billing System — Task Spec untuk AI Agent</div>
+  <h1>TASK-09 — Setoran Petugas (Titip) Resource</h1>
+  <div class="sub">Pencatatan titip parsial + info panel sisa belum disetor real-time</div>
+  <div class="badges">
+    <span class="badge">Module: Core Feature</span>
+    <span class="badge">Estimasi: 3 jam</span>
+    <span class="badge amber">Prioritas: P0</span>
+  </div>
+</header>
+
+<section>
+  <div class="sec-title">📌 Dependencies (kerjakan setelah task berikut selesai)</div>
+  <div class="sec-body"><span class="dep">TASK-08</span></div>
+</section>
+
+<section><div class="sec-title">🎯 Objective</div><div class="sec-body"><p>Pengganti digital dari TITIP 1–4 + KEKURANGAN SETOR di header Excel. Petugas inisiasi setoran, admin konfirmasi. Form menampilkan sisa yang belum disetor secara real-time.</p></div></section>
+<section><div class="sec-title">📋 Form dengan Info Panel</div><div class="sec-body"><pre><code>Select::make('officer_id')
+    ->relationship('petugas','name',fn($q)=>$q->role('field_officer'))
+    ->default(fn()=>auth()->user()->isRole(Role::FieldOfficer)
+        ? auth()->id() : null)
+    ->disabled(fn()=>auth()->user()->isRole(Role::FieldOfficer))
+    ->live()->required(),
+
+DatePicker::make('period')->displayFormat('F Y')
+    ->default(now()->startOfMonth())->live()->required(),
+
+// ⭐ INFO PANEL — sisa belum disetor
+Placeholder::make('info_sisa')
+    ->label('💰 Sisa Belum Disetor Periode Ini')
+    ->content(function(Get $get) {
+        if (!$get('officer_id')) return '—';
+        $sisa = BillingService::officerRemainingBalance(
+            $get('officer_id'), Carbon::parse($get('period')));
+        return 'Rp '.number_format($sisa,0,',','.');
+    }),
+
+TextInput::make('amount')->numeric()->prefix('Rp')->required(),
+Select::make('received_by')
+    ->relationship('penerima','name',fn($q)=>$q->role('admin'))
+    ->required(),
+DateTimePicker::make('deposited_at')->default(now())->required(),</code></pre></div></section>
+<section><div class="sec-title">📋 Table Ringkasan</div><div class="sec-body"><pre><code>// Table: riwayat semua setoran
+TextColumn::make('petugas.name'),
+TextColumn::make('period')->date('F Y'),
+TextColumn::make('amount')->money('IDR'),
+TextColumn::make('penerima.name')->label('Diterima oleh'),
+TextColumn::make('deposited_at')->dateTime('d M Y H:i'),
+
+// Header widget di halaman ini: total setoran bulan berjalan
+// per petugas + sisa (KEKURANGAN SETOR)</code></pre></div></section>
+<section><div class="sec-title">🧪 Testing — Feature Tests</div><div class="sec-body"><pre><code>it('calculates sisa correctly after multiple titip', function () {
+    $petugas = petugasFactory();
+    // Tunai terkumpul: 3.000.000
+    Transaction::factory()->count(3)->create([
+        'officer_id'=>$petugas->id, 'payment_method'=>'cash',
+        'paid_amount'=>1000000, 'period'=>now()->startOfMonth()]);
+    // TITIP 1: 1jt, TITIP 2: 500rb
+    OfficerDeposit::factory()->create(['officer_id'=>$petugas->id,
+        'amount'=>1000000,'period'=>now()->startOfMonth()]);
+    OfficerDeposit::factory()->create(['officer_id'=>$petugas->id,
+        'amount'=>500000,'period'=>now()->startOfMonth()]);
+    // Sisa harus 1.500.000
+    expect(BillingService::officerRemainingBalance($petugas->id, now()))
+        ->toBe(1500000.0);
+});
+
+it('petugas can only create setoran for themselves', function () { ... });</code></pre></div></section>
+
+
+<section>
+  <div class="sec-title">✅ Acceptance Criteria — Definition of Done</div>
+  <div class="sec-body"><ul class="checklist"><li>Petugas login → officer_id terkunci ke diri sendiri</li><li>Info panel sisa update real-time saat pilih petugas/periode</li><li>Multiple titip per bulan bisa dicatat (TITIP 1, 2, 3, ...)</li><li>Perhitungan sisa: total tunai − total setor (transfer tidak masuk)</li><li>received_by hanya menampilkan user role admin</li><li>Feature test hijau min 4 cases termasuk perhitungan multi-titip</li></ul></div>
+</section>
+
+<section>
+  <div class="sec-title">🤖 Prompt untuk Claude Code</div>
+  <div class="sec-body">
+    <div class="agent-prompt"><div class="ap-label">Copy-paste prompt ini ke Claude Code:</div><pre>Kerjakan TASK-09 PionTech (setelah TASK-08).
+Buat OfficerDepositResource: form dengan Placeholder info panel &#x27;Sisa Belum Disetor&#x27; yang live-update via BillingService::officerRemainingBalance. Petugas login → officer_id auto-fill dan disabled. received_by select role admin only.
+Table riwayat setoran dengan format uang IDR dan timestamp.
+Feature test min 4 cases — kritis: skenario multi-titip (3jt tunai, titip 1jt + 500rb → sisa 1.5jt).
+Commit &#x27;feat: setoran petugas resource (TASK-09)&#x27;.</pre></div>
+  </div>
+</section>
+
+<footer>PionTech Billing System — Albiruni Software House · Laravel 13 + Filament v5 · Task generated Juli 2026</footer>
+</div>
+</body>
+</html>
