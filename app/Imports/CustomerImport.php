@@ -3,10 +3,13 @@
 namespace App\Imports;
 
 use App\Enums\CustomerStatus;
+use App\Models\Cluster;
 use App\Models\Customer;
 use App\Models\Package;
 use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Throwable;
 
 /**
@@ -15,6 +18,7 @@ use Throwable;
  * Cleaning rules dari spec: WA scientific notation → string 62xxx,
  * kolom Paket berupa angka (110 → default_price 110000), status text
  * bebas → enum (fallback active), URL maps divalidasi.
+ * Cluster & harga per-baris di Excel; cluster opsional (assign via UI nanti).
  */
 class CustomerImport
 {
@@ -23,25 +27,21 @@ class CustomerImport
     /** @var array<int, string> Pesan gagal per baris (untuk log downloadable). */
     public array $failures = [];
 
-    public function __construct(private string $clusterId)
-    {
-    }
-
     /**
      * Template xlsx untuk diisi user: heading + baris contoh
      * (format sama persis dengan yang dibaca import()).
      */
     public static function templateContent(): string
     {
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $spreadsheet = new Spreadsheet();
         $spreadsheet->getActiveSheet()->fromArray([
-            ['NAMA', 'WA', 'PAKET', 'ALAMAT', 'KET.', 'MAPS'],
-            ['Budi', '081234567890', 110, 'PADI 1', 'AKTIF', 'https://maps.app.goo.gl/contoh'],
-            ['Sari', '6281234567891', 100, 'KAPAS 2', 'ISOLIR', ''],
+            ['NAMA', 'WA', 'PAKET', 'HARGA', 'CLUSTER', 'ALAMAT', 'TGL TAGIH', 'KET.', 'MAPS'],
+            ['Budi', '081234567890', 110, 110000, 'PADI', 'PADI 1', 5, 'AKTIF', 'https://maps.app.goo.gl/contoh'],
+            ['Sari', '6281234567891', 100, '', 'KAPAS', 'KAPAS 2', 20, 'ISOLIR', ''],
         ], null, 'A1');
 
         $tmp = tempnam(sys_get_temp_dir(), 'tpl');
-        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($tmp);
+        (new Xlsx($spreadsheet))->save($tmp);
         $content = file_get_contents($tmp);
         unlink($tmp);
 
@@ -75,13 +75,15 @@ class CustomerImport
                 Customer::create([
                     'name' => trim((string) $row['nama']),
                     'whatsapp_number' => $this->cleanWhatsappNumber($row['wa'] ?? null),
-                    'cluster_id' => $this->clusterId,
+                    'cluster_id' => $this->lookupCluster($row['cluster'] ?? null),
                     'package_id' => $packageId,
-                    'billing_amount' => $packageId ? Package::find($packageId)->default_price : null,
+                    // Prioritas kolom HARGA; kosong → fallback harga paket.
+                    'billing_amount' => $this->cleanAmount($row['harga'] ?? null)
+                        ?? ($packageId ? Package::find($packageId)->default_price : null),
                     'address' => $row['alamat'] ?? null,
                     'maps_url' => $this->validUrl($row['maps'] ?? null),
                     'status' => $this->cleanStatus($row['ket'] ?? null),
-                    'billing_day' => 1, // default — admin edit manual nanti
+                    'billing_day' => $this->cleanBillingDay($row['tgl tagih'] ?? null),
                     'registered_at' => now()->toDateString(),
                 ]);
 
@@ -125,6 +127,45 @@ class CustomerImport
         }
 
         return $id;
+    }
+
+    /** Nama cluster → id (case-insensitive); kosong/tak dikenal → null + log. */
+    public function lookupCluster(mixed $v): ?string
+    {
+        if (blank($v)) {
+            return null;
+        }
+
+        $id = Cluster::whereRaw('lower(name) = ?', [strtolower(trim((string) $v))])->value('id');
+
+        if ($id === null) {
+            Log::warning("Import pelanggan: cluster '{$v}' tidak ditemukan, dikosongkan (assign via UI).");
+        }
+
+        return $id;
+    }
+
+    /** Nominal tagihan; angka gaya lama (110 = 110rb) dinormalisasi ×1000. */
+    public function cleanAmount(mixed $v): ?float
+    {
+        if (blank($v) || ! is_numeric($v)) {
+            return null;
+        }
+
+        $n = (float) $v;
+
+        // ponytail: heuristik <1000 dianggap format ribuan gaya Excel lama
+        return $n < 1000 ? $n * 1000 : $n;
+    }
+
+    /** Tanggal tagih 1-31; invalid → 1 (default). */
+    public function cleanBillingDay(mixed $v): int
+    {
+        if (is_numeric($v) && (int) $v >= 1 && (int) $v <= 31) {
+            return (int) $v;
+        }
+
+        return 1;
     }
 
     /** Text status bebas (AKTIF/ISOLIR/OFF) → enum; invalid → active + log. */
