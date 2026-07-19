@@ -37,7 +37,7 @@ class ArrearsExport extends BaseExport
                 $customer->status->getLabel(),
                 $customer->suspended_at ? (int) $customer->suspended_at->diffInDays(now()) : '',
                 $customer->whatsapp_number ?? '',
-                $customer->cluster->name,
+                $customer->cluster?->name ?? '',
                 $this->rupiah((float) $customer->billing_amount),
             ];
         }
