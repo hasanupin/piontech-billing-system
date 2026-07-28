@@ -13,8 +13,11 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 abstract class BaseExport
 {
-    public function __construct(protected Carbon $period)
+    public function __construct(protected Carbon $from, protected Carbon $until)
     {
+        // Normalisasi sekali di sini — subclass tinggal whereBetween.
+        $this->from = $from->copy()->startOfDay();
+        $this->until = $until->copy()->endOfDay();
     }
 
     /** @return array<int, array<int, string|int|float>> */

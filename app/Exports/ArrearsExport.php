@@ -6,8 +6,8 @@ use App\Enums\TransactionStatus;
 use App\Models\Customer;
 
 /**
- * Daftar Tunggakan / ISOLIR — pelanggan billable yang belum bayar periode ini,
- * dengan durasi isolir, WA, dan cluster untuk aksi follow-up.
+ * Daftar Tunggakan / ISOLIR — pelanggan billable tanpa pembayaran lunas
+ * dalam rentang tanggal, dengan durasi isolir, WA, dan cluster untuk follow-up.
  */
 class ArrearsExport extends BaseExport
 {
@@ -25,7 +25,7 @@ class ArrearsExport extends BaseExport
         $customers = Customer::query()
             ->billable()
             ->whereDoesntHave('transactions', fn ($q) => $q
-                ->forPeriod($this->period)
+                ->whereBetween('paid_at', [$this->from, $this->until])
                 ->where('status', TransactionStatus::Paid))
             ->with('cluster')
             ->orderBy('name')
