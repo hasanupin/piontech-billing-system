@@ -84,6 +84,83 @@ class BillingServiceTest extends TestCase
         );
     }
 
+    public function testRangeSummaryFiltersByPaidAtAndDepositedAt(): void
+    {
+        $officer = User::factory()->fieldOfficer()->create();
+
+        // dalam range: tunai 500rb + transfer 300rb + setor 200rb
+        Transaction::factory()->create([
+            'officer_id' => $officer->id,
+            'payment_method' => 'cash',
+            'billed_amount' => 500000,
+            'paid_amount' => 500000,
+            'paid_at' => now(),
+        ]);
+        Transaction::factory()->transfer()->create([
+            'billed_amount' => 300000,
+            'paid_amount' => 300000,
+            'paid_at' => now(),
+        ]);
+        OfficerDeposit::factory()->create([
+            'officer_id' => $officer->id,
+            'amount' => 200000,
+            'deposited_at' => now(),
+        ]);
+
+        // luar range (2 bulan lalu) — harus diabaikan
+        Transaction::factory()->create([
+            'payment_method' => 'cash',
+            'billed_amount' => 999000,
+            'paid_amount' => 999000,
+            'paid_at' => now()->subMonths(2),
+        ]);
+        OfficerDeposit::factory()->create([
+            'officer_id' => $officer->id,
+            'amount' => 777000,
+            'deposited_at' => now()->subMonths(2),
+        ]);
+
+        $summary = $this->service()->rangeSummary(now()->startOfMonth(), now()->endOfMonth());
+
+        $this->assertEquals(500000, $summary['cash']);
+        $this->assertEquals(300000, $summary['transfer']);
+        $this->assertEquals(800000, $summary['total_collected']);
+        $this->assertEquals(200000, $summary['total_deposited']);
+        $this->assertEquals(300000, $summary['held_by_officers']);
+    }
+
+    public function testRangeSummaryScopesToOfficer(): void
+    {
+        $officer = User::factory()->fieldOfficer()->create();
+        $other = User::factory()->fieldOfficer()->create();
+
+        Transaction::factory()->create([
+            'officer_id' => $officer->id,
+            'payment_method' => 'cash',
+            'billed_amount' => 400000,
+            'paid_amount' => 400000,
+            'paid_at' => now(),
+        ]);
+        Transaction::factory()->create([
+            'officer_id' => $other->id,
+            'payment_method' => 'cash',
+            'billed_amount' => 999000,
+            'paid_amount' => 999000,
+            'paid_at' => now(),
+        ]);
+        OfficerDeposit::factory()->create([
+            'officer_id' => $officer->id,
+            'amount' => 150000,
+            'deposited_at' => now(),
+        ]);
+
+        $summary = $this->service()->rangeSummary(now()->startOfMonth(), now()->endOfMonth(), $officer->id);
+
+        $this->assertEquals(400000, $summary['cash']);
+        // sisa = tunai officer − setoran officer
+        $this->assertEquals(250000, $summary['held_by_officers']);
+    }
+
     public function testMonthlySummaryIgnoresOtherPeriods(): void
     {
         $period = now()->startOfMonth();

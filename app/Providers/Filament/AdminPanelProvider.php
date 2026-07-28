@@ -70,6 +70,12 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 Dashboard::class,
             ])
+            // Urutan grup nav: Laporan di atas Master data.
+            ->navigationGroups([
+                __('Reports'),
+                __('Master'),
+                __('Billing'),
+            ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 AccountWidget::class,

@@ -123,5 +123,11 @@
     "Download Excel": "Download Excel",
     "Billed, collected (cash/transfer), success rate, trend vs last month": "Ditagih, terbayar (tunai/transfer), % keberhasilan, tren vs bulan lalu",
     "Per officer: cash collected, deposit history, remaining balance": "Per petugas: total tagih tunai, riwayat titip, sisa setoran",
-    "Unpaid & suspended customers with WhatsApp and cluster for follow-up": "Pelanggan belum bayar & ISOLIR dengan WA dan cluster untuk follow-up"
+    "Unpaid & suspended customers with WhatsApp and cluster for follow-up": "Pelanggan belum bayar & ISOLIR dengan WA dan cluster untuk follow-up",
+    "Payment Recap": "Rekap Pembayaran",
+    "Arrears Report": "Laporan Tunggakan",
+    "Officer Deposit Report": "Laporan Setoran Petugas",
+    "Date Range": "Rentang Tanggal",
+    "Value": "Nilai",
+    "Billed, collected (cash/transfer), success rate": "Ditagih, terbayar (tunai/transfer), % keberhasilan"
 }

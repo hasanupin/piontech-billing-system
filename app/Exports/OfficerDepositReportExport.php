@@ -4,12 +4,12 @@ namespace App\Exports;
 
 use App\Enums\Role;
 use App\Models\OfficerDeposit;
-use App\Models\Transaction;
 use App\Models\User;
 use App\Services\BillingService;
 
 /**
- * Setoran per Petugas — total tagih tunai, riwayat titip (timestamp), sisa.
+ * Setoran per Petugas — total tagih tunai, riwayat titip (timestamp), sisa;
+ * semua dalam rentang tanggal (paid_at / deposited_at).
  */
 class OfficerDepositReportExport extends BaseExport
 {
@@ -20,16 +20,13 @@ class OfficerDepositReportExport extends BaseExport
         $rows = [[__('Officer'), __('Cash Collected'), __('Total Deposited'), __('Remaining')]];
 
         foreach (User::where('role', Role::FieldOfficer)->orderBy('name')->get() as $officer) {
-            $cash = (float) Transaction::where('officer_id', $officer->id)
-                ->forPeriod($this->period)->cash()->sum('paid_amount');
-            $deposited = (float) OfficerDeposit::where('officer_id', $officer->id)
-                ->whereDate('period', $this->period)->sum('amount');
+            $summary = $service->rangeSummary($this->from, $this->until, $officer->id);
 
             $rows[] = [
                 $officer->name,
-                $this->rupiah($cash),
-                $this->rupiah($deposited),
-                $this->rupiah($service->officerRemainingBalance($officer->id, $this->period)),
+                $this->rupiah($summary['cash']),
+                $this->rupiah($summary['total_deposited']),
+                $this->rupiah($summary['held_by_officers']),
             ];
         }
 
@@ -39,7 +36,7 @@ class OfficerDepositReportExport extends BaseExport
         $rows[] = [__('Officer'), __('Deposited At'), __('Amount'), __('Received By')];
 
         $deposits = OfficerDeposit::with(['officer', 'receiver'])
-            ->whereDate('period', $this->period)
+            ->whereBetween('deposited_at', [$this->from, $this->until])
             ->orderBy('deposited_at')
             ->get();
 

@@ -8,35 +8,34 @@ use App\Models\Customer;
 use App\Services\BillingService;
 
 /**
- * Rekap Pembayaran Bulanan — angka bersumber BillingService agar
- * konsisten dengan dashboard.
+ * Rekap Pembayaran — angka bersumber BillingService::rangeSummary agar
+ * konsisten dengan dashboard; filter berbasis paid_at dalam rentang.
  */
 class MonthlyRecapExport extends BaseExport
 {
     public function rows(): array
     {
-        $service = app(BillingService::class);
-        $current = $service->monthlySummary($this->period);
-        $previous = $service->monthlySummary($this->period->copy()->subMonth());
+        $summary = app(BillingService::class)->rangeSummary($this->from, $this->until);
 
         $aktif = Customer::billable()->where('status', CustomerStatus::Active)->count();
         $isolir = Customer::billable()->where('status', CustomerStatus::Suspended)->count();
         $ditagih = $aktif + $isolir;
         $lunas = Customer::billable()->whereHas(
             'transactions',
-            fn ($q) => $q->forPeriod($this->period)->where('status', TransactionStatus::Paid),
+            fn ($q) => $q->whereBetween('paid_at', [$this->from, $this->until])
+                ->where('status', TransactionStatus::Paid),
         )->count();
 
         return [
-            [__('Metric'), __('This Period'), __('Last Month')],
-            [__('Billed Customers'), $ditagih, ''],
-            [__('Paid Customers'), $lunas, ''],
-            [__('Success Rate'), round($lunas / max(1, $ditagih) * 100, 1).'%', ''],
-            [__('Cash Collected'), $this->rupiah($current['cash']), $this->rupiah($previous['cash'])],
-            [__('Via Transfer'), $this->rupiah($current['transfer']), $this->rupiah($previous['transfer'])],
-            [__('Total Collected'), $this->rupiah($current['total_collected']), $this->rupiah($previous['total_collected'])],
-            [__('Total Deposited'), $this->rupiah($current['total_deposited']), $this->rupiah($previous['total_deposited'])],
-            [__('Held By Officers'), $this->rupiah($current['held_by_officers']), $this->rupiah($previous['held_by_officers'])],
+            [__('Metric'), __('Value')],
+            [__('Billed Customers'), $ditagih],
+            [__('Paid Customers'), $lunas],
+            [__('Success Rate'), round($lunas / max(1, $ditagih) * 100, 1).'%'],
+            [__('Cash Collected'), $this->rupiah($summary['cash'])],
+            [__('Via Transfer'), $this->rupiah($summary['transfer'])],
+            [__('Total Collected'), $this->rupiah($summary['total_collected'])],
+            [__('Total Deposited'), $this->rupiah($summary['total_deposited'])],
+            [__('Held By Officers'), $this->rupiah($summary['held_by_officers'])],
         ];
     }
 }

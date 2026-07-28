@@ -44,6 +44,37 @@ class BillingService
         ];
     }
 
+    /**
+     * Ringkasan keuangan rentang tanggal — basis timestamp aktual
+     * (paid_at transaksi, deposited_at setoran), bukan bulan tagihan.
+     * Dipakai laporan; formula sama dengan monthlySummary.
+     *
+     * @return array{cash: float, transfer: float, total_collected: float, total_deposited: float, held_by_officers: float}
+     */
+    public function rangeSummary(Carbon $from, Carbon $until, ?int $officerId = null): array
+    {
+        $range = [$from->copy()->startOfDay(), $until->copy()->endOfDay()];
+
+        $cash = (float) Transaction::whereBetween('paid_at', $range)->cash()
+            ->when($officerId, fn ($q) => $q->where('officer_id', $officerId))
+            ->sum('paid_amount');
+        $transfer = (float) Transaction::whereBetween('paid_at', $range)
+            ->where('payment_method', PaymentMethod::Transfer)
+            ->when($officerId, fn ($q) => $q->where('officer_id', $officerId))
+            ->sum('paid_amount');
+        $deposited = (float) OfficerDeposit::whereBetween('deposited_at', $range)
+            ->when($officerId, fn ($q) => $q->where('officer_id', $officerId))
+            ->sum('amount');
+
+        return [
+            'cash' => $cash,
+            'transfer' => $transfer,
+            'total_collected' => $cash + $transfer,
+            'total_deposited' => $deposited,
+            'held_by_officers' => $cash - $deposited,
+        ];
+    }
+
     public function officerRemainingBalance(int $officerId, Carbon $period): float
     {
         $p = $period->copy()->startOfMonth();
