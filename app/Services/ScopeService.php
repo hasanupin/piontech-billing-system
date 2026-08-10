@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\Role;
+use App\Models\Cluster;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -47,6 +48,34 @@ class ScopeService
 
             default => $query->whereRaw('1 = 0'),
         };
+    }
+
+    /**
+     * Apply scope to a Cluster query based on the actor's role.
+     * Field officer hanya boleh memakai cluster yang dia pegang.
+     */
+    public function scopeClustersForUser(Builder $query, User $actor): Builder
+    {
+        return match ($actor->role) {
+            Role::SuperAdmin, Role::Admin => $query,
+
+            Role::FieldOfficer => $query->where('officer_id', $actor->id),
+
+            default => $query->whereRaw('1 = 0'),
+        };
+    }
+
+    /**
+     * Otorisasi tulis: pastikan cluster tujuan pelanggan berada dalam scope aktor.
+     */
+    public function authorizeCustomerCluster(User $actor, ?string $clusterId): void
+    {
+        abort_unless(
+            filled($clusterId) && $this->scopeClustersForUser(Cluster::query(), $actor)
+                ->whereKey($clusterId)
+                ->exists(),
+            403,
+        );
     }
 
     /**

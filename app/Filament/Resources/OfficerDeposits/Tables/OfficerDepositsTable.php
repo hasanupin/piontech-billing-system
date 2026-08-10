@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\OfficerDeposits\Tables;
 
+use App\Models\OfficerDeposit;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -27,6 +28,10 @@ class OfficerDepositsTable
                     ->label(__('Amount'))
                     ->money('IDR')
                     ->sortable(),
+                TextColumn::make('must_collect')
+                    ->label(__('Must Collect'))
+                    ->state(fn (OfficerDeposit $record): float => $record->mustCollect())
+                    ->money('IDR'),
                 TextColumn::make('receiver.name')
                     ->label(__('Received By')),
                 TextColumn::make('deposited_at')

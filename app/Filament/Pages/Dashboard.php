@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Filament\Widgets\BillingStatsOverview;
 use App\Filament\Widgets\DueTodayWidget;
+use App\Filament\Widgets\NetworkStatusStrip;
 use App\Filament\Widgets\OfficerDepositWidget;
 use App\Filament\Widgets\PaymentChartWidget;
 use Filament\Forms\Components\Select;
@@ -31,7 +32,8 @@ class Dashboard extends BaseDashboard
     }
 
     /**
-     * Opsi periode: 12 bulan terakhir (pola sama dengan MonthlyBilling).
+     * Opsi periode: 12 bulan terakhir. Dipakai ulang oleh filter periode
+     * di MonthlyBilling.
      *
      * @return array<string, string>
      */
@@ -51,6 +53,7 @@ class Dashboard extends BaseDashboard
     public function getWidgets(): array
     {
         return [
+            NetworkStatusStrip::class,
             BillingStatsOverview::class,
             PaymentChartWidget::class,
             OfficerDepositWidget::class,

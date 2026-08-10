@@ -52,6 +52,11 @@ class CustomersTable
                 TextColumn::make('status')
                     ->label(__('Status'))
                     ->badge(),
+                TextColumn::make('referral')
+                    ->label(__('Referral'))
+                    // Nama penerima tipe Pelanggan datang dari mirror, bukan kolom name.
+                    ->state(fn (Customer $record): ?string => $record->referral?->display_name)
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('status')

@@ -50,6 +50,12 @@ COPY . /var/www/html
 # Copy existing application directory permissions
 COPY --chown=www-data:www-data . /var/www/html
 
+# Build asset Filament (panel memakai ->viteTheme(); tanpa ini panel tampil tanpa CSS)
+RUN npm ci && npm run build
+
+# Symlink public/storage — tanpa ini foto rumah pelanggan tidak tampil
+RUN php artisan storage:link
+
 # Set proper permissions
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \

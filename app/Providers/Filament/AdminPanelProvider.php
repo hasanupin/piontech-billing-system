@@ -2,18 +2,18 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Dashboard;
 use App\Http\Middleware\SetLocale;
+use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use App\Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\View\PanelsRenderHook;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
+use Illuminate\Contracts\View\View;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -31,34 +31,46 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->brandName('Piontech Billing System')
+            ->brandLogo(fn (): View => view('filament.brand'))
+            ->darkModeBrandLogo(fn (): View => view('filament.brand'))
+            ->brandLogoHeight('2.25rem')
+            ->favicon(asset('favicon.svg'))
+            ->viteTheme('resources/css/filament/admin/theme.css')
+            // Dark jadi default (tema "NOC console"), tapi toggle light tetap ada.
+            ->defaultThemeMode(ThemeMode::Dark)
+            ->darkMode()
+            ->sidebarCollapsibleOnDesktop()
             ->font('Outfit')
-            // Palet warna mengadopsi design tokens TailAdmin (tailadmin.com, free version).
+            // Mono khusus angka uang/counter — tabular-nums diatur di theme.css.
+            ->monoFont('JetBrains Mono')
+            // Palet "NOC": primary cyan (metafora fiber), gray bernuansa navy
+            // supaya surface dark jadi near-black-navy, bukan abu netral.
             ->colors([
                 'primary' => [
-                    50 => '#ecf3ff',
-                    100 => '#dde9ff',
-                    200 => '#c2d6ff',
-                    300 => '#9cb9ff',
-                    400 => '#7592ff',
-                    500 => '#465fff',
-                    600 => '#3641f5',
-                    700 => '#2a31d8',
-                    800 => '#252dae',
-                    900 => '#262e89',
-                    950 => '#161950',
+                    50 => '#ecfeff',
+                    100 => '#cffafe',
+                    200 => '#a5f3fc',
+                    300 => '#67e8f9',
+                    400 => '#22d3ee',
+                    500 => '#06b6d4',
+                    600 => '#0891b2',
+                    700 => '#0e7490',
+                    800 => '#155e75',
+                    900 => '#164e63',
+                    950 => '#083344',
                 ],
                 'gray' => [
-                    50 => '#f9fafb',
-                    100 => '#f2f4f7',
-                    200 => '#e4e7ec',
-                    300 => '#d0d5dd',
-                    400 => '#98a2b3',
-                    500 => '#667085',
-                    600 => '#475467',
-                    700 => '#344054',
-                    800 => '#1d2939',
-                    900 => '#101828',
-                    950 => '#0c111d',
+                    50 => '#f8fafc',
+                    100 => '#f1f5f9',
+                    200 => '#e2e8f0',
+                    300 => '#cbd5e1',
+                    400 => '#94a3b8',
+                    500 => '#64748b',
+                    600 => '#475569',
+                    700 => '#334155',
+                    800 => '#1e293b',
+                    900 => '#0f172a',
+                    950 => '#070b14',
                 ],
                 'success' => Color::hex('#12b76a'),
                 'danger' => Color::hex('#f04438'),
@@ -70,17 +82,16 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 Dashboard::class,
             ])
-            // Urutan grup nav: Laporan di atas Master data.
+            // Urutan grup nav: Penagihan → Laporan → Master.
             ->navigationGroups([
+                __('Billing'),
                 __('Reports'),
                 __('Master'),
-                __('Billing'),
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
-            ->widgets([
-                AccountWidget::class,
-                FilamentInfoWidget::class,
-            ])
+            // Sengaja kosong: AccountWidget & FilamentInfoWidget dead code
+            // (Dashboard::getWidgets() menimpanya) sekaligus branding Filament.
+            ->widgets([])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -96,6 +107,11 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::USER_MENU_PROFILE_AFTER,
                 fn (): string => view('filament.locale-switcher')->render(),
+            )
+            // Backdrop grid + glow di halaman login (layout simple).
+            ->renderHook(
+                PanelsRenderHook::SIMPLE_LAYOUT_START,
+                fn (): string => view('filament.login-backdrop')->render(),
             )
             ->authMiddleware([
                 Authenticate::class,

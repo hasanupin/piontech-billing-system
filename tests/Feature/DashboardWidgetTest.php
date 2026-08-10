@@ -83,11 +83,11 @@ class DashboardWidgetTest extends TestCase
         Transaction::factory()->create(['paid_amount' => 1_000_000]);
         Transaction::factory()->create([
             'paid_amount' => 400_000,
-            'period' => now()->subMonth()->startOfMonth(),
+            'period' => now()->startOfMonth()->subMonth(),
         ]);
 
         Livewire::test(BillingStatsOverview::class, [
-            'pageFilters' => ['period' => now()->subMonth()->format('Y-m')],
+            'pageFilters' => ['period' => now()->startOfMonth()->subMonth()->format('Y-m')],
         ])
             ->assertSee('Rp 400.000')
             ->assertDontSee('Rp 1.000.000');
@@ -109,6 +109,23 @@ class DashboardWidgetTest extends TestCase
         Livewire::test(OfficerDepositWidget::class)
             ->assertSee('Petugas Uji')
             ->assertSee('600.000');
+    }
+
+    public function testStatsCarrySparklineOverSixMonths(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+
+        $stats = Livewire::test(BillingStatsOverview::class)->instance()->sparkline('cash');
+
+        $this->assertCount(6, $stats);
+    }
+
+    public function testStatsRenderOnEmptyDatabase(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+
+        // Sparkline 6 bulan menambah loop + pembagian; DB kosong harus tetap aman.
+        Livewire::test(BillingStatsOverview::class)->assertOk();
     }
 
     public function testDueTodayWidgetShowsUnpaidCustomersDueToday(): void

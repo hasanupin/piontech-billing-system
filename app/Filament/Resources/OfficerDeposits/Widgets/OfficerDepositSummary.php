@@ -4,19 +4,24 @@ namespace App\Filament\Resources\OfficerDeposits\Widgets;
 
 use App\Enums\Role;
 use App\Services\BillingService;
+use Carbon\Carbon;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class OfficerDepositSummary extends StatsOverviewWidget
 {
+    use InteractsWithPageFilters;
+
     protected function getStats(): array
     {
         $user = auth()->user();
         $billing = app(BillingService::class);
+        $period = Carbon::parse(($this->pageFilters['period'] ?? now()->format('Y-m')).'-01')->startOfMonth();
 
         // Petugas: hanya sisa (KEKURANGAN SETOR) miliknya bulan ini.
         if ($user?->isRole(Role::FieldOfficer)) {
-            $remaining = $billing->officerRemainingBalance((int) $user->id, now());
+            $remaining = $billing->officerRemainingBalance((int) $user->id, $period);
 
             return [
                 Stat::make(__('Remaining To Deposit This Period'), 'Rp '.number_format($remaining, 0, ',', '.')),
@@ -24,7 +29,7 @@ class OfficerDepositSummary extends StatsOverviewWidget
         }
 
         // Admin/super admin: ringkasan seluruh petugas bulan ini.
-        $summary = $billing->monthlySummary(now());
+        $summary = $billing->monthlySummary($period);
 
         return [
             Stat::make(__('Cash Collected'), 'Rp '.number_format($summary['cash'], 0, ',', '.')),
