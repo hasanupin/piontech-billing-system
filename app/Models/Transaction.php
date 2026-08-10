@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\PaymentMethod;
 use App\Enums\TransactionStatus;
+use App\Services\BillingService;
 use Carbon\Carbon;
 use Database\Factories\TransactionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -45,6 +46,12 @@ class Transaction extends Model
                 $t->officer_id = null;
             }
         });
+
+        // Sama seperti OfficerDeposit: memo progres petugas jadi basi.
+        $forget = fn () => app(BillingService::class)->forgetOfficerProgress();
+
+        static::saved($forget);
+        static::deleted($forget);
     }
 
     /**
@@ -69,7 +76,9 @@ class Transaction extends Model
 
     public function scopeForPeriod(Builder $query, Carbon|string $date): Builder
     {
-        return $query->whereDate('period', Carbon::parse($date)->startOfMonth());
+        // qualifyColumn: scope ini juga dipakai di join (mis. relasi through
+        // pada perhitungan komisi) yang punya kolom bernama sama.
+        return $query->whereDate($query->qualifyColumn('period'), Carbon::parse($date)->startOfMonth());
     }
 
     public function customer(): BelongsTo

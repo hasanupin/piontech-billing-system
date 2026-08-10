@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\PaymentMethod;
 use App\Filament\Pages\MonthlyBilling;
 use App\Filament\Resources\Transactions\Pages\CreateTransaction;
+use App\Filament\Resources\Transactions\Pages\ListTransactions;
 use App\Filament\Resources\Transactions\TransactionResource;
 use App\Models\Cluster;
 use App\Models\Customer;
@@ -42,6 +43,133 @@ class TransactionModuleTest extends TestCase
         Livewire::test(CreateTransaction::class)
             ->set('data.customer_id', $customer->id)
             ->assertSet('data.billed_amount', '110.000,00');
+    }
+
+    public function testPrefillsFromCustomerIdQueryString(): void
+    {
+        $customer = Customer::factory()->create(['billing_amount' => 115000]);
+        $this->actingAs(User::factory()->admin()->create());
+
+        // Tombol "Catat Pembayaran" di Tagihan Bulanan mengirim ?customer_id=...
+        Livewire::withQueryParams(['customer_id' => $customer->id])
+            ->test(CreateTransaction::class)
+            ->assertSet('data.customer_id', $customer->id)
+            ->assertSet('data.billed_amount', '115.000,00')
+            // Nominal bayar ikut terisi — mayoritas pembayaran lunas penuh.
+            ->assertSet('data.paid_amount', '115.000,00')
+            // Default field lain tidak boleh hilang gara-gara prefill.
+            ->assertSet('data.payment_method', PaymentMethod::Cash->value)
+            ->assertSet('data.period', now()->startOfMonth()->format('Y-m-d'))
+            ->assertNotSet('data.paid_at', null);
+
+        // Jalur HTTP asli (link dari Tagihan Bulanan) tetap sehat.
+        $this->get(TransactionResource::getUrl('create', ['customer_id' => $customer->id]))
+            ->assertOk();
+    }
+
+    public function testPrefillsFromQueryStringForFieldOfficerOwnCluster(): void
+    {
+        $officer = User::factory()->fieldOfficer()->create();
+        $customer = Customer::factory()->create([
+            'billing_amount' => 100000,
+            'cluster_id' => Cluster::factory()->create(['officer_id' => $officer->id])->id,
+        ]);
+
+        $this->actingAs($officer);
+
+        Livewire::withQueryParams(['customer_id' => $customer->id])
+            ->test(CreateTransaction::class)
+            ->assertSet('data.customer_id', $customer->id)
+            ->assertSet('data.billed_amount', '100.000,00')
+            ->assertSet('data.paid_amount', '100.000,00')
+            // Petugas terkunci ke dirinya sendiri — default ini juga harus selamat.
+            ->assertSet('data.officer_id', $officer->id);
+    }
+
+    public function testIgnoresCustomerIdOutsideFieldOfficerScope(): void
+    {
+        $officer = User::factory()->fieldOfficer()->create();
+        $foreign = Customer::factory()->create([
+            'billing_amount' => 100000,
+            'cluster_id' => Cluster::factory()->create()->id,
+        ]);
+
+        $this->actingAs($officer);
+
+        // Pelanggan cluster lain tidak boleh bocor lewat query string.
+        Livewire::withQueryParams(['customer_id' => $foreign->id])
+            ->test(CreateTransaction::class)
+            ->assertSet('data.customer_id', null)
+            ->assertSet('data.billed_amount', null);
+    }
+
+    public function testHidesCreateAnotherWhenPrefilledFromCustomer(): void
+    {
+        $customer = Customer::factory()->create();
+        $this->actingAs(User::factory()->admin()->create());
+
+        // Datang dari "Catat Pembayaran" = mencatat satu tagihan spesifik,
+        // bukan entri massal — "Buat & buat lainnya" tidak relevan.
+        $this->assertFalse(
+            Livewire::withQueryParams(['customer_id' => $customer->id])
+                ->test(CreateTransaction::class)
+                ->instance()
+                ->canCreateAnother(),
+        );
+    }
+
+    public function testShowsCreateAnotherForBlankCreate(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+
+        $this->assertTrue(
+            Livewire::test(CreateTransaction::class)->instance()->canCreateAnother(),
+        );
+    }
+
+    public function testRedirectsBackToMonthlyBillingAfterPrefilledCreate(): void
+    {
+        $officer = User::factory()->fieldOfficer()->create();
+        $customer = Customer::factory()->create(['billing_amount' => 115000]);
+        $this->actingAs(User::factory()->admin()->create());
+
+        Livewire::withQueryParams(['customer_id' => $customer->id])
+            ->test(CreateTransaction::class)
+            ->fillForm(['officer_id' => $officer->id])
+            ->call('create')
+            ->assertHasNoFormErrors()
+            ->assertRedirect(MonthlyBilling::getUrl());
+    }
+
+    public function testKeepsDefaultRedirectForBlankCreate(): void
+    {
+        $officer = User::factory()->fieldOfficer()->create();
+        $customer = Customer::factory()->create();
+        $this->actingAs(User::factory()->admin()->create());
+
+        // Tanpa customer_id perilaku bawaan Filament dipertahankan:
+        // lanjut ke halaman edit record yang baru dibuat.
+        Livewire::test(CreateTransaction::class)
+            ->fillForm([
+                'customer_id' => $customer->id,
+                'payment_method' => PaymentMethod::Cash->value,
+                'officer_id' => $officer->id,
+                'billed_amount' => '100000',
+                'paid_amount' => '100000',
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors()
+            ->assertRedirect(TransactionResource::getUrl('edit', ['record' => Transaction::first()]));
+    }
+
+    public function testPrefillsPaidAmountWhenCustomerSelectedManually(): void
+    {
+        $customer = Customer::factory()->create(['billing_amount' => 110000]);
+        $this->actingAs(User::factory()->admin()->create());
+
+        Livewire::test(CreateTransaction::class)
+            ->set('data.customer_id', $customer->id)
+            ->assertSet('data.paid_amount', '110.000,00');
     }
 
     public function testAllowsOverridingPrefilledNominal(): void
@@ -122,8 +250,26 @@ class TransactionModuleTest extends TestCase
 
         Livewire::test(MonthlyBilling::class)
             ->assertCanSeeTableRecords([$paidCustomer, $unpaidCustomer])
-            ->filterTable('unpaid')
+            ->set('filters.payment_status', 'unpaid')
             ->assertCanSeeTableRecords([$unpaidCustomer])
             ->assertCanNotSeeTableRecords([$paidCustomer]);
+    }
+
+    public function testAdminCanExportTransactionsToExcel(): void
+    {
+        Transaction::factory()->create();
+        $this->actingAs(User::factory()->admin()->create());
+
+        Livewire::test(ListTransactions::class)
+            ->callAction('export')
+            ->assertFileDownloaded();
+    }
+
+    public function testFieldOfficerCannotExportTransactions(): void
+    {
+        $this->actingAs(User::factory()->fieldOfficer()->create());
+
+        Livewire::test(ListTransactions::class)
+            ->assertActionHidden('export');
     }
 }

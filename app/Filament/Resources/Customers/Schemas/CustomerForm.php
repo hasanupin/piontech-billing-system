@@ -3,7 +3,12 @@
 namespace App\Filament\Resources\Customers\Schemas;
 
 use App\Enums\CustomerStatus;
+use App\Enums\Role;
+use App\Models\Cluster;
+use App\Models\CommissionRecipient;
+use App\Models\Customer;
 use App\Models\Package;
+use App\Services\ScopeService;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -13,6 +18,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\RawJs;
+use Illuminate\Database\Eloquent\Builder;
 
 class CustomerForm
 {
@@ -37,10 +43,24 @@ class CustomerForm
                     ->schema([
                         Select::make('cluster_id')
                             ->label(__('Cluster'))
-                            ->relationship('cluster', 'name')
+                            ->relationship('cluster', 'name', fn (Builder $query): Builder => app(ScopeService::class)
+                                ->scopeClustersForUser($query, auth()->user()))
                             ->searchable()
                             ->preload()
                             ->required()
+                            // Petugas dengan satu cluster → langsung terisi; kalau pegang beberapa,
+                            // dia pilih sendiri (opsi tetap terbatas pada clusternya).
+                            ->default(function (): ?string {
+                                $user = auth()->user();
+
+                                if (! $user?->isRole(Role::FieldOfficer)) {
+                                    return null;
+                                }
+
+                                $clusters = Cluster::where('officer_id', $user->id)->pluck('id');
+
+                                return $clusters->count() === 1 ? $clusters->first() : null;
+                            })
                             ->helperText(__('Assignment reference for the field officer')),
                         Select::make('package_id')
                             ->label(__('Package'))
@@ -85,6 +105,26 @@ class CustomerForm
                             ->minValue(1)
                             ->maxValue(31)
                             ->required(),
+                        Select::make('referral_id')
+                            ->label(__('Referral'))
+                            ->relationship(
+                                'referral',
+                                'name',
+                                // Hanya penerima aktif, dan pelanggan ini tidak boleh
+                                // jadi referal dirinya sendiri.
+                                fn (Builder $query, ?Customer $record): Builder => $query
+                                    ->active()
+                                    ->when($record, fn (Builder $q) => $q->where(
+                                        fn (Builder $inner) => $inner
+                                            ->whereNull('customer_id')
+                                            ->orWhere('customer_id', '!=', $record->getKey()),
+                                    )),
+                            )
+                            // Label tipe Pelanggan datang dari mirror, bukan kolom name.
+                            ->getOptionLabelFromRecordUsing(fn (CommissionRecipient $record): ?string => $record->display_name)
+                            ->searchable()
+                            ->preload()
+                            ->helperText(__('Leave empty if there is no commission')),
                     ])->columns(),
                 Section::make(__('Location (Reference)'))
                     ->schema([
@@ -105,7 +145,11 @@ class CustomerForm
                             ->label(__('Status'))
                             ->options(CustomerStatus::class)
                             ->default(CustomerStatus::Active)
-                            ->required(),
+                            ->required()
+                            // Isolir/Pulihkan tetap wewenang admin (quick action di CustomersTable).
+                            // Tanpa ->dehydrated(): field disabled tidak ikut ter-submit, jadi saat
+                            // create jatuh ke default kolom (active) dan saat edit nilainya tak berubah.
+                            ->disabled(fn (): bool => auth()->user()?->isRole(Role::FieldOfficer) ?? false),
                         DatePicker::make('registered_at')
                             ->label(__('Registered At'))
                             ->default(now())

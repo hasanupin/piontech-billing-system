@@ -43,6 +43,10 @@ class PaymentChartWidget extends ChartWidget
                     'data' => [$lunas, max(0, $ditagih - $lunas)],
                     // Warna success & danger dari palet panel.
                     'backgroundColor' => ['#12b76a', '#f04438'],
+                    // Transparan, bukan warna surface: memberi jeda antar segmen
+                    // tanpa jadi cincin gelap saat light mode.
+                    'borderColor' => 'transparent',
+                    'borderWidth' => 3,
                 ],
             ],
             'labels' => [__('Paid'), __('Unpaid')],

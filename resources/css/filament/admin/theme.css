@@ -1,0 +1,481 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+/*
+ |----------------------------------------------------------------------------
+ | Tema "NOC Console" — Piontech Billing
+ |----------------------------------------------------------------------------
+ | Semua override memakai CSS hook `fi-*` bawaan Filament v5 supaya terkumpul
+ | di satu file (bukan tersebar sebagai utility di Blade). Palet warna sendiri
+ | diatur lewat ->colors() di AdminPanelProvider, bukan di sini.
+ |
+ | Konvensi variabel: --noc-* = token khusus tema ini.
+ */
+
+:root {
+    --noc-line: rgba(34, 211, 238, 0.14);
+    --noc-glow: rgba(34, 211, 238, 0.35);
+    --noc-grid: rgba(100, 116, 139, 0.08);
+    --noc-surface: var(--color-white);
+}
+
+.dark {
+    --noc-line: rgba(34, 211, 238, 0.16);
+    --noc-grid: rgba(34, 211, 238, 0.035);
+    --noc-surface: var(--color-gray-900);
+}
+
+/* ── Background bertekstur ────────────────────────────────────────────────
+   Grid tipis + glow radial. Ini pemicu kesan "konsol" paling besar. */
+
+/* z-index negatif, BUKAN menaikkan konten lewat `.fi-body > *`. Aturan itu
+   memaksa position:relative ke .fi-topbar-ctn yang aslinya sticky, sehingga
+   topbar ikut ter-scroll dan menyisakan celah kosong di atas sidebar
+   (sidebar fixed di top:4rem). Dekorasi cukup ditaruh di belakang konten. */
+
+.fi-body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+        repeating-linear-gradient(0deg, var(--noc-grid) 0 1px, transparent 1px 40px),
+        repeating-linear-gradient(90deg, var(--noc-grid) 0 1px, transparent 1px 40px);
+}
+
+.dark .fi-body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        radial-gradient(60rem 40rem at 12% -10%, rgba(6, 182, 212, 0.10), transparent 70%),
+        radial-gradient(50rem 35rem at 100% 0%, rgba(70, 95, 255, 0.08), transparent 70%);
+}
+
+/* ── Sidebar ──────────────────────────────────────────────────────────── */
+
+.dark .fi-sidebar {
+    background-image: linear-gradient(180deg, var(--color-gray-900), var(--color-gray-950));
+    border-inline-end: 1px solid var(--noc-line);
+}
+
+.fi-sidebar-group-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-gray-500);
+}
+
+.fi-sidebar-item-btn {
+    position: relative;
+    border-radius: 0.5rem;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+
+.fi-sidebar-item.fi-active > .fi-sidebar-item-btn::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0;
+    top: 50%;
+    translate: 0 -50%;
+    width: 3px;
+    height: 60%;
+    border-radius: 999px;
+    background: var(--color-primary-400);
+    box-shadow: 0 0 12px var(--noc-glow);
+}
+
+.dark .fi-sidebar-item.fi-active > .fi-sidebar-item-btn {
+    background-color: rgba(6, 182, 212, 0.10);
+}
+
+/* ── Topbar ───────────────────────────────────────────────────────────── */
+
+.dark .fi-topbar > nav {
+    background-color: rgba(15, 23, 42, 0.72);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--noc-line);
+}
+
+/* ── Wordmark ─────────────────────────────────────────────────────────── */
+
+.fi-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    height: 100%;
+}
+
+.fi-brand-glyph {
+    width: 1.6rem;
+    height: 1.6rem;
+    flex: none;
+    color: var(--color-primary-500);
+}
+
+.dark .fi-brand-glyph {
+    color: var(--color-primary-400);
+}
+
+.fi-brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+}
+
+.fi-brand-word {
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    background-image: linear-gradient(90deg, var(--color-primary-400), var(--color-primary-600));
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.fi-brand-sub {
+    font-size: 0.55rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-gray-400);
+}
+
+/* ── Kartu & section ──────────────────────────────────────────────────── */
+
+.fi-section,
+.fi-ta-ctn,
+.fi-wi-chart,
+.fi-wi-stats-overview-stat {
+    border-radius: 0.75rem;
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.dark .fi-section,
+.dark .fi-ta-ctn,
+.dark .fi-wi-chart,
+.dark .fi-wi-stats-overview-stat {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.dark .fi-section:hover,
+.dark .fi-wi-stats-overview-stat:hover {
+    border-color: var(--noc-line);
+}
+
+/* ── Stat card ────────────────────────────────────────────────────────── */
+
+.fi-wi-stats-overview-stat {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Garis "sinyal" tipis di tepi atas. Warna stat tidak ada di elemen root —
+   Filament menaruhnya di description/chart — jadi dibaca lewat :has(). */
+.fi-wi-stats-overview-stat {
+    --noc-accent: var(--color-primary-500);
+}
+
+.fi-wi-stats-overview-stat:has(.fi-color-success) { --noc-accent: var(--color-success-500); }
+.fi-wi-stats-overview-stat:has(.fi-color-danger) { --noc-accent: var(--color-danger-500); }
+.fi-wi-stats-overview-stat:has(.fi-color-warning) { --noc-accent: var(--color-warning-500); }
+.fi-wi-stats-overview-stat:has(.fi-color-info) { --noc-accent: var(--color-info-500); }
+
+.fi-wi-stats-overview-stat::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 2px;
+    background-image: linear-gradient(90deg, transparent, var(--noc-accent) 30%, var(--noc-accent) 70%, transparent);
+    opacity: 0.7;
+}
+
+.fi-wi-stats-overview-stat-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-gray-500);
+}
+
+.fi-wi-stats-overview-stat-value {
+    font-family: var(--mono-font-family);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+.fi-wi-stats-overview-stat-description {
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Badge ────────────────────────────────────────────────────────────── */
+
+.fi-badge {
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+}
+
+.fi-badge::before {
+    content: '';
+    display: inline-block;
+    width: 0.4rem;
+    height: 0.4rem;
+    margin-inline-end: 0.1rem;
+    border-radius: 999px;
+    background-color: currentColor;
+    box-shadow: 0 0 6px currentColor;
+    flex: none;
+}
+
+/* ── Tabel ────────────────────────────────────────────────────────────── */
+
+.fi-ta-header-cell {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-gray-500);
+}
+
+.fi-ta-row {
+    transition: background-color 120ms ease, box-shadow 120ms ease;
+}
+
+.dark .fi-ta-row:hover {
+    background-color: rgba(34, 211, 238, 0.04);
+    box-shadow: inset 3px 0 0 var(--color-primary-500);
+}
+
+/* ── Input & tombol ───────────────────────────────────────────────────── */
+
+.fi-input-wrp:focus-within {
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.18);
+}
+
+.dark .fi-btn.fi-color-primary {
+    background-image: linear-gradient(135deg, var(--color-primary-600), var(--color-primary-500));
+}
+
+/* ── Halaman login ────────────────────────────────────────────────────── */
+
+.fi-noc-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.fi-noc-backdrop-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        repeating-linear-gradient(0deg, var(--noc-grid) 0 1px, transparent 1px 44px),
+        repeating-linear-gradient(90deg, var(--noc-grid) 0 1px, transparent 1px 44px);
+    mask-image: radial-gradient(70% 60% at 50% 40%, #000, transparent);
+}
+
+.fi-noc-backdrop-glow {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(40rem 28rem at 50% -5%, rgba(6, 182, 212, 0.18), transparent 70%),
+        radial-gradient(35rem 25rem at 85% 100%, rgba(70, 95, 255, 0.14), transparent 70%);
+}
+
+.fi-simple-layout {
+    position: relative;
+}
+
+.fi-simple-main {
+    position: relative;
+    z-index: 1;
+    border-radius: 1rem;
+}
+
+.dark .fi-simple-main {
+    border: 1px solid var(--noc-line);
+    box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.75);
+}
+
+/* ── Komponen strip status jaringan ───────────────────────────────────── */
+
+@layer components {
+    .noc-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.35rem 0.75rem;
+        border: 1px solid var(--color-gray-200);
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        white-space: nowrap;
+        color: var(--color-gray-600);
+    }
+
+    .noc-chip b {
+        font-family: var(--mono-font-family);
+        font-variant-numeric: tabular-nums;
+        font-weight: 700;
+        color: var(--color-gray-900);
+    }
+
+    .dark .noc-chip {
+        border-color: var(--color-gray-800);
+        background-color: rgba(7, 11, 20, 0.45);
+        color: var(--color-gray-400);
+    }
+
+    .dark .noc-chip b {
+        color: var(--color-gray-100);
+    }
+
+    .noc-chip-success { border-color: color-mix(in srgb, var(--color-success-500) 35%, transparent); }
+    .noc-chip-warning { border-color: color-mix(in srgb, var(--color-warning-500) 35%, transparent); }
+    .noc-chip-primary { border-color: color-mix(in srgb, var(--color-primary-500) 35%, transparent); }
+    .noc-chip-danger { border-color: color-mix(in srgb, var(--color-danger-500) 45%, transparent); }
+
+    .noc-dot {
+        width: 0.45rem;
+        height: 0.45rem;
+        border-radius: 999px;
+        flex: none;
+        background-color: var(--color-gray-400);
+    }
+
+    .noc-dot-success { background-color: var(--color-success-500); box-shadow: 0 0 8px var(--color-success-500); }
+    .noc-dot-warning { background-color: var(--color-warning-500); box-shadow: 0 0 8px var(--color-warning-500); }
+    .noc-dot-primary { background-color: var(--color-primary-500); box-shadow: 0 0 8px var(--color-primary-500); }
+    .noc-dot-danger { background-color: var(--color-danger-500); box-shadow: 0 0 8px var(--color-danger-500); }
+    .noc-dot-muted { background-color: var(--color-gray-500); }
+
+    /* Dot berdenyut = "live". Dimatikan untuk yang minta reduced motion. */
+    .noc-dot-success,
+    .noc-dot-danger {
+        animation: noc-pulse 2.4s ease-in-out infinite;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .noc-dot-success,
+        .noc-dot-danger {
+            animation: none;
+        }
+    }
+
+    .noc-meter {
+        height: 0.4rem;
+        width: 100%;
+        border-radius: 999px;
+        overflow: hidden;
+        background-color: var(--color-gray-200);
+    }
+
+    .dark .noc-meter {
+        background-color: var(--color-gray-800);
+    }
+
+    .noc-meter-fill {
+        height: 100%;
+        border-radius: 999px;
+        background-image: linear-gradient(90deg, var(--color-primary-500), var(--color-success-500));
+        transition: width 400ms ease;
+    }
+}
+
+@keyframes noc-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
+}
+
+.fi-noc-strip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.5rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--color-gray-200);
+    border-radius: 0.75rem;
+    background-color: var(--noc-surface);
+}
+
+.dark .fi-noc-strip {
+    border-color: var(--noc-line);
+    background-image: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(7, 11, 20, 0.9));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.fi-noc-strip-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.fi-noc-strip-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-primary-500);
+}
+
+.dark .fi-noc-strip-title {
+    color: var(--color-primary-400);
+}
+
+.fi-noc-strip-period {
+    font-family: var(--mono-font-family);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-gray-500);
+}
+
+.fi-noc-strip-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    flex: 1 1 20rem;
+}
+
+.fi-noc-strip-meter {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    flex: 0 1 14rem;
+    min-width: 11rem;
+}
+
+.fi-noc-strip-meter-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-gray-500);
+}
+
+.fi-noc-strip-meter-head b {
+    font-family: var(--mono-font-family);
+    font-variant-numeric: tabular-nums;
+    font-size: 1rem;
+    letter-spacing: -0.02em;
+    color: var(--color-gray-900);
+}
+
+.dark .fi-noc-strip-meter-head b {
+    color: var(--color-gray-50);
+}
+
+.fi-noc-strip-meter-foot {
+    font-size: 0.7rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-gray-500);
+}

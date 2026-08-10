@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\CustomerStatus;
+use App\Filament\Resources\Customers\Pages\ListCustomers;
 use App\Imports\CustomerImport;
 use App\Models\Cluster;
 use App\Models\Customer;
@@ -19,7 +20,7 @@ class CustomerImportTest extends TestCase
     public function testConvertsScientificNotationWaToProperString(): void
     {
         // Nilai float persis seperti hasil baca Excel (6.28226E+12).
-        $wa = (new CustomerImport())->cleanWhatsappNumber(6.28226E+12);
+        $wa = (new CustomerImport)->cleanWhatsappNumber(6.28226E+12);
 
         $this->assertIsString($wa);
         $this->assertStringStartsWith('62', $wa);
@@ -28,24 +29,24 @@ class CustomerImportTest extends TestCase
 
     public function testNormalizesLeadingZeroWaTo62(): void
     {
-        $this->assertSame('6281234567890', (new CustomerImport())->cleanWhatsappNumber('081234567890'));
-        $this->assertNull((new CustomerImport())->cleanWhatsappNumber(null));
+        $this->assertSame('6281234567890', (new CustomerImport)->cleanWhatsappNumber('081234567890'));
+        $this->assertNull((new CustomerImport)->cleanWhatsappNumber(null));
     }
 
     public function testMapsPaket110ToMasterPaket110000(): void
     {
         $package = Package::factory()->create(['default_price' => 110_000]);
 
-        $this->assertSame($package->id, (new CustomerImport())->lookupPackage(110));
+        $this->assertSame($package->id, (new CustomerImport)->lookupPackage(110));
         // Tidak ketemu → null (warning masuk log).
-        $this->assertNull((new CustomerImport())->lookupPackage(999));
+        $this->assertNull((new CustomerImport)->lookupPackage(999));
     }
 
     public function testResolvesClusterByNameCaseInsensitive(): void
     {
         $cluster = Cluster::factory()->create(['name' => 'PADI']);
 
-        $import = new CustomerImport();
+        $import = new CustomerImport;
 
         $this->assertSame($cluster->id, $import->lookupCluster(' padi '));
         // Tidak ketemu / kosong → null, admin assign belakangan via UI.
@@ -55,7 +56,7 @@ class CustomerImportTest extends TestCase
 
     public function testCleansBillingDayAndAmount(): void
     {
-        $import = new CustomerImport();
+        $import = new CustomerImport;
 
         $this->assertSame(15, $import->cleanBillingDay(15));
         $this->assertSame(1, $import->cleanBillingDay(null));
@@ -70,7 +71,7 @@ class CustomerImportTest extends TestCase
 
     public function testDefaultsInvalidStatusToActive(): void
     {
-        $import = new CustomerImport();
+        $import = new CustomerImport;
 
         $this->assertSame(CustomerStatus::Active, $import->cleanStatus('ngawur'));
         $this->assertSame(CustomerStatus::Suspended, $import->cleanStatus(' ISOLIR '));
@@ -80,7 +81,7 @@ class CustomerImportTest extends TestCase
 
     public function testRejectsInvalidMapsUrl(): void
     {
-        $import = new CustomerImport();
+        $import = new CustomerImport;
 
         $this->assertSame('https://maps.app.goo.gl/abc', $import->validUrl('https://maps.app.goo.gl/abc'));
         $this->assertNull($import->validUrl('bukan-url'));
@@ -93,7 +94,7 @@ class CustomerImportTest extends TestCase
         $padi = Cluster::factory()->create(['name' => 'PADI']);
         Cluster::factory()->create(['name' => 'KAPAS']);
 
-        $import = new CustomerImport();
+        $import = new CustomerImport;
         $import->import(base_path('tests/fixtures/sample_pelanggan.xlsx'));
 
         $this->assertSame(10, Customer::count());
@@ -116,7 +117,7 @@ class CustomerImportTest extends TestCase
         $path = tempnam(sys_get_temp_dir(), 'tpl').'.xlsx';
         file_put_contents($path, CustomerImport::templateContent());
 
-        $import = new CustomerImport();
+        $import = new CustomerImport;
         $import->import($path);
         unlink($path);
 
@@ -131,7 +132,7 @@ class CustomerImportTest extends TestCase
         // Modal import ter-mount tanpa error; cluster bukan lagi field wajib
         // di modal (pindah ke kolom CLUSTER di Excel). Tombol template ada
         // di dalam modal (SchemaActions di ListCustomers).
-        Livewire::test(\App\Filament\Resources\Customers\Pages\ListCustomers::class)
+        Livewire::test(ListCustomers::class)
             ->mountAction('import')
             ->assertActionMounted('import');
     }
@@ -139,11 +140,11 @@ class CustomerImportTest extends TestCase
     public function testAdminSeesImportActionPetugasNot(): void
     {
         $this->actingAs(User::factory()->admin()->create());
-        Livewire::test(\App\Filament\Resources\Customers\Pages\ListCustomers::class)
+        Livewire::test(ListCustomers::class)
             ->assertActionExists('import');
 
         $this->actingAs(User::factory()->fieldOfficer()->create());
-        Livewire::test(\App\Filament\Resources\Customers\Pages\ListCustomers::class)
+        Livewire::test(ListCustomers::class)
             ->assertActionHidden('import');
     }
 }

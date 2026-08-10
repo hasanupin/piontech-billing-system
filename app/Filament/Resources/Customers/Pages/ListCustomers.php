@@ -3,8 +3,10 @@
 namespace App\Filament\Resources\Customers\Pages;
 
 use App\Enums\Role;
+use App\Filament\Actions\ExportTableAction;
 use App\Filament\Resources\Customers\CustomerResource;
 use App\Imports\CustomerImport;
+use App\Models\Customer;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\FileUpload;
@@ -46,7 +48,7 @@ class ListCustomers extends ListRecords
                         ->required(),
                 ])
                 ->action(function (array $data): void {
-                    $import = new CustomerImport();
+                    $import = new CustomerImport;
                     $import->import(Storage::disk('public')->path($data['file']));
 
                     $failed = count($import->failures);
@@ -69,6 +71,35 @@ class ListCustomers extends ListRecords
                         ->persistent()
                         ->send();
                 }),
+            ExportTableAction::make(
+                'pelanggan',
+                [
+                    __('Name'),
+                    __('Cluster'),
+                    __('Package'),
+                    __('Billing Amount'),
+                    __('Address'),
+                    __('Officer'),
+                    __('Billing Day'),
+                    __('WhatsApp'),
+                    __('Status'),
+                    __('Referral'),
+                    __('Maps'),
+                ],
+                fn (Customer $record): array => [
+                    $record->name,
+                    $record->cluster?->name ?? '',
+                    $record->package?->name ?? '',
+                    (float) $record->billing_amount,
+                    $record->address ?? '',
+                    $record->cluster?->officer?->name ?? '',
+                    $record->billing_day,
+                    $record->whatsapp_number ?? '',
+                    $record->status->getLabel(),
+                    $record->referral?->display_name ?? '',
+                    $record->maps_url ?? '',
+                ],
+            ),
             CreateAction::make(),
         ];
     }

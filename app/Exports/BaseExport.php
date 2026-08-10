@@ -3,8 +3,6 @@
 namespace App\Exports;
 
 use Carbon\Carbon;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -25,14 +23,7 @@ abstract class BaseExport
 
     public function download(string $filename): StreamedResponse
     {
-        $spreadsheet = new Spreadsheet();
-        $spreadsheet->getActiveSheet()->fromArray($this->rows(), null, 'A1');
-
-        return response()->streamDownload(
-            fn () => (new Xlsx($spreadsheet))->save('php://output'),
-            $filename,
-            ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
-        );
+        return Xlsx::stream($filename, $this->rows());
     }
 
     protected function rupiah(float $value): string

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Cluster;
+use App\Models\CommissionRecipient;
 use App\Models\Customer;
 use App\Models\Package;
 use App\Models\Transaction;
@@ -14,12 +15,15 @@ class RoleAccessTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function testFieldOfficerCannotUpdateCustomer(): void
+    public function testFieldOfficerCanCreateCustomerButNotOutsideOwnCluster(): void
     {
         $officer = User::factory()->fieldOfficer()->create();
+        // Factory memakai cluster petugas lain.
         $customer = Customer::factory()->create();
 
+        $this->assertTrue($officer->can('create', Customer::class));
         $this->assertFalse($officer->can('update', $customer));
+        $this->assertFalse($officer->can('delete', $customer));
     }
 
     public function testFieldOfficerCanCreateTransaction(): void
@@ -35,6 +39,7 @@ class RoleAccessTest extends TestCase
 
         $this->assertFalse($officer->can('viewAny', Cluster::class));
         $this->assertFalse($officer->can('viewAny', Package::class));
+        $this->assertFalse($officer->can('viewAny', CommissionRecipient::class));
     }
 
     public function testAdminCanCreateCustomerButNotManageUsers(): void
@@ -42,6 +47,7 @@ class RoleAccessTest extends TestCase
         $admin = User::factory()->admin()->create();
 
         $this->assertTrue($admin->can('create', Customer::class));
+        $this->assertTrue($admin->can('create', CommissionRecipient::class));
         $this->assertFalse($admin->can('viewAny', User::class));
     }
 

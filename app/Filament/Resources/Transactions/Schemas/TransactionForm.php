@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Transactions\Schemas;
 
 use App\Enums\PaymentMethod;
 use App\Enums\Role;
+use App\Filament\Resources\Transactions\Pages\CreateTransaction;
 use App\Models\Customer;
 use App\Models\Transaction;
 use Carbon\Carbon;
@@ -20,6 +21,26 @@ use Illuminate\Database\Eloquent\Model;
 
 class TransactionForm
 {
+    /**
+     * Pelanggan yang dibawa lewat ?customer_id=... (tombol "Catat Pembayaran"
+     * di halaman Tagihan Bulanan). Prefill dipasang sebagai ->default() per
+     * field, BUKAN dengan override fillForm() + form->fill([...]): fill()
+     * dengan argumen array melewatkan seluruh default komponen lain, sehingga
+     * payment_method/period/paid_at/officer_id justru ikut kosong.
+     *
+     * Sumber ID-nya CreateTransaction::$customerId (bukan request()->query()
+     * langsung) supaya cuma ada satu tempat yang membaca query string.
+     *
+     * Query tunduk pada global scope cluster — petugas yang menebak ID
+     * pelanggan cluster lain tidak mendapat prefill apa pun.
+     */
+    private static function prefillCustomer(mixed $livewire): ?Customer
+    {
+        $id = $livewire instanceof CreateTransaction ? $livewire->customerId : null;
+
+        return filled($id) ? Customer::billable()->find($id) : null;
+    }
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -32,11 +53,17 @@ class TransactionForm
                     ->preload()
                     ->required()
                     ->live()
+                    ->default(fn ($livewire): mixed => self::prefillCustomer($livewire)?->getKey())
                     ->afterStateUpdated(function ($state, Set $set): void {
                         // Pre-fill nominal dari billing_amount pelanggan — tetap editable.
                         // Set sudah dalam format tampilan (rupiah) agar konsisten dengan dehydrate mask.
                         $amount = Customer::find($state)?->billing_amount;
-                        $set('billed_amount', filled($amount) ? number_format((float) $amount, 2, ',', '.') : null);
+                        $formatted = filled($amount) ? number_format((float) $amount, 2, ',', '.') : null;
+
+                        $set('billed_amount', $formatted);
+                        // Nominal bayar ikut terisi: mayoritas pembayaran lunas penuh,
+                        // dan petugas cukup mengubahnya saat pembayaran sebagian.
+                        $set('paid_amount', $formatted);
                     })
                     // Tolak duplikat pelanggan+periode (unique constraint TASK-02) dengan pesan jelas.
                     ->rule(fn (Get $get, ?Model $record) => function (string $attribute, $value, Closure $fail) use ($get, $record): void {
@@ -73,6 +100,7 @@ class TransactionForm
                 TextInput::make('billed_amount')
                     ->label(__('Billed Amount'))
                     ->required()
+                    ->default(fn ($livewire): mixed => self::prefillCustomer($livewire)?->billing_amount)
                     ->prefix('Rp')
                     ->mask(RawJs::make("\$money(\$input, ',', '.')"))
                     ->formatStateUsing(fn ($state) => filled($state) ? number_format((float) $state, 2, ',', '.') : $state)
@@ -81,6 +109,7 @@ class TransactionForm
                 TextInput::make('paid_amount')
                     ->label(__('Paid Amount'))
                     ->required()
+                    ->default(fn ($livewire): mixed => self::prefillCustomer($livewire)?->billing_amount)
                     ->prefix('Rp')
                     ->mask(RawJs::make("\$money(\$input, ',', '.')"))
                     ->formatStateUsing(fn ($state) => filled($state) ? number_format((float) $state, 2, ',', '.') : $state)

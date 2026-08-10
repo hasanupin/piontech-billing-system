@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Filament\Resources\Packages\Pages\CreatePackage;
 use App\Filament\Resources\Packages\PackageResource;
+use App\Filament\Resources\Packages\Pages\CreatePackage;
 use App\Models\Package;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;

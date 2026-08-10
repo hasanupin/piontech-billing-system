@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Enums\TransactionStatus;
 use App\Models\Customer;
+use Filament\Support\Enums\FontFamily;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
@@ -16,7 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class DueTodayWidget extends TableWidget
 {
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     public function table(Table $table): Table
     {
@@ -39,9 +40,11 @@ class DueTodayWidget extends TableWidget
                     ->label(__('Cluster')),
                 TextColumn::make('billing_amount')
                     ->label(__('Amount'))
+                    ->fontFamily(FontFamily::Mono)
                     ->state(fn (Customer $record): string => BillingStatsOverview::rupiah((float) $record->billing_amount)),
                 TextColumn::make('whatsapp_number')
-                    ->label(__('WhatsApp')),
+                    ->label(__('WhatsApp'))
+                    ->fontFamily(FontFamily::Mono),
                 TextColumn::make('status')
                     ->label(__('Status'))
                     ->badge(),
