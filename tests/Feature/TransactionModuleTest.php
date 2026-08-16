@@ -282,6 +282,26 @@ class TransactionModuleTest extends TestCase
             ->assertCanNotSeeTableRecords([$cash]);
     }
 
+    public function testCanSwitchFromPeriodToDateRangeFilter(): void
+    {
+        $thisMonth = Transaction::factory()->create();
+        $lastMonth = Transaction::factory()->create([
+            'period' => now()->subMonthNoOverflow()->startOfMonth(),
+            'paid_at' => now()->subMonthNoOverflow(),
+        ]);
+        $this->actingAs(User::factory()->admin()->create());
+
+        // Centang "gunakan rentang tanggal" → periode diabaikan, paid_at yang dipakai.
+        Livewire::test(ListTransactions::class)
+            ->filterTable('period', [
+                'use_range' => true,
+                'from' => now()->subMonthNoOverflow()->startOfMonth()->toDateString(),
+                'until' => now()->subMonthNoOverflow()->endOfMonth()->toDateString(),
+            ])
+            ->assertCanSeeTableRecords([$lastMonth])
+            ->assertCanNotSeeTableRecords([$thisMonth]);
+    }
+
     public function testClusterDropdownFiltersTransactions(): void
     {
         $cluster = Cluster::factory()->create();

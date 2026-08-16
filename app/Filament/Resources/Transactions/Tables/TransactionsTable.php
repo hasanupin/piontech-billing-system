@@ -12,7 +12,10 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
@@ -59,23 +62,38 @@ class TransactionsTable
             // Satu kolom — semua filter tersusun ke bawah.
             ->filtersFormColumns(1)
             ->filters([
-                // Periode bulan-tahun — default bulan berjalan.
-                SelectFilter::make('period')
-                    ->label(__('Period'))
-                    ->options(self::periodOptions())
-                    ->default(now()->format('Y-m'))
-                    ->query(fn (Builder $query, array $data): Builder => filled($data['value'] ?? null)
-                        ? $query->whereDate('period', Carbon::parse($data['value'].'-01')->startOfMonth())
-                        : $query),
-                // Rentang tanggal bayar — default 1 s/d akhir bulan berjalan.
-                Filter::make('paid_between')
+                // Periode ATAU rentang tanggal bayar — checkbox memilih salah satu.
+                // Default: mode periode, bulan berjalan.
+                Filter::make('period')
                     ->schema([
-                        DatePicker::make('from')->label(__('Start Date'))->default(now()->startOfMonth()),
-                        DatePicker::make('until')->label(__('End Date'))->default(now()->endOfMonth()),
+                        Checkbox::make('use_range')
+                            ->label(__('Use Date Range'))
+                            ->live(),
+                        Select::make('period')
+                            ->label(__('Period'))
+                            ->options(self::periodOptions())
+                            ->default(now()->format('Y-m'))
+                            ->hidden(fn (Get $get): bool => (bool) $get('use_range')),
+                        DatePicker::make('from')
+                            ->label(__('Start Date'))
+                            ->default(now()->startOfMonth())
+                            ->visible(fn (Get $get): bool => (bool) $get('use_range')),
+                        DatePicker::make('until')
+                            ->label(__('End Date'))
+                            ->default(now()->endOfMonth())
+                            ->visible(fn (Get $get): bool => (bool) $get('use_range')),
                     ])
-                    ->query(fn (Builder $query, array $data): Builder => $query
-                        ->when($data['from'] ?? null, fn (Builder $q, $date) => $q->whereDate('paid_at', '>=', $date))
-                        ->when($data['until'] ?? null, fn (Builder $q, $date) => $q->whereDate('paid_at', '<=', $date))),
+                    ->query(function (Builder $query, array $data): Builder {
+                        if ($data['use_range'] ?? false) {
+                            return $query
+                                ->when($data['from'] ?? null, fn (Builder $q, $date) => $q->whereDate('paid_at', '>=', $date))
+                                ->when($data['until'] ?? null, fn (Builder $q, $date) => $q->whereDate('paid_at', '<=', $date));
+                        }
+
+                        return filled($data['period'] ?? null)
+                            ? $query->whereDate('period', Carbon::parse($data['period'].'-01')->startOfMonth())
+                            : $query;
+                    }),
                 SelectFilter::make('status')
                     ->label(__('Status'))
                     ->options(TransactionStatus::class),
