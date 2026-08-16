@@ -162,7 +162,41 @@ class BillingService
 
         return CommissionRecipient::query()
             ->withSum(['referredTransactions as paid_base' => $paidInPeriod], 'paid_amount')
-            ->withCount(['referredTransactions as paid_count' => $paidInPeriod]);
+            ->withCount(['referredTransactions as paid_count' => $paidInPeriod])
+            // Dasar estimasi: tagihan pelanggan referal yang belum lunas periode ini —
+            // komisi yang belum jadi hak karena uangnya belum masuk.
+            ->withSum(['referredCustomers as estimated_base' => fn (Builder $query): Builder => $query
+                ->billable()
+                ->whereDoesntHave('transactions', $paidInPeriod)], 'billing_amount');
+    }
+
+    /**
+     * Komisi versi rentang tanggal — basis paid_at aktual, sama seperti laporan
+     * lain. Tanpa estimated_base: estimasi hanya bermakna per periode tagihan.
+     */
+    public function commissionRangeQuery(Carbon $from, Carbon $until): Builder
+    {
+        $paidInRange = fn (Builder $query): Builder => $query
+            // Qualified: relasi through ikut menarik tabel customers.
+            ->whereBetween('transactions.paid_at', [$from->copy()->startOfDay(), $until->copy()->endOfDay()])
+            ->where('transactions.status', TransactionStatus::Paid);
+
+        return CommissionRecipient::query()
+            ->with('customer')
+            ->withSum(['referredTransactions as paid_base' => $paidInRange], 'paid_amount')
+            ->withCount(['referredTransactions as paid_count' => $paidInRange]);
+    }
+
+    /** Total komisi seluruh penerima pada satu periode. */
+    public function commissionTotal(Carbon $period): float
+    {
+        return (float) $this->commissionQuery($period)->get()->sum('commission_amount');
+    }
+
+    /** Total estimasi komisi (pelanggan referal yang belum bayar) satu periode. */
+    public function commissionEstimateTotal(Carbon $period): float
+    {
+        return (float) $this->commissionQuery($period)->get()->sum('estimated_commission_amount');
     }
 
     /**

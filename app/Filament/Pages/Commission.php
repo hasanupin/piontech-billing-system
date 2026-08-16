@@ -3,8 +3,9 @@
 namespace App\Filament\Pages;
 
 use App\Enums\Role;
+use App\Filament\Actions\ExportTableAction;
 use App\Filament\Resources\CommissionRecipients\Tables\CommissionRecipientsTable;
-use App\Filament\Widgets\CommissionChart;
+use App\Filament\Widgets\CommissionSummary;
 use App\Models\CommissionRecipient;
 use App\Services\BillingService;
 use BackedEnum;
@@ -37,6 +38,8 @@ class Commission extends Page implements HasTable
     }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedReceiptPercent;
+
+    protected static ?int $navigationSort = 5;
 
     public static function getNavigationLabel(): string
     {
@@ -71,33 +74,51 @@ class Commission extends Page implements HasTable
             ]);
     }
 
-    /** Urutan konten: filter → chart → tabel. */
+    /** Urutan konten: filter → kartu ringkasan → tabel. */
     public function content(Schema $schema): Schema
     {
         return $schema->components([
             EmbeddedSchema::make('filtersForm'),
-            Grid::make(1)->schema(fn (): array => $this->getWidgetsSchemaComponents([
-                CommissionChart::class,
+            Grid::make(3)->schema(fn (): array => $this->getWidgetsSchemaComponents([
+                CommissionSummary::class,
             ])),
             EmbeddedTable::make(),
         ]);
     }
 
+    /** Export mengikuti filter periode halaman + filter/search/sort tabel. */
+    protected function getHeaderActions(): array
+    {
+        return [
+            ExportTableAction::make(
+                'komisi_'.$this->periodStart()->format('Y_m'),
+                [
+                    __('Name'),
+                    __('Type'),
+                    __('WhatsApp'),
+                    __('Paid Transactions'),
+                    __('Commission Base'),
+                    __('Commission Percentage'),
+                    __('Commission Amount'),
+                    __('Estimated Commission'),
+                ],
+                fn (CommissionRecipient $record): array => [
+                    $record->display_name ?? '',
+                    $record->type->getLabel(),
+                    $record->display_whatsapp ?? '',
+                    (int) $record->paid_count,
+                    (float) ($record->paid_base ?? 0),
+                    (float) $record->commission_percent,
+                    $record->commission_amount,
+                    $record->estimated_commission_amount,
+                ],
+            ),
+        ];
+    }
+
     public function periodStart(): Carbon
     {
         return Carbon::parse(($this->filters['period'] ?? now()->format('Y-m')).'-01')->startOfMonth();
-    }
-
-    public function getSubheading(): ?string
-    {
-        $total = app(BillingService::class)->commissionQuery($this->periodStart())
-            ->get()
-            ->sum('commission_amount');
-
-        return __('Total commission :period: :amount', [
-            'period' => $this->periodStart()->translatedFormat('F Y'),
-            'amount' => 'Rp '.number_format($total, 0, ',', '.'),
-        ]);
     }
 
     public function table(Table $table): Table
@@ -132,6 +153,13 @@ class Commission extends Page implements HasTable
                     // Komisi bukan kolom tabel — urutkan lewat basis × persentase.
                     ->sortable(query: fn (Builder $query, string $direction): Builder => $query
                         ->orderByRaw("COALESCE(paid_base, 0) * commission_percent {$direction}")),
+                TextColumn::make('estimated_commission_amount')
+                    ->label(__('Estimated Commission'))
+                    ->state(fn (CommissionRecipient $record): float => $record->estimated_commission_amount)
+                    ->money('IDR')
+                    ->color('warning')
+                    ->sortable(query: fn (Builder $query, string $direction): Builder => $query
+                        ->orderByRaw("COALESCE(estimated_base, 0) * commission_percent {$direction}")),
             ])
             ->filters([
                 // Semua penerima tampil secara default; filter ini cara membatasi

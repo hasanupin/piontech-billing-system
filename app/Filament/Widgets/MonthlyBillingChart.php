@@ -2,48 +2,26 @@
 
 namespace App\Filament\Widgets;
 
-use App\Filament\Widgets\Concerns\ReadsMonthlyBillingFilters;
-use Filament\Widgets\ChartWidget;
-
 /**
- * Doughnut lunas vs belum bayar untuk periode & cluster terpilih
- * di halaman Tagihan Bulanan.
+ * Pie Total Tagihan: nominal terbayar vs belum dibayar pada periode & cluster
+ * terpilih di halaman Tagihan Bulanan.
  */
-class MonthlyBillingChart extends ChartWidget
+class MonthlyBillingChart extends MonthlyBillingPieChart
 {
-    use ReadsMonthlyBillingFilters;
-
-    protected ?string $maxHeight = '220px';
-
-    protected int|string|array $columnSpan = 1;
-
     public function getHeading(): ?string
     {
-        return __('Payment Percentage');
+        return __('Total Billing');
     }
 
-    protected function getType(): string
-    {
-        return 'doughnut';
-    }
-
-    protected function getData(): array
+    protected function slices(): array
     {
         $progress = $this->progress();
 
         return [
-            'datasets' => [
-                [
-                    'data' => [$progress['paid'], $progress['unpaid']],
-                    // Warna success & danger dari palet panel.
-                    'backgroundColor' => ['#12b76a', '#f04438'],
-                    // Transparan, bukan warna surface: jeda antar segmen tanpa
-                    // jadi cincin gelap saat light mode.
-                    'borderColor' => 'transparent',
-                    'borderWidth' => 3,
-                ],
-            ],
             'labels' => [__('Paid'), __('Unpaid')],
+            'data' => [$progress['paid_amount'], $progress['outstanding']],
+            // Warna success & danger dari palet panel.
+            'colors' => ['#12b76a', '#f04438'],
         ];
     }
 }

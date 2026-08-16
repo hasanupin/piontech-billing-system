@@ -255,6 +255,61 @@ class TransactionModuleTest extends TestCase
             ->assertCanNotSeeTableRecords([$paidCustomer]);
     }
 
+    public function testListDefaultsToCurrentMonthTransactions(): void
+    {
+        $thisMonth = Transaction::factory()->create();
+        $lastMonth = Transaction::factory()->create([
+            'period' => now()->subMonthNoOverflow()->startOfMonth(),
+            'paid_at' => now()->subMonthNoOverflow(),
+        ]);
+        $this->actingAs(User::factory()->admin()->create());
+
+        // Tanpa menyentuh filter, list hanya menampilkan bulan berjalan.
+        Livewire::test(ListTransactions::class)
+            ->assertCanSeeTableRecords([$thisMonth])
+            ->assertCanNotSeeTableRecords([$lastMonth]);
+    }
+
+    public function testPaymentMethodDropdownFiltersTransactions(): void
+    {
+        $cash = Transaction::factory()->create();
+        $transfer = Transaction::factory()->transfer()->create();
+        $this->actingAs(User::factory()->admin()->create());
+
+        Livewire::test(ListTransactions::class)
+            ->filterTable('payment_method', PaymentMethod::Transfer->value)
+            ->assertCanSeeTableRecords([$transfer])
+            ->assertCanNotSeeTableRecords([$cash]);
+    }
+
+    public function testClusterDropdownFiltersTransactions(): void
+    {
+        $cluster = Cluster::factory()->create();
+        $inCluster = Transaction::factory()->create([
+            'customer_id' => Customer::factory()->create(['cluster_id' => $cluster->id])->id,
+        ]);
+        $outside = Transaction::factory()->create();
+        $this->actingAs(User::factory()->admin()->create());
+
+        Livewire::test(ListTransactions::class)
+            ->filterTable('cluster', $cluster->id)
+            ->assertCanSeeTableRecords([$inCluster])
+            ->assertCanNotSeeTableRecords([$outside]);
+    }
+
+    public function testOfficerDropdownFiltersTransactions(): void
+    {
+        $officer = User::factory()->fieldOfficer()->create();
+        $mine = Transaction::factory()->create(['officer_id' => $officer->id]);
+        $others = Transaction::factory()->create();
+        $this->actingAs(User::factory()->admin()->create());
+
+        Livewire::test(ListTransactions::class)
+            ->filterTable('officer_id', $officer->id)
+            ->assertCanSeeTableRecords([$mine])
+            ->assertCanNotSeeTableRecords([$others]);
+    }
+
     public function testAdminCanExportTransactionsToExcel(): void
     {
         Transaction::factory()->create();

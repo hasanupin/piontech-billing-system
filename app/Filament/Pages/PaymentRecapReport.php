@@ -29,6 +29,18 @@ class PaymentRecapReport extends AbstractRangeReportPage
         return __('Billed, collected (cash/transfer), success rate');
     }
 
+    /** Ringkasan layar saja — angka detailnya sudah ada di laporan lain. */
+    public function hasExport(): bool
+    {
+        return false;
+    }
+
+    /** Isinya 8 baris metrik tetap. */
+    public function isPaginated(): bool
+    {
+        return false;
+    }
+
     protected function makeExport(Carbon $from, Carbon $until): BaseExport
     {
         return new MonthlyRecapExport($from, $until);

@@ -2,8 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Enums\CustomerStatus;
 use App\Filament\Pages\Commission;
-use App\Filament\Widgets\CommissionChart;
+use App\Filament\Widgets\CommissionSummary;
 use App\Models\CommissionRecipient;
 use App\Models\Customer;
 use App\Models\Transaction;
@@ -125,6 +126,22 @@ class CommissionPageTest extends TestCase
         $this->assertSame(10_000.0, $this->commissionOf($big));
     }
 
+    public function testCommissionTotalSumsAllRecipients(): void
+    {
+        foreach ([4, 10] as $percent) {
+            $recipient = CommissionRecipient::factory()->create(['commission_percent' => $percent]);
+            $customer = Customer::factory()->create(['referral_id' => $recipient->id]);
+            Transaction::factory()->create([
+                'customer_id' => $customer->id,
+                'period' => now()->startOfMonth(),
+                'billed_amount' => 100_000,
+                'paid_amount' => 100_000,
+            ]);
+        }
+
+        $this->assertSame(14_000.0, $this->service()->commissionTotal(now()->startOfMonth()));
+    }
+
     public function testPeriodFilterChangesTheNumbers(): void
     {
         $recipient = CommissionRecipient::factory()->create(['commission_percent' => 10]);
@@ -145,48 +162,102 @@ class CommissionPageTest extends TestCase
             $this->service()->commissionQuery($lastMonth)->find($recipient->getKey())->commission_amount,
         );
 
-        Livewire::test(Commission::class)
-            ->assertSee('Rp 0')
-            ->set('filters.period', $lastMonth->format('Y-m'))
+        // Kartu ringkasan mengikuti filter periode halaman.
+        Livewire::test(CommissionSummary::class, ['pageFilters' => ['period' => now()->format('Y-m')]])
+            ->assertSee('Rp 0');
+        Livewire::test(CommissionSummary::class, ['pageFilters' => ['period' => $lastMonth->format('Y-m')]])
             ->assertSee('Rp 10.000');
     }
 
-    public function testChartFollowsPeriodFilter(): void
+    public function testFilterRendersAboveSummaryAndTable(): void
     {
-        $recipient = CommissionRecipient::factory()->create([
-            'name' => 'Pak Referal',
-            'commission_percent' => 10,
+        CommissionRecipient::factory()->create(['name' => 'Pak Referal']);
+        $this->actingAs(User::factory()->admin()->create());
+
+        $this->get(Commission::getUrl())->assertSeeInOrder([
+            'filters.period',    // filter halaman
+            'CommissionSummary', // kartu ringkasan
+            'Pak Referal',       // baris tabel
+        ], escape: false);
+    }
+
+    /** Estimasi = tagihan pelanggan referal yang BELUM lunas × persentase penerima. */
+    public function testEstimateCountsOnlyUnpaidBillableReferredCustomers(): void
+    {
+        $recipient = CommissionRecipient::factory()->create(['commission_percent' => 10]);
+
+        // Belum bayar → masuk estimasi.
+        Customer::factory()->create([
+            'referral_id' => $recipient->id,
+            'billing_amount' => 100_000,
         ]);
-        $customer = Customer::factory()->create(['referral_id' => $recipient->id]);
+        // Sudah lunas periode ini → tidak masuk estimasi (sudah jadi komisi riil).
+        $paid = Customer::factory()->create([
+            'referral_id' => $recipient->id,
+            'billing_amount' => 200_000,
+        ]);
+        Transaction::factory()->create([
+            'customer_id' => $paid->id,
+            'period' => now()->startOfMonth(),
+            'billed_amount' => 200_000,
+            'paid_amount' => 200_000,
+        ]);
+        // Berhenti berlangganan → tidak ditagih, tidak masuk estimasi.
+        Customer::factory()->create([
+            'referral_id' => $recipient->id,
+            'billing_amount' => 500_000,
+            'status' => CustomerStatus::Terminated,
+        ]);
+        // Tanpa referal → tidak menambah estimasi siapa pun.
+        Customer::factory()->create(['billing_amount' => 900_000]);
+
+        $this->assertSame(
+            10_000.0,
+            $this->service()->commissionQuery(now()->startOfMonth())
+                ->find($recipient->getKey())
+                ->estimated_commission_amount,
+        );
+        $this->assertSame(10_000.0, $this->service()->commissionEstimateTotal(now()->startOfMonth()));
+    }
+
+    public function testSummaryShowsTotalsAndRecipientCounts(): void
+    {
+        $recipient = CommissionRecipient::factory()->create(['commission_percent' => 10]);
+        $customer = Customer::factory()->create([
+            'referral_id' => $recipient->id,
+            'billing_amount' => 100_000,
+        ]);
         Transaction::factory()->create([
             'customer_id' => $customer->id,
             'period' => now()->startOfMonth(),
             'billed_amount' => 100_000,
             'paid_amount' => 100_000,
         ]);
+        // Belum bayar → estimasi 20.000.
+        Customer::factory()->create([
+            'referral_id' => $recipient->id,
+            'billing_amount' => 200_000,
+        ]);
+        CommissionRecipient::factory()->customerType()->create();
+
         $this->actingAs(User::factory()->admin()->create());
 
-        Livewire::test(CommissionChart::class, [
+        Livewire::test(CommissionSummary::class, [
             'pageFilters' => ['period' => now()->format('Y-m')],
         ])
             ->assertSuccessful()
-            ->assertSee('Pak Referal')
-            ->assertSee('10000');
-
-        Livewire::test(CommissionChart::class, [
-            'pageFilters' => ['period' => now()->startOfMonth()->subMonth()->format('Y-m')],
-        ])->assertDontSee('Pak Referal');
+            ->assertSee('Rp 10.000')  // total komisi
+            ->assertSee('Rp 20.000')  // estimasi komisi
+            ->assertSee('1 / 1');     // non pelanggan / pelanggan
     }
 
-    public function testFilterRendersAboveChartAndTable(): void
+    public function testExportStreamsXlsxOfFilteredRows(): void
     {
-        CommissionRecipient::factory()->create(['name' => 'Pak Referal']);
+        CommissionRecipient::factory()->create();
         $this->actingAs(User::factory()->admin()->create());
 
-        $this->get(Commission::getUrl())->assertSeeInOrder([
-            'filters.period',   // filter halaman
-            'CommissionChart',  // chart
-            'Pak Referal',      // baris tabel
-        ], escape: false);
+        Livewire::test(Commission::class)
+            ->callAction('export')
+            ->assertFileDownloaded();
     }
 }

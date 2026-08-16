@@ -20,8 +20,13 @@ trait ReadsMonthlyBillingFilters
 {
     use InteractsWithPageFilters;
 
+    protected function periodStart(): Carbon
+    {
+        return Carbon::parse(($this->pageFilters['period'] ?? now()->format('Y-m')).'-01')->startOfMonth();
+    }
+
     /**
-     * @return array{billed: int, paid: int, unpaid: int, paid_amount: float, outstanding: float, deposited: float}
+     * @return array{billed: int, paid: int, unpaid: int, billed_amount: float, paid_amount: float, outstanding: float, cash: float, transfer: float, must_deposit: float, deposited: float, not_deposited: float}
      */
     protected function progress(): array
     {
@@ -35,7 +40,7 @@ trait ReadsMonthlyBillingFilters
             : ($user?->isRole(Role::FieldOfficer) ? $user->id : null);
 
         return app(BillingService::class)->billingProgress(
-            Carbon::parse(($this->pageFilters['period'] ?? now()->format('Y-m')).'-01'),
+            $this->periodStart(),
             $clusterId,
             $officerId,
         );

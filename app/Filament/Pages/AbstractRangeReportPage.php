@@ -10,6 +10,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -48,6 +49,18 @@ abstract class AbstractRangeReportPage extends Page implements HasTable
 
     /** Deskripsi singkat isi laporan (ditampilkan di halaman). */
     abstract public function description(): string;
+
+    /** Laporan yang sengaja view-only (Rekap Pembayaran) meng-override false. */
+    public function hasExport(): bool
+    {
+        return true;
+    }
+
+    /** Laporan berjumlah baris tetap & sedikit meng-override false. */
+    public function isPaginated(): bool
+    {
+        return true;
+    }
 
     abstract protected function makeExport(Carbon $from, Carbon $until): BaseExport;
 
@@ -97,14 +110,43 @@ abstract class AbstractRangeReportPage extends Page implements HasTable
         }
 
         return $table
-            ->records(fn (): array => $records)
+            // Dua closure, bukan satu bercabang: saat paginasi mati Filament
+            // menyuntik recordsPerPage = null lewat closure bertipe int|string
+            // miliknya sendiri — parameternya harus tidak diminta sama sekali.
+            ->records($this->isPaginated()
+                ? fn (int|string $page, int|string $recordsPerPage): LengthAwarePaginator => $this
+                    ->paginateRecords($records, $page, $recordsPerPage)
+                : fn (): array => $records)
             ->columns($columns)
-            ->paginated([25, 50, 100, 'all']);
+            ->paginated($this->isPaginated() ? [25, 50, 100, 'all'] : false);
+    }
+
+    /**
+     * Tabel ber-records() array tidak paginasi sendiri: Filament hanya menyuntik
+     * page & recordsPerPage, paginator-nya harus dibuat di sini — kalau tidak,
+     * seluruh baris tumpah ke satu halaman tanpa kontrol paginasi.
+     *
+     * @param  array<int, array<string, string|int|float>>  $records
+     */
+    private function paginateRecords(array $records, int|string $page, int|string $recordsPerPage): LengthAwarePaginator
+    {
+        $total = count($records);
+        // Opsi "all" → satu halaman berisi semuanya (perPage minimal 1: paginator membagi dengannya).
+        $perPage = $recordsPerPage === 'all' ? max(1, $total) : max(1, (int) $recordsPerPage);
+        $page = max(1, (int) $page);
+
+        return new LengthAwarePaginator(
+            // preserve_keys: key baris dipakai sebagai record key — harus unik lintas halaman.
+            array_slice($records, ($page - 1) * $perPage, $perPage, preserve_keys: true),
+            $total,
+            $perPage,
+            $page,
+        );
     }
 
     public function download(): StreamedResponse
     {
-        abort_unless(static::canAccess(), 403);
+        abort_unless(static::canAccess() && $this->hasExport(), 403);
 
         [$from, $until] = $this->resolvedRange();
         $filename = sprintf('%s_%s_%s.xlsx', $this->filenamePrefix(), $from->toDateString(), $until->toDateString());

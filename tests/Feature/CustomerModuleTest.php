@@ -77,6 +77,37 @@ class CustomerModuleTest extends TestCase
             ->assertTableActionHidden('suspend', $customer);
     }
 
+    public function testStatusChangeStampsSuspendedAndTerminatedDates(): void
+    {
+        $customer = Customer::factory()->create(['status' => CustomerStatus::Active]);
+
+        // Dicatat di model, bukan di quick action — form & import ikut terpakai.
+        $customer->update(['status' => CustomerStatus::Suspended]);
+        $this->assertNotNull($customer->fresh()->suspended_at);
+
+        $customer->update(['status' => CustomerStatus::Terminated]);
+        $customer->refresh();
+        $this->assertNull($customer->suspended_at);
+        $this->assertNotNull($customer->terminated_at);
+
+        $customer->update(['status' => CustomerStatus::Active]);
+        $this->assertNull($customer->fresh()->terminated_at);
+    }
+
+    public function testExplicitStatusDatesAreNotOverwritten(): void
+    {
+        // Impor & seeder mengirim tanggal aslinya — jangan ditimpa now().
+        $customer = Customer::factory()->create([
+            'status' => CustomerStatus::Suspended,
+            'suspended_at' => now()->subMonths(2)->toDateString(),
+        ]);
+
+        $this->assertSame(
+            now()->subMonths(2)->toDateString(),
+            $customer->fresh()->suspended_at->toDateString(),
+        );
+    }
+
     public function testSuspendedCustomerStaysBillableButTerminatedDoesNot(): void
     {
         Customer::factory()->suspended()->create();

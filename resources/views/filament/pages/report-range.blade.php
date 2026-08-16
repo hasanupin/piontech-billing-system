@@ -20,11 +20,14 @@
 
         <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">{{ $this->description() }}</p>
 
-        <x-slot name="footerActions">
-            <x-filament::button wire:click="download" icon="heroicon-o-arrow-down-tray">
-                {{ __('Download Excel') }}
-            </x-filament::button>
-        </x-slot>
+        @if ($this->hasExport())
+            {{-- Slot komponen section bernama "footer" — "footerActions" dibuang diam-diam. --}}
+            <x-slot name="footer">
+                <x-filament::button wire:click="download" icon="heroicon-o-arrow-down-tray">
+                    {{ __('Download Excel') }}
+                </x-filament::button>
+            </x-slot>
+        @endif
     </x-filament::section>
 
     {{ $this->table }}
