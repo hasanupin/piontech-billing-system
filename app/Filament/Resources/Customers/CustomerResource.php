@@ -23,6 +23,8 @@ class CustomerResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
+    protected static ?int $navigationSort = 2;
+
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function getModelLabel(): string
@@ -33,6 +35,11 @@ class CustomerResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return __('Customers');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Customer Data');
     }
 
     public static function getNavigationGroup(): ?string

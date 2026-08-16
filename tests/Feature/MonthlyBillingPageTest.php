@@ -5,8 +5,10 @@ namespace Tests\Feature;
 use App\Filament\Pages\MonthlyBilling;
 use App\Filament\Widgets\MonthlyBillingChart;
 use App\Filament\Widgets\MonthlyBillingDepositChart;
+use App\Filament\Widgets\MonthlyBillingMethodChart;
 use App\Filament\Widgets\MonthlyBillingSummary;
 use App\Models\Cluster;
+use App\Models\CommissionRecipient;
 use App\Models\Customer;
 use App\Models\OfficerDeposit;
 use App\Models\Transaction;
@@ -36,8 +38,10 @@ class MonthlyBillingPageTest extends TestCase
         // urutannya adalah placeholder-nya.
         $this->get(MonthlyBilling::getUrl())->assertSeeInOrder([
             'filters.period',               // filter halaman
-            'MonthlyBillingChart',          // doughnut + kartu ringkasan
-            'MonthlyBillingDepositChart',   // chart rekap uang
+            'MonthlyBillingSummary',        // 4 kartu ringkasan
+            'MonthlyBillingChart',          // pie total tagihan
+            'MonthlyBillingMethodChart',    // pie metode bayar
+            'MonthlyBillingDepositChart',   // pie setoran
             'Budi Tester',                  // baris tabel
         ], escape: false);
     }
@@ -168,14 +172,17 @@ class MonthlyBillingPageTest extends TestCase
         ])->assertSuccessful();
     }
 
-    public function testDepositChartShowsEightAmountsForFilteredCluster(): void
+    /**
+     * Cluster berisi: tunai 100rb (lunas), transfer 150rb (lunas), belum bayar
+     * 200rb, setoran 40rb. Cluster lain 999rb tidak boleh ikut terhitung.
+     */
+    private function makeClusterScenario(): Cluster
     {
         $officer = User::factory()->fieldOfficer()->create();
         $cluster = Cluster::factory()->create(['officer_id' => $officer->id]);
         $tunai = Customer::factory()->create(['cluster_id' => $cluster->id, 'billing_amount' => 100000]);
         $transfer = Customer::factory()->create(['cluster_id' => $cluster->id, 'billing_amount' => 150000]);
         Customer::factory()->create(['cluster_id' => $cluster->id, 'billing_amount' => 200000]);
-        // Cluster lain — tidak boleh ikut terhitung.
         Customer::factory()->create(['billing_amount' => 999000]);
 
         Transaction::factory()->create([
@@ -196,22 +203,76 @@ class MonthlyBillingPageTest extends TestCase
             'period' => now()->startOfMonth(),
             'amount' => 40000,
         ]);
+
+        return $cluster;
+    }
+
+    public function testTotalBillingChartShowsPaidVersusOutstanding(): void
+    {
+        $cluster = $this->makeClusterScenario();
+        $this->actingAs(User::factory()->admin()->create());
+
+        Livewire::test(MonthlyBillingChart::class, [
+            'pageFilters' => ['cluster_id' => $cluster->id],
+        ])
+            ->assertSuccessful()
+            // Data chart di-render sebagai JSON di atribut Alpine.
+            ->assertSee('250000')  // terbayar
+            ->assertSee('200000')  // belum dibayar
+            ->assertDontSee('999000');
+    }
+
+    public function testMethodChartSplitsCashAndTransfer(): void
+    {
+        $cluster = $this->makeClusterScenario();
+        $this->actingAs(User::factory()->admin()->create());
+
+        Livewire::test(MonthlyBillingMethodChart::class, [
+            'pageFilters' => ['cluster_id' => $cluster->id],
+        ])
+            ->assertSuccessful()
+            ->assertSee('100000')  // tunai
+            ->assertSee('150000')  // transfer
+            ->assertDontSee('999000');
+    }
+
+    public function testDepositChartShowsDepositedVersusNotDeposited(): void
+    {
+        $cluster = $this->makeClusterScenario();
         $this->actingAs(User::factory()->admin()->create());
 
         Livewire::test(MonthlyBillingDepositChart::class, [
             'pageFilters' => ['cluster_id' => $cluster->id],
         ])
             ->assertSuccessful()
-            // Data chart di-render sebagai JSON di atribut Alpine.
-            ->assertSee('450000')  // nominal tagihan
-            ->assertSee('250000')  // terbayar
-            ->assertSee('200000')  // belum dibayar
-            ->assertSee('100000')  // tunai
-            ->assertSee('150000')  // transfer
-            ->assertSee('300000')  // harus disetor
             ->assertSee('40000')   // sudah disetor
-            ->assertSee('260000')  // belum disetor
+            ->assertSee('260000')  // belum disetor (harus disetor 300rb − 40rb)
             ->assertDontSee('999000');
+    }
+
+    public function testSummaryShowsCommissionTotalForAdmin(): void
+    {
+        $recipient = CommissionRecipient::factory()->create(['commission_percent' => 10]);
+        $customer = Customer::factory()->create(['referral_id' => $recipient->id]);
+        Transaction::factory()->create([
+            'customer_id' => $customer->id,
+            'period' => now()->startOfMonth(),
+            'billed_amount' => 100_000,
+            'paid_amount' => 100_000,
+        ]);
+        $this->actingAs(User::factory()->admin()->create());
+
+        Livewire::test(MonthlyBillingSummary::class)
+            ->assertSee(__('Commission'))
+            ->assertSee('Rp 10.000');
+    }
+
+    public function testSummaryHidesCommissionFromFieldOfficer(): void
+    {
+        $this->actingAs(User::factory()->fieldOfficer()->create());
+
+        Livewire::test(MonthlyBillingSummary::class)
+            ->assertDontSee(__('Commission'));
     }
 
     public function testExportStreamsXlsxOfFilteredRows(): void

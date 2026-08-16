@@ -6,12 +6,15 @@ use App\Enums\RecipientType;
 use App\Filament\Resources\CommissionRecipients\CommissionRecipientResource;
 use App\Filament\Resources\CommissionRecipients\Pages\CreateCommissionRecipient;
 use App\Filament\Resources\CommissionRecipients\Pages\EditCommissionRecipient;
+use App\Filament\Resources\CommissionRecipients\RelationManagers\ReferredCustomersRelationManager;
 use App\Models\Cluster;
 use App\Models\CommissionRecipient;
 use App\Models\Customer;
 use App\Models\Setting;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -175,5 +178,75 @@ class CommissionRecipientModuleTest extends TestCase
         CommissionRecipient::factory()->inactive()->create();
 
         $this->assertSame(1, CommissionRecipient::active()->count());
+    }
+
+    public function testReferredCustomersPanelListsOnlyOwnReferrals(): void
+    {
+        $recipient = CommissionRecipient::factory()->create();
+        $mine = Customer::factory()->create(['referral_id' => $recipient->id]);
+        $other = Customer::factory()->create();
+        $this->actingAs(User::factory()->admin()->create());
+
+        // Panel numpang di halaman Edit — pastikan pendaftarannya tidak merusak halaman.
+        $this->get(CommissionRecipientResource::getUrl('edit', ['record' => $recipient]))->assertOk();
+
+        $this->relationManager($recipient)
+            ->assertCanSeeTableRecords([$mine])
+            ->assertCanNotSeeTableRecords([$other]);
+    }
+
+    public function testAdminCanDissociateReferredCustomerWithoutDeletingIt(): void
+    {
+        $recipient = CommissionRecipient::factory()->create();
+        $customer = Customer::factory()->create(['referral_id' => $recipient->id]);
+        $this->actingAs(User::factory()->admin()->create());
+
+        $this->relationManager($recipient)
+            ->callAction(TestAction::make('dissociate')->table($customer));
+
+        // Lepas kaitan, bukan hapus pelanggan.
+        $this->assertNull($customer->fresh()->referral_id);
+        $this->assertModelExists($customer);
+    }
+
+    public function testAdminCanAssociateCustomerAsReferral(): void
+    {
+        $recipient = CommissionRecipient::factory()->create();
+        $customer = Customer::factory()->create();
+        $this->actingAs(User::factory()->admin()->create());
+
+        $this->relationManager($recipient)
+            ->callAction(TestAction::make('associate')->table(), ['recordId' => $customer->id]);
+
+        $this->assertSame($recipient->id, $customer->fresh()->referral_id);
+    }
+
+    public function testAssociateOptionsSkipCustomersAlreadyReferredElsewhere(): void
+    {
+        $recipient = CommissionRecipient::factory()->create();
+        $mirrored = Customer::factory()->create();
+        $selfRecipient = CommissionRecipient::factory()->customerType($mirrored)->create();
+        $taken = Customer::factory()->create(['referral_id' => $selfRecipient->id]);
+        $free = Customer::factory()->create();
+        $this->actingAs(User::factory()->admin()->create());
+
+        $options = ReferredCustomersRelationManager::associateOptions($recipient)->pluck('id');
+
+        $this->assertTrue($options->contains($free->id));
+        $this->assertFalse($options->contains($taken->id));
+        // Penerima tipe Pelanggan tidak boleh mereferal dirinya sendiri.
+        $this->assertFalse(
+            ReferredCustomersRelationManager::associateOptions($selfRecipient)
+                ->pluck('id')
+                ->contains($mirrored->id)
+        );
+    }
+
+    private function relationManager(CommissionRecipient $recipient): Testable
+    {
+        return Livewire::test(ReferredCustomersRelationManager::class, [
+            'ownerRecord' => $recipient,
+            'pageClass' => EditCommissionRecipient::class,
+        ]);
     }
 }

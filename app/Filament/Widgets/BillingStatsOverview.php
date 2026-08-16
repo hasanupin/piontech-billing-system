@@ -67,6 +67,11 @@ class BillingStatsOverview extends StatsOverviewWidget
                 ->icon('heroicon-o-banknotes')
                 ->chart($this->sparkline('held_by_officers'))
                 ->color('warning'),
+            Stat::make(__('Total Deposited'), self::rupiah($summary['total_deposited']))
+                ->description(__('Received by admin'))
+                ->icon('heroicon-o-inbox-arrow-down')
+                ->chart($this->sparkline('total_deposited'))
+                ->color('success'),
         ];
     }
 

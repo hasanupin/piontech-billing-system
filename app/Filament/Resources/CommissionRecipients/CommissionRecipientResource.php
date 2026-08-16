@@ -6,6 +6,7 @@ use App\Enums\Role;
 use App\Filament\Resources\CommissionRecipients\Pages\CreateCommissionRecipient;
 use App\Filament\Resources\CommissionRecipients\Pages\EditCommissionRecipient;
 use App\Filament\Resources\CommissionRecipients\Pages\ListCommissionRecipients;
+use App\Filament\Resources\CommissionRecipients\RelationManagers\ReferredCustomersRelationManager;
 use App\Filament\Resources\CommissionRecipients\Schemas\CommissionRecipientForm;
 use App\Filament\Resources\CommissionRecipients\Tables\CommissionRecipientsTable;
 use App\Models\CommissionRecipient;
@@ -20,6 +21,8 @@ class CommissionRecipientResource extends Resource
     protected static ?string $model = CommissionRecipient::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserPlus;
+
+    protected static ?int $navigationSort = 4;
 
     protected static ?string $recordTitleAttribute = 'name';
 
@@ -51,6 +54,13 @@ class CommissionRecipientResource extends Resource
     public static function table(Table $table): Table
     {
         return CommissionRecipientsTable::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            ReferredCustomersRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

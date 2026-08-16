@@ -3,9 +3,12 @@
 namespace Tests\Feature;
 
 use App\Filament\Widgets\BillingStatsOverview;
+use App\Filament\Widgets\BusinessStatsOverview;
 use App\Filament\Widgets\DueTodayWidget;
 use App\Filament\Widgets\OfficerDepositWidget;
+use App\Filament\Widgets\RevenueTrendChart;
 use App\Models\Cluster;
+use App\Models\CommissionRecipient;
 use App\Models\Customer;
 use App\Models\OfficerDeposit;
 use App\Models\Transaction;
@@ -44,6 +47,25 @@ class DashboardWidgetTest extends TestCase
 
         Livewire::test(BillingStatsOverview::class)
             ->assertSee('Rp 1.500.000');
+    }
+
+    public function testStatsShowTotalDeposited(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+        $officer = User::factory()->fieldOfficer()->create();
+
+        Transaction::factory()->create(['officer_id' => $officer->id, 'paid_amount' => 1_000_000]);
+        OfficerDeposit::factory()->create([
+            'officer_id' => $officer->id,
+            'amount' => 400_000,
+            'period' => now()->startOfMonth(),
+        ]);
+
+        // Setoran yang sudah masuk ke admin, di samping kekurangan setornya (600rb).
+        Livewire::test(BillingStatsOverview::class)
+            ->assertSee(__('Total Deposited'))
+            ->assertSee('Rp 400.000')
+            ->assertSee('Rp 600.000');
     }
 
     public function testIsolirPelangganCountedInDitagih(): void
@@ -126,6 +148,47 @@ class DashboardWidgetTest extends TestCase
 
         // Sparkline 6 bulan menambah loop + pembagian; DB kosong harus tetap aman.
         Livewire::test(BillingStatsOverview::class)->assertOk();
+    }
+
+    public function testBusinessStatsShowCommissionAndCustomerMovement(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+
+        $recipient = CommissionRecipient::factory()->create(['commission_percent' => 10]);
+        $customer = Customer::factory()->create([
+            'referral_id' => $recipient->id,
+            'registered_at' => now(),
+        ]);
+        Transaction::factory()->create([
+            'customer_id' => $customer->id,
+            'billed_amount' => 300_000,
+            'paid_amount' => 300_000,
+        ]);
+
+        // Komisi 10% × 300rb = 30rb; 1 pelanggan baru bulan ini.
+        Livewire::test(BusinessStatsOverview::class)
+            ->assertSee('Rp 30.000')
+            ->assertSee(__('New Customers'));
+    }
+
+    public function testBusinessWidgetsHiddenFromFieldOfficer(): void
+    {
+        $this->actingAs(User::factory()->fieldOfficer()->create());
+
+        $this->assertFalse(BusinessStatsOverview::canView());
+        $this->assertFalse(RevenueTrendChart::canView());
+    }
+
+    public function testRevenueTrendChartCoversTwelveMonths(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+        Transaction::factory()->create(['paid_amount' => 500_000]);
+
+        $trend = Livewire::test(RevenueTrendChart::class)->instance()->trend();
+
+        $this->assertCount(12, $trend['labels']);
+        // Bulan terakhir = periode terpilih; tunai 500rb masuk di sana.
+        $this->assertSame(500_000.0, end($trend['cash']));
     }
 
     public function testDueTodayWidgetShowsUnpaidCustomersDueToday(): void

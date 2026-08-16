@@ -62,6 +62,12 @@ class OfficerDepositReport extends AbstractRangeReportPage
         return $rows;
     }
 
+    /** Satu baris per petugas — jumlahnya selalu muat satu layar. */
+    public function isPaginated(): bool
+    {
+        return false;
+    }
+
     protected function filenamePrefix(): string
     {
         return 'setoran';

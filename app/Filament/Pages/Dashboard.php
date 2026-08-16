@@ -3,10 +3,12 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Widgets\BillingStatsOverview;
+use App\Filament\Widgets\BusinessStatsOverview;
 use App\Filament\Widgets\DueTodayWidget;
 use App\Filament\Widgets\NetworkStatusStrip;
 use App\Filament\Widgets\OfficerDepositWidget;
 use App\Filament\Widgets\PaymentChartWidget;
+use App\Filament\Widgets\RevenueTrendChart;
 use Filament\Forms\Components\Select;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
@@ -55,6 +57,8 @@ class Dashboard extends BaseDashboard
         return [
             NetworkStatusStrip::class,
             BillingStatsOverview::class,
+            BusinessStatsOverview::class,
+            RevenueTrendChart::class,
             PaymentChartWidget::class,
             OfficerDepositWidget::class,
             DueTodayWidget::class,

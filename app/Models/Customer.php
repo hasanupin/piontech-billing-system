@@ -29,6 +29,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'billing_day',
     'status',
     'suspended_at',
+    'terminated_at',
     'registered_at',
     'notes',
 ])]
@@ -47,6 +48,23 @@ class Customer extends Model
                 app(ScopeService::class)->scopeCustomersForUser($query, $user);
             }
         });
+
+        // Tanggal isolir/berhenti dicatat di sini, bukan di quick action, supaya
+        // semua jalur tulis (form, import, seeder) ikut — dasar hitungan bulanan
+        // di Laporan Pelanggan. Nilai yang dikirim eksplisit tidak ditimpa.
+        static::saving(function (self $customer): void {
+            if (! $customer->isDirty('status')) {
+                return;
+            }
+
+            if (! $customer->isDirty('suspended_at')) {
+                $customer->suspended_at = $customer->status === CustomerStatus::Suspended ? now() : null;
+            }
+
+            if (! $customer->isDirty('terminated_at')) {
+                $customer->terminated_at = $customer->status === CustomerStatus::Terminated ? now() : null;
+            }
+        });
     }
 
     /**
@@ -59,6 +77,7 @@ class Customer extends Model
             'billing_amount' => 'decimal:2',
             'billing_day' => 'integer',
             'suspended_at' => 'date',
+            'terminated_at' => 'date',
             'registered_at' => 'date',
         ];
     }

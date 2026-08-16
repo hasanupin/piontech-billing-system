@@ -3,7 +3,10 @@
 namespace App\Filament\Resources\Transactions\Tables;
 
 use App\Enums\PaymentMethod;
+use App\Enums\Role;
 use App\Enums\TransactionStatus;
+use App\Models\Cluster;
+use App\Services\ScopeService;
 use Carbon\Carbon;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -52,35 +55,23 @@ class TransactionsTable
                     ->dateTime('d M Y H:i')
                     ->sortable(),
             ])
-            ->filtersLayout(FiltersLayout::AboveContent)
-            ->filtersFormColumns(3)
+            ->filtersLayout(FiltersLayout::AboveContentCollapsible)
+            // Satu kolom — semua filter tersusun ke bawah.
+            ->filtersFormColumns(1)
             ->filters([
-                // Quick filter — tombol toggle di atas table.
-                Filter::make('lunas')
-                    ->label(__('LUNAS'))
-                    ->toggle()
-                    ->query(fn (Builder $query): Builder => $query->where('status', TransactionStatus::Paid)),
-                Filter::make('tunai')
-                    ->label(__('TUNAI'))
-                    ->toggle()
-                    ->query(fn (Builder $query): Builder => $query->where('payment_method', PaymentMethod::Cash)),
-                Filter::make('transfer')
-                    ->label(__('TRANSFER'))
-                    ->toggle()
-                    ->query(fn (Builder $query): Builder => $query->where('payment_method', PaymentMethod::Transfer)),
-                // Periode bulan-tahun.
+                // Periode bulan-tahun — default bulan berjalan.
                 SelectFilter::make('period')
                     ->label(__('Period'))
                     ->options(self::periodOptions())
+                    ->default(now()->format('Y-m'))
                     ->query(fn (Builder $query, array $data): Builder => filled($data['value'] ?? null)
                         ? $query->whereDate('period', Carbon::parse($data['value'].'-01')->startOfMonth())
                         : $query),
-                // Rentang tanggal bayar.
+                // Rentang tanggal bayar — default 1 s/d akhir bulan berjalan.
                 Filter::make('paid_between')
-                    ->label(__('Paid Date Range'))
                     ->schema([
-                        DatePicker::make('from')->label(__('From')),
-                        DatePicker::make('until')->label(__('Until')),
+                        DatePicker::make('from')->label(__('Start Date'))->default(now()->startOfMonth()),
+                        DatePicker::make('until')->label(__('End Date'))->default(now()->endOfMonth()),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query
                         ->when($data['from'] ?? null, fn (Builder $q, $date) => $q->whereDate('paid_at', '>=', $date))
@@ -88,6 +79,25 @@ class TransactionsTable
                 SelectFilter::make('status')
                     ->label(__('Status'))
                     ->options(TransactionStatus::class),
+                SelectFilter::make('payment_method')
+                    ->label(__('Payment Method'))
+                    ->options(PaymentMethod::class),
+                SelectFilter::make('officer_id')
+                    ->label(__('Officer'))
+                    ->relationship('officer', 'name', fn (Builder $query): Builder => $query->where('role', Role::FieldOfficer))
+                    ->searchable()
+                    ->preload(),
+                // Cluster lewat relasi customer; opsi mengikuti scope role user.
+                SelectFilter::make('cluster')
+                    ->label(__('Cluster'))
+                    ->options(fn (): array => app(ScopeService::class)
+                        ->scopeClustersForUser(Cluster::query(), auth()->user())
+                        ->orderBy('name')
+                        ->pluck('name', 'id')
+                        ->all())
+                    ->query(fn (Builder $query, array $data): Builder => filled($data['value'] ?? null)
+                        ? $query->whereHas('customer', fn (Builder $q) => $q->where('cluster_id', $data['value']))
+                        : $query),
             ])
             ->recordActions([
                 EditAction::make(),

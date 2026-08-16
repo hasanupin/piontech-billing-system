@@ -90,6 +90,18 @@ class CommissionRecipient extends Model
         ));
     }
 
+    /**
+     * Estimasi komisi: tagihan pelanggan referal yang belum lunas × persentase.
+     * estimated_base ikut sumber yang sama dengan commission_amount.
+     */
+    protected function estimatedCommissionAmount(): Attribute
+    {
+        return Attribute::get(fn (): float => round(
+            (float) ($this->estimated_base ?? 0) * (float) $this->commission_percent / 100,
+            2,
+        ));
+    }
+
     protected function displayName(): Attribute
     {
         return Attribute::get(fn (): ?string => $this->mirror('name'));

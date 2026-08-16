@@ -8,6 +8,7 @@ use App\Filament\Actions\ExportTableAction;
 use App\Filament\Resources\Transactions\TransactionResource;
 use App\Filament\Widgets\MonthlyBillingChart;
 use App\Filament\Widgets\MonthlyBillingDepositChart;
+use App\Filament\Widgets\MonthlyBillingMethodChart;
 use App\Filament\Widgets\MonthlyBillingSummary;
 use App\Models\Cluster;
 use App\Models\Customer;
@@ -40,6 +41,8 @@ class MonthlyBilling extends Page implements HasTable
     }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
+
+    protected static ?int $navigationSort = 1;
 
     public static function getNavigationLabel(): string
     {
@@ -124,15 +127,16 @@ class MonthlyBilling extends Page implements HasTable
     }
 
     /**
-     * Urutan konten: filter → chart + ringkasan → tabel.
+     * Urutan konten: filter → kartu ringkasan → 3 pie → tabel.
      */
     public function content(Schema $schema): Schema
     {
         return $schema->components([
             EmbeddedSchema::make('filtersForm'),
             Grid::make(3)->schema(fn (): array => $this->getWidgetsSchemaComponents([
-                MonthlyBillingChart::class,
                 MonthlyBillingSummary::class,
+                MonthlyBillingChart::class,
+                MonthlyBillingMethodChart::class,
                 MonthlyBillingDepositChart::class,
             ])),
             EmbeddedTable::make(),

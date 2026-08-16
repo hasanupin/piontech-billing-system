@@ -78,9 +78,9 @@ class CustomersTable
                     ->visible(fn (Customer $record): bool => $record->status === CustomerStatus::Active
                         && (auth()->user()?->isRole(Role::SuperAdmin, Role::Admin) ?? false))
                     ->requiresConfirmation()
+                    // Tanggal isolir di-stamp Customer::booted().
                     ->action(fn (Customer $record) => $record->update([
                         'status' => CustomerStatus::Suspended,
-                        'suspended_at' => now()->toDateString(),
                     ])),
                 Action::make('restore_active')
                     ->label(__('Restore Active'))
@@ -91,7 +91,6 @@ class CustomersTable
                     ->requiresConfirmation()
                     ->action(fn (Customer $record) => $record->update([
                         'status' => CustomerStatus::Active,
-                        'suspended_at' => null,
                     ])),
                 EditAction::make(),
                 DeleteAction::make(),

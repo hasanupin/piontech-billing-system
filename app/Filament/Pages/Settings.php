@@ -27,6 +27,8 @@ class Settings extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
 
+    protected static ?int $navigationSort = 5;
+
     /** @var array<string, mixed>|null */
     public ?array $data = [];
 
