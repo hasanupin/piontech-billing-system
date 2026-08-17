@@ -7,10 +7,22 @@ use App\Filament\Resources\Transactions\TransactionResource;
 use App\Models\Transaction;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
 
 class ListTransactions extends ListRecords
 {
     protected static string $resource = TransactionResource::class;
+
+    /**
+     * Record yang baru dibuat dipin ke baris pertama (sort tabel jadi
+     * tie-breaker). ?created= hanya ada di GET awal, jadi pin otomatis lepas
+     * begitu user menyentuh tabel.
+     */
+    protected function getTableQuery(): Builder
+    {
+        return parent::getTableQuery()
+            ->when(request()->query('created'), fn (Builder $query, string $id) => $query->orderByRaw('id = ? desc', [$id]));
+    }
 
     protected function getHeaderActions(): array
     {

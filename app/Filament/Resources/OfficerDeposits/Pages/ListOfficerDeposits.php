@@ -61,7 +61,12 @@ class ListOfficerDeposits extends ListRecords
     /** Baris tabel ikut periode terpilih; ListRecords memanggil method ini di makeTable(). */
     protected function getTableQuery(): Builder
     {
-        return parent::getTableQuery()->whereDate('period', $this->periodStart());
+        return parent::getTableQuery()
+            ->whereDate('period', $this->periodStart())
+            // Record yang baru dibuat dipin ke baris pertama (sort tabel jadi
+            // tie-breaker). ?created= hanya ada di GET awal, jadi pin otomatis
+            // lepas begitu user menyentuh tabel.
+            ->when(request()->query('created'), fn (Builder $query, string $id) => $query->orderByRaw('id = ? desc', [$id]));
     }
 
     protected function getHeaderActions(): array

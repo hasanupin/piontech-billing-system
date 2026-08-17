@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Services\ScopeService;
 use Filament\Forms\Components\Select;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
@@ -146,12 +147,84 @@ class CustomerModuleTest extends TestCase
                 'registered_at' => now()->toDateString(),
             ])
             ->call('create')
-            ->assertHasNoFormErrors();
+            ->assertHasNoErrors();
 
         $customer = Customer::where('name', 'Pelanggan Lapangan')->firstOrFail();
         $this->assertSame($cluster->id, $customer->cluster_id);
         // Field status disabled untuk petugas → jatuh ke default kolom.
         $this->assertSame(CustomerStatus::Active, $customer->status);
+    }
+
+    public function testHidesCreateAnotherOnCreatePage(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+
+        // Pilihan "lanjut atau berhenti" dipindah ke popup setelah simpan.
+        $this->assertFalse(
+            Livewire::test(CreateCustomer::class)->instance()->canCreateAnother(),
+        );
+    }
+
+    public function testShowsPromptModalAfterCreate(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+
+        $this->createCustomer()
+            // assertHasNoFormErrors() tidak bisa dipakai setelah popup pasca-simpan
+            // termount: helper-nya mencari schema milik action, yang memang tidak ada.
+            ->assertHasNoErrors()
+            ->assertNoRedirect()
+            ->assertActionMounted('createdPrompt');
+
+        // Record tetap tersimpan walau redirect ditahan.
+        $this->assertSame(1, Customer::count());
+    }
+
+    public function testPromptBackToListRedirectsToPinnedList(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+
+        $this->createCustomer()
+            ->callMountedAction()
+            ->assertRedirect(CustomerResource::getUrl('index', [
+                'created' => Customer::first()->getKey(),
+            ]));
+    }
+
+    public function testPromptCreateAnotherRedirectsToBlankForm(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+
+        $this->createCustomer()
+            ->callMountedAction(['another' => true])
+            ->assertRedirect(CustomerResource::getUrl('create'));
+    }
+
+    public function testPinsCreatedCustomerToFirstRow(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+
+        // Tanpa defaultSort tabel ini urut ULID naik — record baru justru di bawah.
+        $first = Customer::factory()->create();
+        $pinned = Customer::factory()->create();
+
+        Livewire::withQueryParams(['created' => $pinned->getKey()])
+            ->test(ListCustomers::class)
+            ->assertCanSeeTableRecords([$pinned, $first], inOrder: true);
+    }
+
+    private function createCustomer(): Testable
+    {
+        $cluster = Cluster::factory()->create();
+
+        return Livewire::test(CreateCustomer::class)
+            ->fillForm([
+                'name' => 'Pelanggan Baru',
+                'cluster_id' => $cluster->id,
+                'billing_amount' => '150000',
+                'billing_day' => 5,
+            ])
+            ->call('create');
     }
 
     public function testFieldOfficerCannotCreateCustomerInOtherOfficerCluster(): void
@@ -308,7 +381,7 @@ class CustomerModuleTest extends TestCase
                 'billing_day' => 5,
             ])
             ->call('create')
-            ->assertHasNoFormErrors();
+            ->assertHasNoErrors();
 
         $this->assertNull(Customer::firstWhere('name', 'Tanpa Referal')->referral_id);
     }
@@ -328,7 +401,7 @@ class CustomerModuleTest extends TestCase
                 'referral_id' => $recipient->id,
             ])
             ->call('create')
-            ->assertHasNoFormErrors();
+            ->assertHasNoErrors();
 
         $this->assertSame(
             $recipient->id,

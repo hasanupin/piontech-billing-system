@@ -14,6 +14,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Services\BillingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -118,11 +119,12 @@ class TransactionModuleTest extends TestCase
         );
     }
 
-    public function testShowsCreateAnotherForBlankCreate(): void
+    public function testHidesCreateAnotherOnBlankCreate(): void
     {
         $this->actingAs(User::factory()->admin()->create());
 
-        $this->assertTrue(
+        // Pilihan "lanjut atau berhenti" dipindah ke popup setelah simpan.
+        $this->assertFalse(
             Livewire::test(CreateTransaction::class)->instance()->canCreateAnother(),
         );
     }
@@ -138,18 +140,70 @@ class TransactionModuleTest extends TestCase
             ->fillForm(['officer_id' => $officer->id])
             ->call('create')
             ->assertHasNoFormErrors()
+            // Alur "Catat Pembayaran" mencatat satu tagihan spesifik — tanpa popup.
+            ->assertActionNotMounted()
             ->assertRedirect(MonthlyBilling::getUrl());
     }
 
-    public function testKeepsDefaultRedirectForBlankCreate(): void
+    public function testShowsPromptModalAfterBlankCreate(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+
+        $this->createBlankTransaction()
+            ->assertHasNoErrors()
+            ->assertNoRedirect()
+            ->assertActionMounted('createdPrompt');
+
+        // Record tetap tersimpan walau redirect ditahan.
+        $this->assertSame(1, Transaction::count());
+    }
+
+    public function testPromptBackToListRedirectsToPinnedList(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+
+        $test = $this->createBlankTransaction()->callMountedAction();
+
+        $test->assertRedirect(TransactionResource::getUrl('index', [
+            'created' => Transaction::first()->getKey(),
+        ]));
+    }
+
+    public function testPromptCreateAnotherRedirectsToBlankForm(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+
+        $this->createBlankTransaction()
+            ->callMountedAction(['another' => true])
+            ->assertRedirect(TransactionResource::getUrl('create'));
+    }
+
+    public function testPinsCreatedRecordToFirstRow(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+
+        // Urutan default paid_at desc menaruh $newest di atas; pin harus menang.
+        $newest = Transaction::factory()->create([
+            'period' => now()->startOfMonth(),
+            'paid_at' => now(),
+        ]);
+        $pinned = Transaction::factory()->create([
+            'period' => now()->startOfMonth(),
+            'paid_at' => now()->subDay(),
+        ]);
+
+        Livewire::withQueryParams(['created' => $pinned->getKey()])
+            ->test(ListTransactions::class)
+            ->assertCanSeeTableRecords([$pinned, $newest], inOrder: true);
+    }
+
+    /** Simpan satu transaksi lewat form kosong (tanpa ?customer_id=...). */
+    private function createBlankTransaction(): Testable
     {
         $officer = User::factory()->fieldOfficer()->create();
         $customer = Customer::factory()->create();
-        $this->actingAs(User::factory()->admin()->create());
 
-        // Tanpa customer_id perilaku bawaan Filament dipertahankan:
-        // lanjut ke halaman edit record yang baru dibuat.
-        Livewire::test(CreateTransaction::class)
+        return Livewire::test(CreateTransaction::class)
             ->fillForm([
                 'customer_id' => $customer->id,
                 'payment_method' => PaymentMethod::Cash->value,
@@ -157,9 +211,7 @@ class TransactionModuleTest extends TestCase
                 'billed_amount' => '100000',
                 'paid_amount' => '100000',
             ])
-            ->call('create')
-            ->assertHasNoFormErrors()
-            ->assertRedirect(TransactionResource::getUrl('edit', ['record' => Transaction::first()]));
+            ->call('create');
     }
 
     public function testPrefillsPaidAmountWhenCustomerSelectedManually(): void
@@ -188,7 +240,9 @@ class TransactionModuleTest extends TestCase
                 'paid_amount' => '100000',
             ])
             ->call('create')
-            ->assertHasNoFormErrors();
+            // assertHasNoFormErrors() tidak bisa dipakai setelah popup pasca-simpan
+            // termount: helper-nya mencari schema milik action, yang memang tidak ada.
+            ->assertHasNoErrors();
 
         $this->assertSame('100000.00', Transaction::first()->billed_amount);
     }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Transactions\Pages;
 
+use App\Filament\Concerns\PromptsAfterCreate;
 use App\Filament\Pages\MonthlyBilling;
 use App\Filament\Resources\Transactions\TransactionResource;
 use Carbon\Carbon;
@@ -9,6 +10,8 @@ use Filament\Resources\Pages\CreateRecord;
 
 class CreateTransaction extends CreateRecord
 {
+    use PromptsAfterCreate;
+
     protected static string $resource = TransactionResource::class;
 
     /**
@@ -27,10 +30,11 @@ class CreateTransaction extends CreateRecord
     }
 
     /**
-     * Datang dari "Catat Pembayaran" = mencatat satu tagihan spesifik,
-     * bukan entri massal — "Buat & buat lainnya" tidak relevan di sana.
+     * Datang dari "Catat Pembayaran" = mencatat satu tagihan spesifik, bukan
+     * entri massal — popup "buat lagi / kembali" tidak relevan di sana; alurnya
+     * langsung balik ke Tagihan Bulanan lewat getRedirectUrl().
      */
-    public function canCreateAnother(): bool
+    protected function shouldPromptAfterCreate(): bool
     {
         return blank($this->customerId);
     }

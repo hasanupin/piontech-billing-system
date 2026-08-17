@@ -13,6 +13,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Services\BillingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -62,10 +63,82 @@ class OfficerDepositModuleTest extends TestCase
                 'received_by' => $admin->id,
             ])
             ->call('create')
-            ->assertHasNoFormErrors();
+            ->assertHasNoErrors();
 
         $deposit = OfficerDeposit::first();
         $this->assertSame($officer->id, $deposit->officer_id);
+    }
+
+    public function testHidesCreateAnotherOnCreatePage(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+
+        // Pilihan "lanjut atau berhenti" dipindah ke popup setelah simpan.
+        $this->assertFalse(
+            Livewire::test(CreateOfficerDeposit::class)->instance()->canCreateAnother(),
+        );
+    }
+
+    public function testShowsPromptModalAfterCreate(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+
+        $this->createDeposit()
+            // assertHasNoFormErrors() tidak bisa dipakai setelah popup pasca-simpan
+            // termount: helper-nya mencari schema milik action, yang memang tidak ada.
+            ->assertHasNoErrors()
+            ->assertNoRedirect()
+            ->assertActionMounted('createdPrompt');
+
+        // Record tetap tersimpan walau redirect ditahan.
+        $this->assertSame(1, OfficerDeposit::count());
+    }
+
+    public function testPromptBackToListRedirectsToPinnedList(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+
+        $this->createDeposit()
+            ->callMountedAction()
+            ->assertRedirect(OfficerDepositResource::getUrl('index', [
+                'created' => OfficerDeposit::first()->getKey(),
+            ]));
+    }
+
+    public function testPromptCreateAnotherRedirectsToBlankForm(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+
+        $this->createDeposit()
+            ->callMountedAction(['another' => true])
+            ->assertRedirect(OfficerDepositResource::getUrl('create'));
+    }
+
+    public function testPinsCreatedDepositToFirstRow(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+
+        // Urutan default deposited_at desc menaruh $newest di atas; pin harus menang.
+        $newest = OfficerDeposit::factory()->create(['deposited_at' => now()]);
+        $pinned = OfficerDeposit::factory()->create(['deposited_at' => now()->subDay()]);
+
+        Livewire::withQueryParams(['created' => $pinned->getKey()])
+            ->test(ListOfficerDeposits::class)
+            ->assertCanSeeTableRecords([$pinned, $newest], inOrder: true);
+    }
+
+    private function createDeposit(): Testable
+    {
+        $officer = User::factory()->fieldOfficer()->create();
+        $admin = User::factory()->admin()->create();
+
+        return Livewire::test(CreateOfficerDeposit::class)
+            ->fillForm([
+                'officer_id' => $officer->id,
+                'amount' => '500000',
+                'received_by' => $admin->id,
+            ])
+            ->call('create');
     }
 
     public function testFieldOfficerCanAccessDepositResource(): void
