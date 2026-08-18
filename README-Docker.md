@@ -105,6 +105,54 @@ php artisan serve
 
 `.env.example` sudah menunjuk ke `127.0.0.1:3309` (MySQL) dan `127.0.0.1:6382` (Redis), jadi tidak perlu instalasi database lokal terpisah.
 
+## Email & Queue Worker (wajib untuk fitur Lupa Password)
+
+Email reset password dikirim sebagai queued notification (`QUEUE_CONNECTION=database`),
+jadi **tanpa worker email tidak akan pernah terkirim**.
+
+1. Isi SMTP asli di `.env` produksi — `MAIL_MAILER=smtp` beserta `MAIL_HOST`, `MAIL_PORT`,
+   `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME`.
+2. Pastikan **`APP_URL`** berisi domain produksi — tautan reset dibangun dari nilai ini;
+   kalau masih `http://localhost`, link di email mati.
+3. Pasang worker sekali di server (`/etc/supervisor/conf.d/piontech-queue.conf`):
+
+	```ini
+	[program:piontech-queue]
+	command=php /var/www/html/piontech-billing-system/artisan queue:work --tries=3 --sleep=3 --max-time=3600
+	directory=/var/www/html/piontech-billing-system
+	user=www-data
+	autostart=true
+	autorestart=true
+	redirect_stderr=true
+	stdout_logfile=/var/www/html/piontech-billing-system/storage/logs/queue.log
+	```
+
+	```bash
+	sudo supervisorctl reread && sudo supervisorctl update && sudo supervisorctl start piontech-queue
+	```
+
+	Deploy sudah menjalankan `php artisan queue:restart` supaya worker memuat kode baru.
+
+Uji lokal tanpa SMTP: `MAIL_MAILER=log` + `QUEUE_CONNECTION=sync`, link reset muncul di
+`storage/logs/laravel.log`.
+
+## Cron Scheduler (wajib untuk retensi Audit Log)
+
+Audit Log menyimpan jejak aktivitas 6 bulan (`AuditLog::RETENTION_MONTHS`) lalu dibersihkan
+`model:prune` yang dijadwalkan harian di `routes/console.php`. **Tanpa cron tabelnya tidak
+pernah dipangkas.** Pasang sekali di server:
+
+```bash
+sudo crontab -u www-data -e
+```
+
+```cron
+* * * * * cd /var/www/html/piontech-billing-system && php artisan schedule:run >> /dev/null 2>&1
+```
+
+Cek manual tanpa menunggu cron: `php artisan schedule:run` atau langsung
+`php artisan model:prune --model="App\Models\AuditLog"`.
+
 ## Troubleshooting
 
 - Rebuild containers:

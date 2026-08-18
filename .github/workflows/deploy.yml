@@ -51,3 +51,11 @@ jobs:
         run: |
           cd /var/www/html/piontech-billing-system
           sudo php artisan optimize
+
+      # Email lupa password dikirim lewat queue (ShouldQueue). Worker lama masih
+      # memegang kode versi sebelumnya — suruh berhenti supaya supervisor
+      # menghidupkannya lagi dengan kode baru.
+      - name: Restart queue worker
+        run: |
+          cd /var/www/html/piontech-billing-system
+          sudo php artisan queue:restart

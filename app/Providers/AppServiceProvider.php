@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Services\AuditService;
 use App\Services\BillingService;
 use App\Services\ScopeService;
 use Filament\Tables\Table;
@@ -18,6 +19,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ScopeService::class);
         $this->app->singleton(BillingService::class);
+        $this->app->singleton(AuditService::class);
     }
 
     /**
@@ -28,6 +30,9 @@ class AppServiceProvider extends ServiceProvider
         // Super admin (CEO) punya akses penuh ke semua fitur tanpa terkecuali.
         // Return null agar role lain jatuh ke policy masing-masing.
         Gate::before(fn (User $user) => $user->isSuperAdmin() ? true : null);
+
+        // Sadapan audit: wildcard event Eloquent + Login/Logout.
+        app(AuditService::class)->listen();
 
         // Default pagination semua table: 20 per halaman, dengan opsi "Semua".
         Table::configureUsing(function (Table $table): void {
