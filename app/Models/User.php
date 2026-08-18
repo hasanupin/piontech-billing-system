@@ -78,6 +78,11 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(OfficerDeposit::class, 'officer_id');
     }
 
+    public function auditLogs(): HasMany
+    {
+        return $this->hasMany(AuditLog::class, 'user_id');
+    }
+
     // --- Role Helpers ---
 
     public function isRole(Role ...$roles): bool

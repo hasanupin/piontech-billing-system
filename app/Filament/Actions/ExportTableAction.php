@@ -2,8 +2,10 @@
 
 namespace App\Filament\Actions;
 
+use App\Enums\AuditEvent;
 use App\Enums\Role;
 use App\Exports\Xlsx;
+use App\Services\AuditService;
 use Closure;
 use Filament\Actions\Action;
 use Filament\Tables\Contracts\HasTable;
@@ -28,6 +30,9 @@ class ExportTableAction
             ->color('gray')
             ->visible(fn (): bool => auth()->user()?->isRole(Role::SuperAdmin, Role::Admin) ?? false)
             ->action(function (HasTable $livewire) use ($filenamePrefix, $headings, $row) {
+                // Satu baris di sini menutup semua call site export, sekarang & nanti.
+                app(AuditService::class)->record(AuditEvent::Exported, label: $filenamePrefix);
+
                 $rows = [$headings];
 
                 // cursor(): export bisa ribuan baris, jangan tahan semua di memori.

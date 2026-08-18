@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Dashboard;
+use App\Http\Middleware\LogPageVisit;
 use App\Http\Middleware\SetLocale;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
@@ -30,6 +31,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->passwordReset()
             ->brandName('Piontech Billing System')
             ->brandLogo(fn (): View => view('filament.brand'))
             ->darkModeBrandLogo(fn (): View => view('filament.brand'))
@@ -115,6 +117,9 @@ class AdminPanelProvider extends PanelProvider
             )
             ->authMiddleware([
                 Authenticate::class,
+                // Di authMiddleware, bukan middleware(): butuh user yang sudah login
+                // dan sengaja tidak mencatat halaman login/reset password.
+                LogPageVisit::class,
             ]);
     }
 }
