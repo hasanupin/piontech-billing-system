@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panduan Admin Penagihan — Piontech Billing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='5' cy='19' r='2.5' fill='%230e7490'/%3E%3Cpath d='M11.5 19a6.5 6.5 0 0 0-6.5-6.5' stroke='%230e7490' stroke-width='2.2' fill='none'/%3E%3Cpath d='M17 19A12 12 0 0 0 5 7' stroke='%230e7490' stroke-width='2.2' fill='none' opacity='.6'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/guide.css">
+</head>
+<body>
+
+<header class="topbar">
+    <a class="brand" href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="5" cy="19" r="2.5" fill="currentColor"/>
+            <path d="M11.5 19a6.5 6.5 0 0 0-6.5-6.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M17 19A12 12 0 0 0 5 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" opacity=".7"/>
+            <path d="M22.5 19A17.5 17.5 0 0 0 5 1.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" opacity=".4"/>
+        </svg>
+        <span>PIONTECH<small>Panduan Pengguna</small></span>
+    </a>
+    <nav class="topnav">
+        <a href="index.html">Ringkasan</a>
+        <a href="ceo.html">CEO</a>
+        <a href="admin.html" aria-current="page">Admin Penagihan</a>
+        <a href="petugas.html">Petugas Lapangan</a>
+    </nav>
+</header>
+
+<div class="layout">
+    <aside class="toc">
+        <h2>Isi Panduan</h2>
+        <ol>
+            <li><a href="#tugas">Tugas Anda</a></li>
+            <li><a href="#harian">Alur kerja harian</a></li>
+            <li><a href="#menu">Peta menu</a></li>
+            <li><a href="#dashboard">Dashboard</a></li>
+            <li><a href="#tagihan">Tagihan Bulanan</a></li>
+            <li><a href="#pelanggan">Data Pelanggan</a></li>
+            <li><a href="#isolir">Isolir &amp; pulihkan</a></li>
+            <li><a href="#import">Import &amp; export Excel</a></li>
+            <li><a href="#transaksi">Transaksi</a></li>
+            <li><a href="#setoran">Setoran Petugas</a></li>
+            <li><a href="#komisi">Komisi</a></li>
+            <li><a href="#paket">Master Paket</a></li>
+            <li><a href="#cluster">Master Cluster</a></li>
+            <li><a href="#penerima">Penerima Komisi</a></li>
+            <li><a href="#laporan">Laporan</a></li>
+            <li><a href="#masalah">Kalau ada masalah</a></li>
+        </ol>
+    </aside>
+
+    <main>
+        <span class="eyebrow">Admin Penagihan</span>
+        <h1>Panduan Admin Penagihan</h1>
+        <p class="lede">
+            Anda memegang operasional harian: memastikan setiap pelanggan tertagih, setiap
+            pembayaran tercatat, setiap setoran petugas masuk, dan laporan siap saat diminta.
+        </p>
+
+        <h2 id="tugas">Tugas Anda</h2>
+        <div class="cards">
+            <div class="card">
+                <h3>Wewenang Anda</h3>
+                <p>
+                    Seluruh menu Penagihan, Laporan, dan Master Data — termasuk mengisolir pelanggan,
+                    mengubah dan menghapus transaksi, mencatat setoran, serta import &amp; export Excel.
+                </p>
+            </div>
+            <div class="card">
+                <h3>Khusus CEO</h3>
+                <p>
+                    Tiga menu tidak tersedia untuk Anda: <strong>Pengguna</strong> (akun),
+                    <strong>Pengaturan</strong>, dan <strong>Log Aktivitas</strong>. Bila membutuhkannya,
+                    hubungi CEO.
+                </p>
+            </div>
+        </div>
+
+        <figure>
+            <img src="screenshots/menu-admin.png" alt="Menu samping admin: grup Penagihan, Laporan, dan Master Data tanpa menu Pengguna, Pengaturan, dan Log Aktivitas">
+            <figcaption>Menu admin — tanpa Pengguna, Pengaturan, dan Log Aktivitas.</figcaption>
+        </figure>
+
+        <h2 id="harian">Alur kerja harian</h2>
+        <div class="chain">
+            <div class="link">
+                <span class="n">PAGI</span>
+                <h4>Cek Dashboard</h4>
+                <p>Lihat tingkat penagihan dan kekurangan setor.</p>
+            </div>
+            <div class="link">
+                <span class="n">SIANG</span>
+                <h4>Catat transfer masuk</h4>
+                <p>Cocokkan mutasi rekening, catat sebagai transaksi Transfer.</p>
+            </div>
+            <div class="link">
+                <span class="n">SORE</span>
+                <h4>Terima setoran petugas</h4>
+                <p>Hitung uang, lalu catat di menu Setoran Petugas.</p>
+            </div>
+            <div class="link">
+                <span class="n">AKHIR BULAN</span>
+                <h4>Isolir &amp; laporan</h4>
+                <p>Isolir penunggak, tarik rekap dan laporan tunggakan.</p>
+            </div>
+        </div>
+
+        <h2 id="menu">Peta menu</h2>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Grup</th><th>Menu</th><th>Untuk apa</th></tr></thead>
+                <tbody>
+                    <tr><td rowspan="5">Penagihan</td><td>Tagihan Bulanan</td><td>Daftar siapa yang harus ditagih bulan ini.</td></tr>
+                    <tr><td>Data Pelanggan</td><td>Induk data pelanggan.</td></tr>
+                    <tr><td>Setoran Petugas</td><td>Mencatat uang tunai yang disetor petugas.</td></tr>
+                    <tr><td>Transaksi</td><td>Seluruh catatan pembayaran.</td></tr>
+                    <tr><td>Komisi</td><td>Hitungan komisi referal per periode.</td></tr>
+                    <tr><td rowspan="2">Laporan</td><td>6 laporan</td><td>Rekap, setoran, tunggakan, komisi, per cluster, pertumbuhan pelanggan.</td></tr>
+                    <tr><td colspan="2" class="muted">Semua bisa diunduh sebagai Excel, kecuali Rekap Pembayaran (hanya dilihat).</td></tr>
+                    <tr><td rowspan="3">Master Data</td><td>Paket</td><td>Daftar paket internet &amp; harganya.</td></tr>
+                    <tr><td>Cluster</td><td>Wilayah penagihan &amp; petugas penanggung jawab.</td></tr>
+                    <tr><td>Penerima Komisi</td><td>Pihak yang berhak atas komisi referal.</td></tr>
+                    <tr><td>Bantuan</td><td>Panduan Pengguna</td><td>Membuka panduan ini di tab baru.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2 id="dashboard">Dashboard</h2>
+        <p>Ringkasan kondisi bulan berjalan. Ganti <strong>Periode</strong> di atas untuk melihat bulan lain.</p>
+
+        <figure>
+            <img src="screenshots/dashboard-admin.png" alt="Dashboard dengan strip status jaringan, kartu statistik, dan grafik">
+            <figcaption>Dashboard admin.</figcaption>
+        </figure>
+
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Kartu</th><th>Artinya</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>Status Jaringan</strong></td><td>Ringkasan cepat: jumlah Aktif, Isolir, jatuh tempo hari ini, dan kekurangan setor, plus tingkat penagihan bulan ini.</td></tr>
+                    <tr><td><strong>Pelanggan Ditagih</strong></td><td>Pelanggan yang ditagih bulan ini (Aktif + Isolir). Pelanggan Berhenti tidak dihitung.</td></tr>
+                    <tr><td><strong>Lunas</strong> / <strong>Belum Bayar</strong></td><td>Jumlah dan persentase pelanggan yang sudah dan belum membayar.</td></tr>
+                    <tr><td><strong>Masuk via Transfer</strong></td><td>Uang yang langsung masuk rekening kantor.</td></tr>
+                    <tr><td><strong>Kekurangan Setor</strong></td><td>Uang tunai yang masih dipegang petugas. <strong>Angka ini yang perlu Anda kejar setiap sore.</strong></td></tr>
+                    <tr><td><strong>Total Setoran</strong></td><td>Uang tunai yang sudah Anda terima dari petugas.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2 id="tagihan">Tagihan Bulanan</h2>
+        <p>
+            Daftar kerja bulanan: siapa yang harus ditagih, siapa yang sudah bayar. Berbeda dari menu
+            Transaksi, di sini pelanggan yang <em>belum</em> membayar pun ikut tampil.
+        </p>
+
+        <figure>
+            <img src="screenshots/tagihan-bulanan.png" alt="Halaman Tagihan Bulanan dengan filter periode, kartu ringkasan, diagram lingkaran, dan tabel pelanggan">
+            <figcaption>Tagihan Bulanan: filter di atas menggerakkan kartu, diagram, dan tabel sekaligus.</figcaption>
+        </figure>
+
+        <ol class="steps">
+            <li>Pilih <strong>Periode</strong> yang ingin dikerjakan.</li>
+            <li>Pilih <strong>Cluster</strong> untuk fokus ke wilayah tertentu.</li>
+            <li>Pilih <strong>Status Bayar</strong> → <em>Belum Bayar</em> untuk melihat sisa tagihan.</li>
+            <li>Gunakan tombol pada tiap baris: <strong>Foto Rumah</strong>, <strong>Cek Lokasi</strong>, atau <strong>Catat Pembayaran</strong>.</li>
+        </ol>
+
+        <figure>
+            <img src="screenshots/tagihan-bulanan-foto-rumah.png" alt="Jendela menampilkan foto rumah pelanggan">
+            <figcaption>Foto rumah membantu memastikan alamat sebelum petugas berangkat.</figcaption>
+        </figure>
+
+        <div class="note">
+            <strong>Kartu Komisi mengabaikan filter cluster</strong>
+            Kartu <strong>Komisi</strong> selalu menampilkan total seluruh cluster, karena komisi
+            dihitung per penerima, bukan per wilayah. Ini disengaja.
+        </div>
+
+        <h2 id="pelanggan">Data Pelanggan</h2>
+        <p>Induk seluruh data. Setiap pelanggan wajib punya cluster dan nominal tagihan.</p>
+
+        <figure>
+            <img src="screenshots/pelanggan-list.png" alt="Daftar pelanggan dengan kolom nama, paket, nominal, alamat, petugas, dan status">
+            <figcaption>Data Pelanggan.</figcaption>
+        </figure>
+
+        <h3>Menambah pelanggan</h3>
+        <figure>
+            <img src="screenshots/pelanggan-form.png" alt="Form pelanggan dengan bagian Identitas, Penugasan dan Paket, Lokasi, dan Status">
+            <figcaption>Form pelanggan, terbagi empat bagian.</figcaption>
+        </figure>
+
+        <ol class="steps">
+            <li><strong>Identitas</strong> — Nama (wajib), Nama Lengkap, No. WhatsApp tanpa angka 0 di depan.</li>
+            <li><strong>Penugasan &amp; Paket</strong> — pilih <strong>Cluster</strong> (wajib) dan <strong>Paket</strong>; Nominal Tagihan terisi otomatis dan tetap bisa diubah.</li>
+            <li><strong>Tgl Tagih</strong> — tanggal 1–31, menentukan kapan pelanggan muncul di daftar jatuh tempo petugas.</li>
+            <li><strong>Referal</strong> — isi bila pelanggan ini datang lewat program referal.</li>
+            <li><strong>Lokasi</strong> — alamat, tautan Maps, dan foto rumah.</li>
+            <li><strong>Status</strong> — biarkan Aktif untuk pelanggan baru.</li>
+            <li>Tekan <strong>Buat</strong>.</li>
+        </ol>
+
+        <div class="note">
+            <strong>Mengubah nominal = otomatis jadi paket Custom</strong>
+            Bila Anda mengetik nominal yang berbeda dari harga paket, sistem otomatis memindahkan
+            pelanggan itu ke paket <strong>Custom</strong>. Harga paket aslinya tidak ikut berubah.
+        </div>
+
+        <h2 id="isolir">Isolir &amp; pulihkan</h2>
+        <p>
+            Untuk pelanggan yang menunggak, gunakan tombol <strong>Tandai ISOLIR</strong> pada baris
+            pelanggan. Untuk mengaktifkannya kembali, gunakan <strong>Pulihkan Aktif</strong>.
+        </p>
+
+        <figure>
+            <img src="screenshots/pelanggan-isolir.png" alt="Jendela konfirmasi sebelum menandai pelanggan sebagai ISOLIR">
+            <figcaption>Sistem selalu meminta konfirmasi sebelum mengubah status.</figcaption>
+        </figure>
+
+        <div class="warn">
+            <strong>Pelanggan ISOLIR tetap ditagih</strong>
+            Status ISOLIR menghentikan layanan, tetapi pelanggannya <em>masih</em> muncul di
+            Tagihan Bulanan karena tunggakannya masih harus ditagih. Gunakan status
+            <strong>Berhenti</strong> hanya bila pelanggan benar-benar berhenti berlangganan —
+            sejak itu ia tidak ditagih lagi.
+        </div>
+
+        <p class="muted">Tanggal isolir dan tanggal berhenti dicatat otomatis oleh sistem, jadi Anda tidak perlu mengisinya.</p>
+
+        <h2 id="import">Import &amp; export Excel</h2>
+        <h3>Import pelanggan</h3>
+        <p>Untuk memasukkan banyak pelanggan sekaligus, gunakan tombol <strong>Import</strong> di halaman Data Pelanggan.</p>
+
+        <figure>
+            <img src="screenshots/pelanggan-import.png" alt="Jendela import Excel dengan tombol unduh template dan area unggah berkas">
+            <figcaption>Jendela import — unduh template dulu agar kolomnya sesuai.</figcaption>
+        </figure>
+
+        <ol class="steps">
+            <li>Unduh <strong>template</strong> dari jendela import.</li>
+            <li>Isi data pelanggan mengikuti kolom template.</li>
+            <li>Unggah berkasnya, lalu jalankan import.</li>
+            <li>Periksa hasilnya di daftar pelanggan.</li>
+        </ol>
+
+        <div class="warn">
+            <strong>Periksa nama cluster dan paket</strong>
+            Bila nama cluster pada Excel tidak cocok dengan master data, pelanggan tetap terimpor
+            tetapi <strong>tanpa cluster</strong> dan harus Anda tetapkan manual. Nama paket yang
+            tidak dikenal juga akan dilewati. Paling aman: buat master cluster dan paket lebih dulu.
+        </div>
+
+        <h3>Export</h3>
+        <p>
+            Tombol <strong>Export Excel</strong> tersedia di Tagihan Bulanan, Data Pelanggan,
+            Transaksi, dan Setoran Petugas. Yang diekspor adalah <strong>data yang sedang tampil</strong> —
+            filter, pencarian, dan urutan ikut terbawa. Saring dulu, baru ekspor.
+        </p>
+
+        <h2 id="transaksi">Transaksi</h2>
+        <p>Seluruh pembayaran yang tercatat. Di sinilah Anda mencatat pembayaran transfer.</p>
+
+        <figure>
+            <img src="screenshots/transaksi-list.png" alt="Daftar transaksi dengan kolom pelanggan, periode, nominal, metode, dan petugas">
+            <figcaption>Daftar transaksi.</figcaption>
+        </figure>
+
+        <p>Filter tersedia di bagian atas (klik untuk membuka):</p>
+        <ul>
+            <li><strong>Periode</strong> — default bulan berjalan. Centang <em>Gunakan Rentang Tanggal</em> untuk menyaring berdasarkan tanggal bayar.</li>
+            <li><strong>Status</strong> dan <strong>Metode Bayar</strong> — misalnya hanya Transfer.</li>
+            <li><strong>Petugas</strong> dan <strong>Cluster</strong> — untuk menelusuri per wilayah.</li>
+        </ul>
+
+        <h3>Mencatat pembayaran</h3>
+        <figure>
+            <img src="screenshots/transaksi-form.png" alt="Form transaksi dengan pelanggan, metode bayar, petugas, periode, dan nominal">
+            <figcaption>Form transaksi.</figcaption>
+        </figure>
+
+        <ol class="steps">
+            <li>Pilih <strong>Pelanggan</strong> — nominal tagihan terisi otomatis.</li>
+            <li>Pilih <strong>Metode Bayar</strong>: <em>Tunai (via Petugas)</em> atau <em>Transfer Langsung</em>.</li>
+            <li>Untuk tunai, pilih <strong>Petugas</strong> yang menarik uangnya. Untuk transfer, kolom ini hilang dengan sendirinya.</li>
+            <li>Pastikan <strong>Periode</strong> benar — ini menentukan tagihan bulan mana yang dilunasi.</li>
+            <li>Isi <strong>Nominal Bayar</strong> dan <strong>Waktu Bayar</strong>, lalu tekan <strong>Buat</strong>.</li>
+        </ol>
+
+        <div class="stop">
+            <strong>Satu pelanggan, satu transaksi per periode</strong>
+            Sistem menolak pencatatan ganda untuk pelanggan dan periode yang sama. Bila muncul
+            peringatan ini, periksa dulu — kemungkinan petugas sudah mencatatnya dari lapangan.
+        </div>
+
+        <div class="note">
+            <strong>Kenapa metode bayar penting</strong>
+            Transaksi <em>Transfer</em> dianggap sudah sampai di kantor sehingga tidak menambah
+            kewajiban setor petugas. Transaksi <em>Tunai</em> menambah "Cash di Tangan" petugas
+            sampai ia menyetorkannya. Salah memilih metode akan membuat hitungan setoran keliru.
+        </div>
+
+        <h2 id="setoran">Setoran Petugas</h2>
+        <p>Mencatat uang tunai yang diserahkan petugas ke kantor.</p>
+
+        <figure>
+            <img src="screenshots/setoran-list.png" alt="Halaman setoran petugas dengan kartu ringkasan per petugas dan tabel setoran">
+            <figcaption>Setoran Petugas: panel per petugas di atas, riwayat setoran di bawah.</figcaption>
+        </figure>
+
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Kolom</th><th>Artinya</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>Harus Ditarik</strong></td><td>Total tagihan pelanggan di cluster petugas itu, dikurangi yang dibayar lewat transfer.</td></tr>
+                    <tr><td><strong>Sudah Tertagih</strong></td><td>Uang tunai yang benar-benar sudah ditarik petugas.</td></tr>
+                    <tr><td><strong>Total Setoran</strong></td><td>Yang sudah diserahkan ke kantor.</td></tr>
+                    <tr><td><strong>Sisa</strong></td><td>Masih dipegang petugas. Merah berarti belum lunas disetor.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Mencatat setoran</h3>
+        <figure>
+            <img src="screenshots/setoran-form.png" alt="Form setoran dengan petugas, periode, nominal, penerima, dan waktu setor">
+            <figcaption>Form setoran menampilkan sisa setoran periode berjalan secara langsung.</figcaption>
+        </figure>
+
+        <ol class="steps">
+            <li>Pilih <strong>Petugas</strong> yang menyetor — panel di atas form menampilkan sisa yang seharusnya.</li>
+            <li>Pastikan <strong>Periode</strong> sesuai bulan penagihannya.</li>
+            <li>Hitung uangnya, isi <strong>Nominal</strong> sesuai jumlah fisik yang diterima.</li>
+            <li><strong>Diterima Oleh</strong> — nama Anda sendiri.</li>
+            <li>Tekan <strong>Buat</strong>.</li>
+        </ol>
+
+        <div class="warn">
+            <strong>Catat sesuai uang yang benar-benar diterima</strong>
+            Jangan menyamakan dengan angka "Sisa" bila jumlah fisiknya berbeda. Selisihnya justru
+            perlu terlihat agar bisa ditelusuri.
+        </div>
+
+        <h2 id="komisi">Komisi</h2>
+        <p>
+            Menghitung komisi untuk penerima referal berdasarkan pembayaran yang
+            <strong>sudah lunas</strong> pada periode terpilih.
+        </p>
+
+        <figure>
+            <img src="screenshots/komisi.png" alt="Halaman komisi dengan kartu total komisi, estimasi, dan tabel penerima">
+            <figcaption>Komisi per periode.</figcaption>
+        </figure>
+
+        <ul>
+            <li><strong>Total Komisi</strong> — yang sudah menjadi hak penerima karena pelanggannya sudah membayar.</li>
+            <li><strong>Estimasi Komisi</strong> — perkiraan tambahan bila pelanggan referal yang belum bayar melunasi bulan ini.</li>
+            <li>Semua penerima tetap ditampilkan, termasuk yang bernilai nol.</li>
+        </ul>
+
+        <h2 id="paket">Master Paket</h2>
+        <p>Daftar paket internet beserta harganya.</p>
+
+        <figure>
+            <img src="screenshots/paket-list.png" alt="Daftar paket dengan nama, kecepatan, dan harga">
+            <figcaption>Master Paket.</figcaption>
+        </figure>
+
+        <figure>
+            <img src="screenshots/paket-form.png" alt="Form paket dengan nama, kecepatan, harga, dan tombol paket custom">
+            <figcaption>Form paket.</figcaption>
+        </figure>
+
+        <div class="note">
+            <strong>Paket Custom</strong>
+            Aktifkan <strong>Paket Custom</strong> untuk paket berharga bebas — kolom harga akan
+            hilang karena nominalnya ditentukan per pelanggan. Sistem memakai paket ini secara
+            otomatis saat nominal pelanggan diubah manual, jadi sebaiknya selalu ada satu.
+        </div>
+
+        <p class="warn">
+            Mengubah harga paket <strong>tidak</strong> mengubah nominal pelanggan lama. Nominal
+            tersimpan per pelanggan, jadi kenaikan harga harus diterapkan ke pelanggan yang bersangkutan.
+        </p>
+
+        <h2 id="cluster">Master Cluster</h2>
+        <p>Wilayah penagihan beserta petugas penanggung jawabnya.</p>
+
+        <figure>
+            <img src="screenshots/cluster-list.png" alt="Daftar cluster dengan nama, petugas, dan jumlah pelanggan">
+            <figcaption>Master Cluster.</figcaption>
+        </figure>
+
+        <figure>
+            <img src="screenshots/cluster-form.png" alt="Form cluster dengan nama, petugas penanggung jawab, deskripsi, dan tombol aktif">
+            <figcaption>Form cluster.</figcaption>
+        </figure>
+
+        <div class="stop">
+            <strong>Mengganti petugas PIC memindahkan seluruh pelanggan</strong>
+            Begitu petugas penanggung jawab diganti, semua pelanggan di cluster itu langsung
+            berpindah ke petugas baru — termasuk daftar tagihan dan perhitungan setorannya.
+            Pastikan ini memang yang Anda maksud.
+        </div>
+
+        <h2 id="penerima">Penerima Komisi</h2>
+        <p>Pihak yang berhak atas komisi. Ada dua jenis:</p>
+
+        <figure>
+            <img src="screenshots/penerima-komisi-list.png" alt="Daftar penerima komisi dengan jenis, nama, dan persentase">
+            <figcaption>Penerima Komisi.</figcaption>
+        </figure>
+
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Jenis</th><th>Keterangan</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>Non Pelanggan</strong></td><td>Pihak luar, misalnya warung atau tokoh setempat. Nama, alamat, dan WhatsApp diisi sendiri.</td></tr>
+                    <tr><td><strong>Pelanggan</strong></td><td>Pelanggan yang mengajak pelanggan lain. Datanya <strong>mengikuti</strong> data pelanggan — cukup ubah di Data Pelanggan, di sini ikut berubah.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <figure>
+            <img src="screenshots/penerima-komisi-form.png" alt="Form penerima komisi dengan pilihan jenis dan persentase komisi">
+            <figcaption>Form penerima komisi.</figcaption>
+        </figure>
+
+        <ol class="steps">
+            <li>Pilih <strong>Jenis</strong>. Untuk jenis Pelanggan, pilih pelanggan yang dimaksud.</li>
+            <li>Isi <strong>Persentase Komisi</strong> — sudah terisi nilai default dari Pengaturan.</li>
+            <li>Simpan, lalu buka kembali untuk memakai panel <strong>Pelanggan Direferalkan</strong>.</li>
+            <li>Gunakan <strong>Tambah Referal</strong> untuk menautkan pelanggan, atau isi kolom Referal dari Data Pelanggan.</li>
+        </ol>
+
+        <div class="note">
+            <strong>Persentase tersimpan per penerima</strong>
+            Mengubah komisi default di Pengaturan <strong>tidak</strong> mengubah penerima yang
+            sudah ada — nilai default hanya dipakai saat membuat penerima baru.
+        </div>
+
+        <p class="muted">
+            <strong>Lepas Referal</strong> hanya memutus hubungan referal; pelanggannya tidak dihapus.
+        </p>
+
+        <h2 id="laporan">Laporan</h2>
+        <p>
+            Enam laporan, semuanya memakai <strong>rentang tanggal</strong> yang default-nya bulan
+            berjalan. Atur rentangnya, lihat pratinjau di layar, lalu tekan <strong>Unduh Excel</strong>.
+        </p>
+
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Laporan</th><th>Isinya</th><th>Kapan dipakai</th></tr></thead>
+                <tbody>
+                    <tr><td>Rekap Pembayaran</td><td>Delapan angka kunci: tagihan, terbayar, tunai, transfer, setoran, dan sisanya.</td><td>Ringkasan cepat ke pimpinan. <em>Hanya dilihat, tanpa unduhan.</em></td></tr>
+                    <tr><td>Laporan Setoran Petugas</td><td>Satu baris per petugas: harus ditarik, tertagih, disetor, sisa.</td><td>Menagih kekurangan setor.</td></tr>
+                    <tr><td>Laporan Tunggakan</td><td>Pelanggan yang belum membayar.</td><td>Bahan penagihan &amp; keputusan isolir.</td></tr>
+                    <tr><td>Laporan Komisi</td><td>Komisi per penerima pada rentang tanggal.</td><td>Dasar pembayaran komisi.</td></tr>
+                    <tr><td>Laporan Per Cluster</td><td>Tagihan, terbayar, tingkat penagihan, jumlah penunggak per cluster.</td><td>Menilai kinerja wilayah.</td></tr>
+                    <tr><td>Laporan Pelanggan</td><td>Pelanggan baru, isolir, berhenti, dan total terdaftar per bulan.</td><td>Melihat pertumbuhan.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <figure>
+            <img src="screenshots/laporan-tunggakan.png" alt="Laporan tunggakan dengan filter rentang tanggal dan tabel pelanggan penunggak">
+            <figcaption>Contoh: Laporan Tunggakan.</figcaption>
+        </figure>
+
+        <figure>
+            <img src="screenshots/laporan-setoran-petugas.png" alt="Laporan setoran petugas dengan satu baris per petugas">
+            <figcaption>Laporan Setoran Petugas.</figcaption>
+        </figure>
+
+        <figure>
+            <img src="screenshots/laporan-rekap-pembayaran.png" alt="Rekap pembayaran berisi delapan baris metrik untuk rentang tanggal terpilih">
+            <figcaption>Rekap Pembayaran — ringkasan delapan angka kunci, tanpa tombol unduh.</figcaption>
+        </figure>
+
+        <figure>
+            <img src="screenshots/laporan-komisi.png" alt="Laporan komisi dengan komisi per penerima pada rentang tanggal">
+            <figcaption>Laporan Komisi — dasar pembayaran komisi referal.</figcaption>
+        </figure>
+
+        <div class="note">
+            <strong>Berkas Excel siap dihitung</strong>
+            Angka nominal ditulis sebagai angka asli sehingga bisa langsung di-SUM, dan nomor
+            WhatsApp ditulis sebagai teks agar tidak berubah menjadi notasi ilmiah.
+        </div>
+
+        <h2 id="masalah">Kalau ada masalah</h2>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Keadaan</th><th>Yang perlu dilakukan</th></tr></thead>
+                <tbody>
+                    <tr><td>Ditolak saat mencatat transaksi</td><td>Pembayaran untuk pelanggan &amp; periode itu sudah ada. Cek menu Transaksi sebelum mencatat ulang.</td></tr>
+                    <tr><td>Angka setoran petugas terasa janggal</td><td>Periksa metode bayar transaksinya. Transaksi tunai yang salah dicatat sebagai transfer akan mengecilkan kewajiban setor petugas.</td></tr>
+                    <tr><td>Pelanggan tidak muncul di Tagihan Bulanan</td><td>Kemungkinan statusnya sudah Berhenti. Pelanggan Berhenti memang tidak ditagih.</td></tr>
+                    <tr><td>Hasil import tanpa cluster</td><td>Nama cluster di Excel tidak cocok dengan master. Perbaiki lewat form pelanggan.</td></tr>
+                    <tr><td>Export isinya tidak sesuai harapan</td><td>Export mengikuti filter yang sedang aktif. Bersihkan atau sesuaikan filter, lalu ekspor ulang.</td></tr>
+                    <tr><td>Butuh menu Pengguna / Pengaturan / Log Aktivitas</td><td>Ketiganya khusus CEO. Hubungi CEO.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+<footer class="page-footer">
+    Panduan Admin Penagihan · Piontech Billing System ·
+    <a href="index.html">Kembali ke ringkasan</a>
+</footer>
+
+</body>
+</html>

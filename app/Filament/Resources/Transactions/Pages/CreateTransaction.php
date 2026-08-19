@@ -22,9 +22,13 @@ class CreateTransaction extends CreateRecord
      */
     public ?string $customerId = null;
 
+    /** Prefill periode (?period=Y-m) dari tombol "Catat Pembayaran" per periode. */
+    public ?string $period = null;
+
     public function mount(): void
     {
         $this->customerId = request()->query('customer_id');
+        $this->period = request()->query('period');
 
         parent::mount();
     }

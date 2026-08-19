@@ -12,7 +12,7 @@ class LocaleSwitchTest extends TestCase
 
     public function testLocaleToggleIsVisibleInTopbar(): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->get('/admin')
             ->assertSee('locale/id')
             ->assertSee('locale/en');
