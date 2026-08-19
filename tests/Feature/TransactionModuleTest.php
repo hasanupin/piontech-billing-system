@@ -29,11 +29,12 @@ class TransactionModuleTest extends TestCase
         $this->get(TransactionResource::getUrl('index'))->assertOk();
     }
 
-    public function testFieldOfficerCanAccessTransactionResource(): void
+    /** Petugas mencatat transaksi lewat panel mobile — lihat FieldPanelTest. */
+    public function testFieldOfficerCannotAccessAdminTransactionResource(): void
     {
         $this->actingAs(User::factory()->fieldOfficer()->create());
 
-        $this->get(TransactionResource::getUrl('index'))->assertOk();
+        $this->get(TransactionResource::getUrl('index'))->assertForbidden();
     }
 
     public function testPrefillsNominalFromCustomerBillingAmount(): void

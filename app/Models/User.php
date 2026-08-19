@@ -48,7 +48,11 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->is_active;
+        // Petugas hanya lewat panel mobile /petugas; role lain hanya /admin.
+        return $this->is_active && match ($panel->getId()) {
+            'field' => $this->isRole(Role::FieldOfficer),
+            default => ! $this->isRole(Role::FieldOfficer),
+        };
     }
 
     // --- Relationships ---

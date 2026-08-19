@@ -1,0 +1,454 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/Field/**/*';
+@source '../../../../app/Filament/Resources/Customers/**/*';
+@source '../../../../app/Filament/Resources/Transactions/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+/*
+ |----------------------------------------------------------------------------
+ | Tema panel mobile Petugas — turunan "NOC Console"
+ |----------------------------------------------------------------------------
+ | Panel /petugas: navigasi bawaan Filament dimatikan (->navigation(false)),
+ | diganti bottom nav 3 menu (view filament/field/bottom-nav.blade.php).
+ | Palet warna dari ->colors() FieldPanelProvider — identik dengan admin.
+ */
+
+:root {
+    --noc-line: rgba(34, 211, 238, 0.14);
+    --noc-glow: rgba(34, 211, 238, 0.35);
+    --noc-grid: rgba(100, 116, 139, 0.08);
+    --noc-surface: var(--color-white);
+}
+
+.dark {
+    --noc-line: rgba(34, 211, 238, 0.16);
+    --noc-grid: rgba(34, 211, 238, 0.035);
+    --noc-surface: var(--color-gray-900);
+}
+
+/* ── Background bertekstur (sama dengan admin) ─────────────────────────── */
+
+.fi-body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+        repeating-linear-gradient(0deg, var(--noc-grid) 0 1px, transparent 1px 40px),
+        repeating-linear-gradient(90deg, var(--noc-grid) 0 1px, transparent 1px 40px);
+}
+
+.dark .fi-body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        radial-gradient(60rem 40rem at 12% -10%, rgba(6, 182, 212, 0.10), transparent 70%),
+        radial-gradient(50rem 35rem at 100% 0%, rgba(70, 95, 255, 0.08), transparent 70%);
+}
+
+/* ── Kerangka mobile ──────────────────────────────────────────────────────
+   Konten diberi ruang untuk bottom nav; topbar tetap (brand + user menu,
+   tanpa item navigasi — panel ->navigation(false)). Global search memang
+   tidak pernah dirender karena tidak ada resource ber-globalSearch. */
+
+.fi-main {
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+}
+
+.fi-topbar {
+    border-bottom: 1px solid var(--noc-line);
+}
+
+.dark .fi-topbar {
+    background: rgba(15, 23, 42, 0.72);
+    backdrop-filter: blur(12px);
+}
+
+/* Sembunyikan tombol buka sidebar — navigasinya memang tidak ada. */
+.fi-topbar-open-sidebar-btn,
+.fi-topbar-close-sidebar-btn,
+.fi-sidebar {
+    display: none !important;
+}
+
+/* ── Wordmark ─────────────────────────────────────────────────────────────
+   Logo bawaan Filament ada di .fi-topbar-start, yang secara default hanya
+   tampil >=64rem (di layar kecil brand-nya ada di sidebar, dan sidebar tidak
+   dipakai di sini). Tampilkan di semua ukuran — jangan menambah brand lewat
+   render hook TOPBAR_START, itu bikin logo dobel di desktop. */
+
+.fi-topbar-start {
+    display: flex;
+}
+
+.fi-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.fi-brand-glyph {
+    width: 1.6rem;
+    height: 1.6rem;
+    flex: none;
+    color: var(--color-primary-500);
+}
+
+.dark .fi-brand-glyph {
+    color: var(--color-primary-400);
+}
+
+.fi-brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+}
+
+.fi-brand-word {
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    background-image: linear-gradient(90deg, var(--color-primary-400), var(--color-primary-600));
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.fi-brand-sub {
+    font-size: 0.5rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-gray-400);
+}
+
+/* ── Bottom nav ─────────────────────────────────────────────────────────── */
+
+.fi-field-bottomnav {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.25rem;
+    padding: 0.5rem 0.75rem calc(0.6rem + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--noc-line);
+    background: color-mix(in srgb, var(--noc-surface) 88%, transparent);
+    backdrop-filter: blur(12px);
+}
+
+.fi-field-navitem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.45rem 0.3rem;
+    border-radius: 0.5rem;
+    color: var(--color-gray-500);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    transition: color 0.18s, background 0.18s;
+}
+
+.fi-field-navitem svg {
+    width: 1.35rem;
+    height: 1.35rem;
+}
+
+.fi-field-navitem.fi-active {
+    color: var(--color-primary-600);
+    background: rgba(6, 182, 212, 0.1);
+    box-shadow: 0 0 14px -4px var(--noc-glow);
+}
+
+.dark .fi-field-navitem.fi-active {
+    color: var(--color-primary-400);
+}
+
+/* ── Segmented tabs Billing ─────────────────────────────────────────────── */
+
+.fi-field-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    border: 1px solid var(--noc-line);
+    border-radius: 999px;
+    background: var(--noc-surface);
+}
+
+.fi-field-tab {
+    padding: 0.5rem;
+    border-radius: 999px;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-gray-500);
+    transition: background 0.18s, color 0.18s;
+}
+
+.fi-field-tab.fi-active {
+    background: rgba(6, 182, 212, 0.14);
+    color: var(--color-primary-600);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary-500) 35%, transparent);
+}
+
+.dark .fi-field-tab.fi-active {
+    color: var(--color-primary-400);
+}
+
+/* ── Kartu stat dashboard ───────────────────────────────────────────────── */
+
+.fi-field-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.fi-field-stat {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.95rem 0.9rem;
+    border: 1px solid var(--noc-line);
+    border-radius: 0.75rem;
+    background: var(--noc-surface);
+}
+
+.fi-field-stat:first-child {
+    grid-column: 1 / -1;
+}
+
+.dark .fi-field-stat {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(7, 11, 20, 0.92));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.fi-field-stat::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 2px;
+    opacity: 0.7;
+    background: linear-gradient(90deg, transparent, var(--color-primary-500) 30%, var(--color-primary-500) 70%, transparent);
+}
+
+.fi-field-stat-warning::after {
+    background: linear-gradient(90deg, transparent, var(--color-warning-500) 30%, var(--color-warning-500) 70%, transparent);
+}
+
+.fi-field-stat-danger::after {
+    background: linear-gradient(90deg, transparent, var(--color-danger-500) 30%, var(--color-danger-500) 70%, transparent);
+}
+
+.fi-field-stat-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-gray-500);
+}
+
+.fi-field-stat-value {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1.15;
+}
+
+.fi-field-stat-value.fi-money {
+    font-size: 1.25rem;
+}
+
+.fi-field-stat-warning .fi-field-stat-value {
+    color: var(--color-warning-500);
+}
+
+.fi-field-stat-danger .fi-field-stat-value {
+    color: var(--color-danger-500);
+}
+
+.fi-field-stat-foot {
+    font-size: 0.72rem;
+    color: var(--color-gray-500);
+}
+
+/* ── Kartu umum (profil, cluster) & pengaturan ──────────────────────────── */
+
+.fi-field-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.fi-field-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.9rem;
+    border: 1px solid var(--noc-line);
+    border-radius: 0.75rem;
+    background: var(--noc-surface);
+}
+
+.dark .fi-field-card {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(7, 11, 20, 0.92));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.fi-field-profile {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.fi-field-avatar {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    flex: none;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--color-primary-500) 35%, transparent);
+    background: rgba(6, 182, 212, 0.1);
+    color: var(--color-primary-600);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.dark .fi-field-avatar {
+    color: var(--color-primary-400);
+}
+
+.fi-field-profile-name {
+    font-weight: 600;
+}
+
+.fi-field-profile-email {
+    font-size: 0.75rem;
+    color: var(--color-gray-500);
+}
+
+.fi-field-chip {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    margin-top: 0.3rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--color-primary-500) 35%, transparent);
+    background: rgba(6, 182, 212, 0.08);
+    color: var(--color-primary-600);
+    font-size: 0.68rem;
+    font-weight: 600;
+}
+
+.dark .fi-field-chip {
+    color: var(--color-primary-400);
+}
+
+.fi-field-chip-success {
+    border-color: color-mix(in srgb, var(--color-success-500) 35%, transparent);
+    background: rgba(18, 183, 106, 0.08);
+    color: var(--color-success-600);
+}
+
+.dark .fi-field-chip-success {
+    color: var(--color-success-400);
+}
+
+.fi-field-cluster-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.fi-field-section-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-gray-500);
+}
+
+.fi-field-readonly {
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: none;
+}
+
+.fi-field-guide {
+    text-decoration: none;
+    color: inherit;
+    transition: border-color .15s;
+}
+
+.fi-field-guide:hover {
+    border-color: color-mix(in srgb, var(--color-primary-500) 45%, transparent);
+}
+
+.fi-field-guide svg {
+    width: 1rem;
+    height: 1rem;
+    flex: none;
+    color: var(--color-primary-600);
+}
+
+.dark .fi-field-guide svg {
+    color: var(--color-primary-400);
+}
+
+.fi-field-logout {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid color-mix(in srgb, var(--color-danger-500) 40%, transparent);
+    border-radius: 0.5rem;
+    background: rgba(240, 68, 56, 0.08);
+    color: var(--color-danger-600);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.dark .fi-field-logout {
+    color: var(--color-danger-400);
+}
+
+/* ── Sentuhan mobile untuk komponen Filament ────────────────────────────── */
+
+/* Form section satu kolom di layar sempit — schema shared tidak diubah. */
+@media (max-width: 640px) {
+    .fi-sc-section .fi-grid,
+    .fi-section-content .fi-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Kartu record (contentGrid) senada kartu NOC. */
+.dark .fi-ta-record {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(7, 11, 20, 0.92));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.fi-ta-record {
+    border: 1px solid var(--noc-line);
+    border-radius: 0.75rem;
+}

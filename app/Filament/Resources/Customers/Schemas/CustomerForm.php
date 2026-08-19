@@ -9,16 +9,19 @@ use App\Models\CommissionRecipient;
 use App\Models\Customer;
 use App\Models\Package;
 use App\Services\ScopeService;
+use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\RawJs;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Js;
 
 class CustomerForm
 {
@@ -107,6 +110,10 @@ class CustomerForm
                             ->required(),
                         Select::make('referral_id')
                             ->label(__('Referral'))
+                            // Referal/komisi urusan admin — petugas tidak melihatnya,
+                            // dan payload forged tidak ikut tersimpan (dehydrated).
+                            ->visible(fn (): bool => ! (auth()->user()?->isRole(Role::FieldOfficer) ?? true))
+                            ->dehydrated(fn (): bool => ! (auth()->user()?->isRole(Role::FieldOfficer) ?? true))
                             ->relationship(
                                 'referral',
                                 'name',
@@ -133,7 +140,28 @@ class CustomerForm
                             ->helperText(__('Village name — reference only')),
                         TextInput::make('maps_url')
                             ->label(__('Maps URL'))
-                            ->url(),
+                            ->url()
+                            ->helperText(__('Paste a Google Maps link, or tap the pin to capture GPS coordinates'))
+                            // Ambil titik GPS via browser (mobile petugas) — koordinat
+                            // disimpan sebagai link maps biasa, tanpa kolom baru.
+                            ->suffixAction(
+                                Action::make('take_coordinates')
+                                    ->label(__('Take Coordinates'))
+                                    ->icon('heroicon-o-map-pin')
+                                    ->alpineClickHandler(function (Component $component): string {
+                                        $statePath = Js::from($component->getStatePath());
+                                        $error = Js::from(__('Location unavailable. Allow location access in your browser, or paste the link manually.'));
+
+                                        return <<<JS
+                                            navigator.geolocation
+                                                ? navigator.geolocation.getCurrentPosition(
+                                                    (position) => \$wire.\$set({$statePath}, 'https://maps.google.com/?q=' + position.coords.latitude.toFixed(6) + ',' + position.coords.longitude.toFixed(6)),
+                                                    () => alert({$error}),
+                                                  )
+                                                : alert({$error})
+                                            JS;
+                                    }),
+                            ),
                         FileUpload::make('house_photo_url')
                             ->label(__('House Photo'))
                             ->image()

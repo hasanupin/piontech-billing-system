@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Auth\Login;
 use App\Filament\Pages\Dashboard;
 use App\Http\Middleware\LogPageVisit;
 use App\Http\Middleware\SetLocale;
@@ -10,9 +11,11 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Icons\Heroicon;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Contracts\View\View;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -30,7 +33,9 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
+            // Halaman login tunggal untuk semua role — petugas yang masuk di
+            // sini otomatis diarahkan ke panel /petugas.
+            ->login(Login::class)
             ->passwordReset()
             ->brandName('Piontech Billing System')
             ->brandLogo(fn (): View => view('filament.brand'))
@@ -89,6 +94,17 @@ class AdminPanelProvider extends PanelProvider
                 __('Billing'),
                 __('Reports'),
                 __('Master'),
+                __('Help'),
+            ])
+            // Panduan pengguna: satu URL, halamannya menyesuaikan peran
+            // (lihat route 'guide' di routes/web.php). Dibuka di tab baru
+            // supaya pekerjaan yang sedang berjalan tidak tertinggal.
+            ->navigationItems([
+                NavigationItem::make('guide')
+                    ->label(__('User Guide'))
+                    ->icon(Heroicon::OutlinedBookOpen)
+                    ->url(fn (): string => route('guide'), shouldOpenInNewTab: true)
+                    ->group(__('Help')),
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             // Sengaja kosong: AccountWidget & FilamentInfoWidget dead code

@@ -141,11 +141,12 @@ class OfficerDepositModuleTest extends TestCase
             ->call('create');
     }
 
-    public function testFieldOfficerCanAccessDepositResource(): void
+    /** Di panel mobile setoran hanya riwayat (read-only) — lihat FieldPanelTest. */
+    public function testFieldOfficerCannotAccessAdminDepositResource(): void
     {
         $this->actingAs(User::factory()->fieldOfficer()->create());
 
-        $this->get(OfficerDepositResource::getUrl('index'))->assertOk();
+        $this->get(OfficerDepositResource::getUrl('index'))->assertForbidden();
     }
 
     public function testFieldOfficerOnlySeesOwnDeposits(): void

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panduan Petugas Lapangan — Piontech Billing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='5' cy='19' r='2.5' fill='%230e7490'/%3E%3Cpath d='M11.5 19a6.5 6.5 0 0 0-6.5-6.5' stroke='%230e7490' stroke-width='2.2' fill='none'/%3E%3Cpath d='M17 19A12 12 0 0 0 5 7' stroke='%230e7490' stroke-width='2.2' fill='none' opacity='.6'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/guide.css">
+</head>
+<body>
+
+<header class="topbar">
+    <a class="brand" href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="5" cy="19" r="2.5" fill="currentColor"/>
+            <path d="M11.5 19a6.5 6.5 0 0 0-6.5-6.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M17 19A12 12 0 0 0 5 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" opacity=".7"/>
+            <path d="M22.5 19A17.5 17.5 0 0 0 5 1.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" opacity=".4"/>
+        </svg>
+        <span>PIONTECH<small>Panduan Pengguna</small></span>
+    </a>
+    <nav class="topnav">
+        <a href="index.html">Ringkasan</a>
+        <a href="ceo.html">CEO</a>
+        <a href="admin.html">Admin Penagihan</a>
+        <a href="petugas.html" aria-current="page">Petugas Lapangan</a>
+    </nav>
+</header>
+
+<div class="layout">
+    <aside class="toc">
+        <h2>Isi Panduan</h2>
+        <ol>
+            <li><a href="#tugas">Tugas Anda</a></li>
+            <li><a href="#masuk">Masuk ke sistem</a></li>
+            <li><a href="#harian">Alur kerja harian</a></li>
+            <li><a href="#dashboard">Dashboard</a></li>
+            <li><a href="#pelanggan">Data Pelanggan</a></li>
+            <li><a href="#daftar-baru">Mendaftarkan pelanggan</a></li>
+            <li><a href="#foto-lokasi">Foto rumah &amp; titik lokasi</a></li>
+            <li><a href="#transaksi">Transaksi per periode</a></li>
+            <li><a href="#catat">Mencatat pembayaran</a></li>
+            <li><a href="#pengaturan">Pengaturan &amp; setoran</a></li>
+            <li><a href="#masalah">Kalau ada masalah</a></li>
+        </ol>
+    </aside>
+
+    <main>
+        <span class="eyebrow">Petugas Lapangan</span>
+        <h1>Panduan Petugas Lapangan</h1>
+        <p class="lede">
+            Tampilan petugas dirancang untuk HP. Semua yang Anda butuhkan ada di tiga menu di
+            bagian bawah layar: <strong>Dashboard</strong>, <strong>Penagihan</strong>, dan
+            <strong>Pengaturan</strong>.
+        </p>
+
+        <h2 id="tugas">Tugas Anda</h2>
+        <div class="cards">
+            <div class="card">
+                <h3>Yang Anda kerjakan</h3>
+                <p>
+                    Menagih pelanggan di cluster Anda, mencatat pembayaran tunai, mendaftarkan
+                    pelanggan baru, serta melengkapi foto rumah dan titik lokasi.
+                </p>
+            </div>
+            <div class="card">
+                <h3>Yang bukan wewenang Anda</h3>
+                <p>
+                    Mengisolir atau memulihkan pelanggan, menghapus data, mengisi kolom Referal,
+                    mengubah transaksi yang sudah tercatat, dan mencatat setoran. Semua itu tugas admin.
+                </p>
+            </div>
+        </div>
+
+        <div class="note">
+            <strong>Anda hanya melihat cluster sendiri</strong>
+            Semua daftar sudah otomatis tersaring: pelanggan cluster petugas lain tidak akan muncul,
+            walaupun Anda mencarinya. Ini normal, bukan data hilang.
+        </div>
+
+        <h2 id="masuk">Masuk ke sistem</h2>
+        <ol class="steps">
+            <li>Buka alamat sistem di browser HP.</li>
+            <li>Masukkan email dan kata sandi Anda, lalu tekan <strong>Masuk</strong>.</li>
+            <li>Sistem otomatis membuka tampilan petugas.</li>
+        </ol>
+
+        <figure class="phone">
+            <img src="screenshots/petugas-login.png" alt="Halaman masuk pada layar HP">
+            <figcaption>Halaman masuk di HP.</figcaption>
+        </figure>
+
+        <div class="note">
+            <strong>Simpan sebagai pintasan</strong>
+            Setelah masuk, gunakan menu browser <em>"Tambahkan ke layar utama"</em> agar sistem
+            bisa dibuka seperti aplikasi biasa.
+        </div>
+
+        <h2 id="harian">Alur kerja harian</h2>
+        <div class="chain">
+            <div class="link">
+                <span class="n">PAGI</span>
+                <h4>Buka Dashboard</h4>
+                <p>Lihat siapa yang jatuh tempo hari ini.</p>
+            </div>
+            <div class="link">
+                <span class="n">DI JALAN</span>
+                <h4>Tekan Tagih</h4>
+                <p>Datangi pelanggan, terima uang, catat lewat tombol Tagih.</p>
+            </div>
+            <div class="link">
+                <span class="n">SORE</span>
+                <h4>Cek Cash di Tangan</h4>
+                <p>Pastikan jumlah uang Anda sama dengan angka di Dashboard.</p>
+            </div>
+            <div class="link">
+                <span class="n">SETOR</span>
+                <h4>Serahkan ke admin</h4>
+                <p>Admin yang mencatat setoran; cek hasilnya di menu Pengaturan.</p>
+            </div>
+        </div>
+
+        <h2 id="dashboard">Dashboard</h2>
+        <p>Halaman pertama saat masuk. Isinya tiga angka utama dan daftar tagihan hari ini.</p>
+
+        <figure class="phone">
+            <img src="screenshots/petugas-dashboard.png" alt="Dashboard petugas: tiga kartu angka dan daftar pelanggan jatuh tempo hari ini">
+            <figcaption>Dashboard petugas.</figcaption>
+        </figure>
+
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Angka</th><th>Artinya</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>Jatuh Tempo Hari Ini</strong></td><td>Jumlah pelanggan yang tanggal tagihnya hari ini.</td></tr>
+                    <tr><td><strong>Cash di Tangan</strong></td><td>Uang tunai yang sudah Anda tarik tetapi belum diserahkan ke admin. <strong>Angka ini harus sama dengan uang di kantong Anda.</strong></td></tr>
+                    <tr><td><strong>Belum Bayar</strong></td><td>Jumlah pelanggan Anda yang belum melunasi bulan ini.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p>Di bawahnya ada daftar pelanggan yang harus ditagih hari ini. Tiap baris punya tombol:</p>
+
+        <ul>
+            <li><strong>Ikon chat</strong> — buka WhatsApp pelanggan untuk mengingatkan sebelum datang.</li>
+            <li><strong>Ikon pin</strong> — buka lokasi rumah di Google Maps.</li>
+            <li><strong>Ikon foto</strong> — lihat foto rumah supaya tidak salah alamat.</li>
+            <li><strong>Tagih</strong> — buka form pembayaran yang sudah terisi otomatis.</li>
+        </ul>
+
+        <div class="note">
+            <strong>Tombol abu-abu tidak bisa ditekan</strong>
+            Kalau ikon pin atau foto berwarna pudar, berarti pelanggan itu belum punya titik lokasi
+            atau foto rumah. Anda bisa melengkapinya lewat menu Penagihan → pilih pelanggan → Ubah.
+        </div>
+
+        <div class="warn">
+            <strong>Daftar kosong padahal angka "Jatuh Tempo" tidak nol?</strong>
+            Daftar ini hanya menampilkan yang <em>belum</em> lunas. Kalau pelanggan hari ini sudah
+            membayar semua, daftarnya memang kosong — pekerjaan Anda selesai.
+        </div>
+
+        <h2 id="pelanggan">Data Pelanggan</h2>
+        <p>
+            Tekan menu <strong>Penagihan</strong> di bawah, lalu pilih tab <strong>Data Pelanggan</strong>.
+            Semua pelanggan di cluster Anda tampil sebagai kartu.
+        </p>
+
+        <figure class="phone">
+            <img src="screenshots/petugas-pelanggan.png" alt="Daftar pelanggan berbentuk kartu dengan kolom pencarian di atasnya">
+            <figcaption>Data Pelanggan — cari nama lewat kolom <em>Cari</em>.</figcaption>
+        </figure>
+
+        <ul>
+            <li><strong>Cari</strong> — ketik sebagian nama pelanggan, daftar langsung menyaring.</li>
+            <li><strong>Ikon corong</strong> — saring berdasarkan status (Aktif / Isolir) atau tampilkan hanya yang jatuh tempo hari ini.</li>
+            <li><strong>Ubah</strong> — memperbaiki data pelanggan, misalnya menambahkan nomor WhatsApp atau foto rumah.</li>
+        </ul>
+
+        <h2 id="daftar-baru">Mendaftarkan pelanggan baru</h2>
+        <p>Dari halaman Data Pelanggan, tekan tombol <strong>Buat Pelanggan</strong> di bagian atas.</p>
+
+        <figure class="phone">
+            <img src="screenshots/petugas-form-pelanggan.png" alt="Form pelanggan baru bagian Identitas dan Penugasan dan Paket">
+            <figcaption>Form pelanggan baru.</figcaption>
+        </figure>
+
+        <ol class="steps">
+            <li><strong>Nama</strong> — nama panggilan yang dikenal di lapangan. Wajib diisi.</li>
+            <li><strong>Nama Lengkap</strong> — sesuai KTP, boleh dikosongkan.</li>
+            <li><strong>No. WhatsApp</strong> — tanpa angka 0 di depan. Contoh: <code>81234567890</code>.</li>
+            <li><strong>Cluster</strong> — sudah terisi cluster Anda. Bila Anda memegang beberapa cluster, pilih yang benar.</li>
+            <li><strong>Paket</strong> — pilih paket; <strong>Nominal Tagihan</strong> akan terisi otomatis.</li>
+            <li><strong>Tgl Tagih</strong> — tanggal 1–31, dipakai sistem untuk menentukan kapan pelanggan muncul di Dashboard Anda.</li>
+            <li>Lengkapi <strong>Alamat</strong>, foto rumah, dan titik lokasi (lihat bagian berikutnya).</li>
+            <li>Tekan <strong>Buat</strong>.</li>
+        </ol>
+
+        <div class="note">
+            <strong>Harga khusus</strong>
+            Bila pelanggan mendapat harga berbeda dari daftar paket, ketik saja angkanya di
+            <strong>Nominal Tagihan</strong>. Sistem otomatis menandainya sebagai paket Custom.
+        </div>
+
+        <div class="warn">
+            <strong>Kolom Status dan Referal tidak ada di layar Anda</strong>
+            Pelanggan baru otomatis berstatus Aktif. Penentuan ISOLIR dan pengisian Referal
+            adalah wewenang admin — bukan kesalahan tampilan.
+        </div>
+
+        <h2 id="foto-lokasi">Foto rumah &amp; titik lokasi</h2>
+        <p>
+            Bagian <strong>Lokasi (Referensi)</strong> di form pelanggan sangat membantu penagihan
+            berikutnya — apalagi kalau nanti pelanggan ditagih petugas lain.
+        </p>
+
+        <figure class="phone">
+            <img src="screenshots/petugas-form-lokasi.png" alt="Bagian Lokasi pada form: kolom Alamat, URL Maps dengan ikon pin, dan unggah Foto Rumah">
+            <figcaption>Bagian Lokasi: alamat, titik koordinat, dan foto rumah.</figcaption>
+        </figure>
+
+        <h3>Mengambil titik koordinat</h3>
+        <ol class="steps">
+            <li>Berdiri di depan rumah pelanggan.</li>
+            <li>Tekan <strong>ikon pin</strong> di ujung kanan kolom <strong>URL Maps</strong>.</li>
+            <li>Bila browser meminta izin lokasi, pilih <strong>Izinkan</strong>.</li>
+            <li>Kolom akan terisi otomatis berupa tautan Google Maps.</li>
+        </ol>
+
+        <p>
+            Bisa juga secara manual: buka Google Maps, tekan lokasi rumah, pilih <em>Bagikan</em>,
+            salin tautannya, lalu tempel ke kolom <strong>URL Maps</strong>.
+        </p>
+
+        <h3>Memotret rumah</h3>
+        <ol class="steps">
+            <li>Tekan area <strong>Foto Rumah</strong>.</li>
+            <li>Pilih <strong>Kamera</strong> pada menu yang muncul, lalu potret bagian depan rumah.</li>
+            <li>Pastikan nomor rumah atau ciri khasnya terlihat.</li>
+        </ol>
+
+        <div class="warn">
+            <strong>Izin lokasi ditolak?</strong>
+            Kalau muncul pesan lokasi tidak tersedia, aktifkan izin lokasi untuk browser di
+            pengaturan HP, lalu coba lagi. Bila tetap gagal, tempel tautan Maps secara manual.
+        </div>
+
+        <h2 id="transaksi">Transaksi per periode</h2>
+        <p>
+            Menu <strong>Penagihan</strong> → tab <strong>Transaksi</strong> menampilkan
+            <strong>daftar tagihan</strong> pada periode tertentu, lengkap dengan status
+            <span class="pill pill-ok">Lunas</span> atau <span class="pill pill-stop">Belum Bayar</span>.
+        </p>
+
+        <figure class="phone">
+            <img src="screenshots/petugas-transaksi.png" alt="Daftar tagihan per periode dengan filter Periode dan Status Bayar">
+            <figcaption>Daftar tagihan — periode bisa diganti ke bulan mana pun.</figcaption>
+        </figure>
+
+        <ul>
+            <li><strong>Periode</strong> — pilih bulan yang ingin dilihat, tidak terbatas bulan berjalan. Berguna untuk menagih tunggakan bulan lalu.</li>
+            <li><strong>Status Bayar</strong> — pilih <em>Belum Bayar</em> untuk melihat sisa pekerjaan Anda.</li>
+            <li><strong>Cari</strong> — cari nama pelanggan tertentu.</li>
+        </ul>
+
+        <div class="note">
+            <strong>Kenapa daftarnya pelanggan, bukan daftar pembayaran?</strong>
+            Karena pelanggan yang belum membayar belum punya catatan pembayaran sama sekali.
+            Dengan menampilkan tagihan, Anda bisa melihat yang belum bayar sekaligus yang sudah.
+        </div>
+
+        <h2 id="catat">Mencatat pembayaran</h2>
+        <p>
+            Tekan <strong>Catat Pembayaran</strong> pada baris pelanggan yang belum lunas —
+            atau tombol <strong>Tagih</strong> dari Dashboard. Form akan terbuka dengan data
+            yang sudah terisi.
+        </p>
+
+        <figure class="phone">
+            <img src="screenshots/petugas-catat-pembayaran.png" alt="Form catat pembayaran dengan pelanggan, metode Tunai, periode, dan nominal terisi otomatis">
+            <figcaption>Form pembayaran — sebagian besar kolom sudah terisi.</figcaption>
+        </figure>
+
+        <ol class="steps">
+            <li>Periksa <strong>Pelanggan</strong> dan <strong>Periode</strong> sudah benar.</li>
+            <li><strong>Metode Bayar</strong> terkunci <strong>Tunai</strong> — memang hanya itu yang Anda catat.</li>
+            <li>Sesuaikan <strong>Nominal Bayar</strong> bila pelanggan membayar sebagian.</li>
+            <li><strong>Waktu Bayar</strong> terisi waktu sekarang; ubah bila mencatat menyusul.</li>
+            <li>Tekan <strong>Buat</strong>.</li>
+        </ol>
+
+        <div class="stop">
+            <strong>Muncul "Transaksi untuk pelanggan dan periode ini sudah ada"</strong>
+            Berarti pembayaran itu sudah pernah dicatat — mungkin oleh admin, atau oleh Anda
+            sendiri sebelumnya. Jangan dicatat dua kali. Periksa daftar tagihan; kalau statusnya
+            sudah <em>Lunas</em>, pekerjaan itu memang sudah selesai.
+        </div>
+
+        <div class="warn">
+            <strong>Salah catat?</strong>
+            Anda tidak bisa mengubah atau menghapus transaksi yang sudah tersimpan. Segera
+            laporkan ke admin agar diperbaiki dari kantor.
+        </div>
+
+        <h2 id="pengaturan">Pengaturan &amp; setoran</h2>
+        <p>Menu <strong>Pengaturan</strong> berisi data akun Anda, cluster yang dipegang, dan riwayat setoran.</p>
+
+        <figure class="phone">
+            <img src="screenshots/petugas-pengaturan.png" alt="Halaman pengaturan: kartu profil, daftar cluster hanya lihat, riwayat Setoran Saya, tombol Keluar">
+            <figcaption>Pengaturan petugas.</figcaption>
+        </figure>
+
+        <ul>
+            <li><strong>Profil</strong> — nama, email, dan peran Anda.</li>
+            <li><strong>Cluster</strong> — wilayah yang Anda pegang beserta jumlah pelanggannya. Hanya bisa dilihat; perubahan cluster dilakukan CEO atau admin.</li>
+            <li><strong>Panduan Pengguna</strong> — membuka kembali panduan ini kapan saja dari dalam aplikasi.</li>
+            <li><strong>Setoran Saya</strong> — riwayat uang yang sudah Anda serahkan ke admin.</li>
+            <li><strong>Keluar</strong> — mengakhiri sesi. Gunakan bila HP dipakai bergantian.</li>
+        </ul>
+
+        <div class="note">
+            <strong>Setoran dicatat oleh admin</strong>
+            Anda menyerahkan uang tunai ke admin, lalu admin yang mencatatnya di sistem. Setelah
+            tercatat, jumlahnya muncul di <strong>Setoran Saya</strong> dan angka
+            <strong>Cash di Tangan</strong> di Dashboard akan berkurang. Kalau setelah menyetor
+            angkanya belum berubah, ingatkan admin untuk mencatatnya.
+        </div>
+
+        <h2 id="masalah">Kalau ada masalah</h2>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Keadaan</th><th>Yang perlu dilakukan</th></tr></thead>
+                <tbody>
+                    <tr><td>Pelanggan tidak ketemu saat dicari</td><td>Pastikan ejaan namanya benar. Kalau tetap tidak ada, kemungkinan pelanggan itu ada di cluster petugas lain.</td></tr>
+                    <tr><td>Tombol Tagih tidak muncul</td><td>Pelanggan itu sudah lunas untuk periode tersebut.</td></tr>
+                    <tr><td>Salah memasukkan nominal</td><td>Hubungi admin — hanya admin yang bisa memperbaiki transaksi.</td></tr>
+                    <tr><td>Halaman menolak dengan tulisan "Forbidden"</td><td>Menu itu bukan untuk petugas. Kembali ke Dashboard lewat menu di bawah.</td></tr>
+                    <tr><td>Cash di Tangan tidak cocok dengan uang Anda</td><td>Periksa apakah ada pembayaran yang belum Anda catat, atau setoran yang belum dicatat admin.</td></tr>
+                    <tr><td>Lupa kata sandi</td><td>Gunakan <strong>Lupa kata sandi?</strong> di halaman masuk, atau minta bantuan CEO.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+<footer class="page-footer">
+    Panduan Petugas Lapangan · Piontech Billing System ·
+    <a href="index.html">Kembali ke ringkasan</a>
+</footer>
+
+</body>
+</html>
