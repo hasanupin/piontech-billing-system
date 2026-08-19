@@ -31,11 +31,12 @@ class CustomerModuleTest extends TestCase
         $this->get(CustomerResource::getUrl('index'))->assertOk();
     }
 
-    public function testFieldOfficerCanAccessCustomerResource(): void
+    /** Petugas dilayani panel mobile /petugas — lihat FieldPanelTest. */
+    public function testFieldOfficerCannotAccessAdminCustomerResource(): void
     {
         $this->actingAs(User::factory()->fieldOfficer()->create());
 
-        $this->get(CustomerResource::getUrl('index'))->assertOk();
+        $this->get(CustomerResource::getUrl('index'))->assertForbidden();
     }
 
     public function testAdminCanMarkCustomerAsSuspendedWithSuspendedAt(): void
@@ -278,17 +279,14 @@ class CustomerModuleTest extends TestCase
         $this->assertSame('81200000000', $customer->refresh()->whatsapp_number);
     }
 
-    public function testFieldOfficerCannotEditCustomerOutsideOwnCluster(): void
+    /** Halaman edit-nya ada di panel mobile — assertion HTTP-nya di FieldPanelTest. */
+    public function testFieldOfficerCannotUpdateCustomerOutsideOwnCluster(): void
     {
         $officer = User::factory()->fieldOfficer()->create();
         Cluster::factory()->create(['officer_id' => $officer->id]);
         $customer = Customer::factory()->create();
 
-        $this->actingAs($officer);
         $this->assertFalse($officer->can('update', $customer));
-
-        // Global scope cluster ikut berlaku di route-model binding → 404 sebelum policy.
-        $this->get(CustomerResource::getUrl('edit', ['record' => $customer]))->assertNotFound();
     }
 
     public function testFieldOfficerCannotChangeCustomerStatus(): void

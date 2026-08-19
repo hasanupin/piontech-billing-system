@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panduan CEO — Piontech Billing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='5' cy='19' r='2.5' fill='%230e7490'/%3E%3Cpath d='M11.5 19a6.5 6.5 0 0 0-6.5-6.5' stroke='%230e7490' stroke-width='2.2' fill='none'/%3E%3Cpath d='M17 19A12 12 0 0 0 5 7' stroke='%230e7490' stroke-width='2.2' fill='none' opacity='.6'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/guide.css">
+</head>
+<body>
+
+<header class="topbar">
+    <a class="brand" href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="5" cy="19" r="2.5" fill="currentColor"/>
+            <path d="M11.5 19a6.5 6.5 0 0 0-6.5-6.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M17 19A12 12 0 0 0 5 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" opacity=".7"/>
+            <path d="M22.5 19A17.5 17.5 0 0 0 5 1.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" opacity=".4"/>
+        </svg>
+        <span>PIONTECH<small>Panduan Pengguna</small></span>
+    </a>
+    <nav class="topnav">
+        <a href="index.html">Ringkasan</a>
+        <a href="ceo.html" aria-current="page">CEO</a>
+        <a href="admin.html">Admin Penagihan</a>
+        <a href="petugas.html">Petugas Lapangan</a>
+    </nav>
+</header>
+
+<div class="layout">
+    <aside class="toc">
+        <h2>Isi Panduan</h2>
+        <ol>
+            <li><a href="#wewenang">Wewenang Anda</a></li>
+            <li><a href="#pertama">Menyiapkan sistem baru</a></li>
+            <li><a href="#dashboard">Membaca Dashboard</a></li>
+            <li><a href="#rutin">Pemeriksaan rutin</a></li>
+            <li><a href="#pengguna">Pengguna (akun)</a></li>
+            <li><a href="#pengaturan">Pengaturan</a></li>
+            <li><a href="#log">Log Aktivitas</a></li>
+            <li><a href="#laporan">Laporan untuk keputusan</a></li>
+            <li><a href="#operasional">Menu operasional</a></li>
+        </ol>
+    </aside>
+
+    <main>
+        <span class="eyebrow">CEO</span>
+        <h1>Panduan CEO</h1>
+        <p class="lede">
+            Anda memiliki akses ke seluruh sistem. Panduan ini menekankan tiga hal yang hanya bisa
+            Anda lakukan — mengelola akun, mengatur komisi, dan memeriksa log aktivitas — serta
+            cara membaca angka untuk mengambil keputusan.
+        </p>
+
+        <h2 id="wewenang">Wewenang Anda</h2>
+        <div class="cards">
+            <div class="card">
+                <h3>Khusus CEO</h3>
+                <p>
+                    <strong>Pengguna</strong> (membuat &amp; menonaktifkan akun),
+                    <strong>Pengaturan</strong> (persentase komisi default), dan
+                    <strong>Log Aktivitas</strong> (jejak perubahan data).
+                </p>
+            </div>
+            <div class="card">
+                <h3>Sama seperti admin</h3>
+                <p>
+                    Seluruh menu Penagihan, Laporan, dan Master Data. Cara memakainya sama persis —
+                    rinciannya ada di <a href="admin.html">Panduan Admin Penagihan</a>.
+                </p>
+            </div>
+        </div>
+
+        <figure>
+            <img src="screenshots/menu-ceo.png" alt="Menu samping CEO lengkap dengan grup Penagihan, Laporan, dan Master Data termasuk Pengguna, Pengaturan, dan Log Aktivitas">
+            <figcaption>Menu CEO — tiga menu terbawah tidak terlihat oleh admin.</figcaption>
+        </figure>
+
+        <h2 id="pertama">Menyiapkan sistem baru</h2>
+        <p>
+            Bila sistem baru dipasang, Andalah yang memulai — karena langkah pertama
+            (membuat akun) hanya bisa dilakukan CEO.
+        </p>
+
+        <div class="chain">
+            <div class="link">
+                <span class="n">LANGKAH 1</span>
+                <h4>Buat akun</h4>
+                <p>Minimal satu admin dan satu petugas per wilayah.</p>
+            </div>
+            <div class="link">
+                <span class="n">LANGKAH 2</span>
+                <h4>Paket</h4>
+                <p>Daftar paket &amp; harga, termasuk satu paket Custom.</p>
+            </div>
+            <div class="link">
+                <span class="n">LANGKAH 3</span>
+                <h4>Cluster</h4>
+                <p>Bagi wilayah, tentukan petugasnya.</p>
+            </div>
+            <div class="link">
+                <span class="n">LANGKAH 4</span>
+                <h4>Pelanggan</h4>
+                <p>Diisi manual atau import Excel oleh admin.</p>
+            </div>
+            <div class="link optional">
+                <span class="n">LANGKAH 5</span>
+                <h4>Komisi</h4>
+                <p>Atur persentase default, lalu daftarkan penerima komisi.</p>
+            </div>
+        </div>
+
+        <p>Rincian lengkap tiap langkah ada di <a href="index.html#setup">halaman ringkasan</a>.</p>
+
+        <h2 id="dashboard">Membaca Dashboard</h2>
+        <p>Satu layar untuk menilai kondisi bulan berjalan. Ganti <strong>Periode</strong> untuk membandingkan bulan.</p>
+
+        <figure>
+            <img src="screenshots/dashboard-ceo.png" alt="Dashboard CEO dengan strip status jaringan, sembilan kartu statistik, dan grafik tren">
+            <figcaption>Dashboard CEO.</figcaption>
+        </figure>
+
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Angka</th><th>Cara membacanya</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>Tingkat Penagihan</strong></td><td>Persentase pelanggan yang sudah membayar bulan ini. Ukuran kesehatan operasional paling cepat.</td></tr>
+                    <tr><td><strong>Belum Bayar</strong></td><td>Bila terus membesar menjelang akhir bulan, penagihan sedang tertinggal.</td></tr>
+                    <tr><td><strong>Kekurangan Setor</strong></td><td>Uang perusahaan yang masih ada di tangan petugas. <strong>Angka ini seharusnya mendekati nol setiap akhir hari.</strong></td></tr>
+                    <tr><td><strong>Masuk via Transfer</strong></td><td>Porsi pembayaran yang langsung ke rekening — makin besar, makin kecil risiko uang tunai di jalan.</td></tr>
+                    <tr><td><strong>Total Komisi</strong></td><td>Kewajiban komisi atas pembayaran yang sudah lunas.</td></tr>
+                    <tr><td><strong>Pelanggan Baru</strong> · <strong>Isolir / Berhenti</strong></td><td>Pertumbuhan bersih. Bila Berhenti melampaui Pelanggan Baru, basis pelanggan sedang menyusut.</td></tr>
+                    <tr><td><strong>Tren Pemasukan 12 Bulan</strong></td><td>Grafik batang tunai vs transfer per bulan, untuk melihat arah jangka panjang.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="note">
+            <strong>Kenapa grafik trennya pemasukan, bukan tagihan</strong>
+            Nominal tagihan tersimpan pada data pelanggan sebagai nilai <em>saat ini</em>. Kalau
+            dipakai untuk bulan-bulan lampau, angkanya akan menyesatkan. Karena itu grafik ini
+            menampilkan uang yang benar-benar masuk.
+        </div>
+
+        <h2 id="rutin">Pemeriksaan rutin</h2>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Kapan</th><th>Yang diperiksa</th><th>Tanda bahaya</th></tr></thead>
+                <tbody>
+                    <tr><td>Harian</td><td>Kekurangan Setor di Dashboard</td><td>Terus naik beberapa hari — uang menumpuk di petugas.</td></tr>
+                    <tr><td>Mingguan</td><td>Tingkat Penagihan &amp; Laporan Tunggakan</td><td>Tunggakan menumpuk di satu cluster tertentu.</td></tr>
+                    <tr><td>Bulanan</td><td>Rekap Pembayaran &amp; Laporan Per Cluster</td><td>Satu cluster tingkat penagihannya jauh di bawah yang lain.</td></tr>
+                    <tr><td>Bulanan</td><td>Laporan Komisi</td><td>Komisi membesar tanpa diikuti pertambahan pelanggan.</td></tr>
+                    <tr><td>Sesekali</td><td>Log Aktivitas</td><td>Perubahan data di luar jam kerja atau oleh akun tak terduga.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2 id="pengguna">Pengguna (akun)</h2>
+        <p>Hanya Anda yang bisa membuat dan menonaktifkan akun.</p>
+
+        <figure>
+            <img src="screenshots/pengguna-list.png" alt="Daftar pengguna dengan nama, email, peran, dan status aktif">
+            <figcaption>Daftar Pengguna.</figcaption>
+        </figure>
+
+        <figure>
+            <img src="screenshots/pengguna-form.png" alt="Form pengguna dengan nama, username, email, telepon, kata sandi, peran, dan tombol aktif">
+            <figcaption>Form pengguna.</figcaption>
+        </figure>
+
+        <ol class="steps">
+            <li>Isi <strong>Nama</strong>, <strong>Username</strong>, dan <strong>Email</strong> — username dan email tidak boleh sama dengan akun lain.</li>
+            <li>Isi <strong>Kata Sandi</strong> awal, lalu minta yang bersangkutan menggantinya.</li>
+            <li>Pilih <strong>Peran</strong>:
+                <em>Petugas Lapangan</em> untuk penagih,
+                <em>Admin Penagihan</em> untuk staf kantor,
+                <em>Super Admin</em> hanya untuk pimpinan.</li>
+            <li>Pastikan <strong>Aktif</strong> menyala, lalu tekan <strong>Buat</strong>.</li>
+        </ol>
+
+        <div class="warn">
+            <strong>Nonaktifkan, jangan hapus</strong>
+            Untuk pegawai yang berhenti, matikan tombol <strong>Aktif</strong>. Akun langsung tidak
+            bisa masuk, tetapi seluruh transaksi dan setoran yang pernah ia catat tetap utuh dalam
+            laporan. Menghapus akun berisiko memutus jejak riwayat.
+        </div>
+
+        <div class="stop">
+            <strong>Petugas terikat pada cluster</strong>
+            Sebelum menonaktifkan seorang petugas, pindahkan dulu clusternya ke petugas lain lewat
+            Master Cluster. Cluster wajib punya penanggung jawab, dan pelanggannya ikut berpindah
+            begitu PIC diganti.
+        </div>
+
+        <p class="muted">Saat mengedit akun, kolom kata sandi yang dibiarkan kosong berarti kata sandi lama tidak diubah.</p>
+
+        <h2 id="pengaturan">Pengaturan</h2>
+        <p>Berisi <strong>Komisi Default (%)</strong> — persentase yang otomatis terisi saat membuat penerima komisi baru.</p>
+
+        <figure>
+            <img src="screenshots/pengaturan.png" alt="Halaman pengaturan dengan kolom komisi default dalam persen">
+            <figcaption>Pengaturan.</figcaption>
+        </figure>
+
+        <div class="note">
+            <strong>Hanya berlaku untuk penerima baru</strong>
+            Mengubah nilai ini <strong>tidak</strong> mengubah penerima komisi yang sudah ada,
+            karena persentase disimpan pada masing-masing penerima. Untuk mengubah yang lama,
+            sunting satu per satu di Master Data → Penerima Komisi.
+        </div>
+
+        <h2 id="log">Log Aktivitas</h2>
+        <p>
+            Jejak siapa mengubah apa dan kapan: pembuatan dan perubahan data, akses menu,
+            login dan logout, serta pengunduhan export.
+        </p>
+
+        <figure>
+            <img src="screenshots/log-aktivitas.png" alt="Log aktivitas dengan kolom waktu, pengguna, kejadian, dan objek yang diubah">
+            <figcaption>Log Aktivitas — hanya bisa dibaca, tidak bisa diubah atau dihapus.</figcaption>
+        </figure>
+
+        <p>Berguna ketika:</p>
+        <ul>
+            <li>Ada angka berubah dan perlu diketahui siapa yang mengubahnya.</li>
+            <li>Terjadi selisih setoran dan perlu ditelusuri urutan kejadiannya.</li>
+            <li>Memastikan pelanggan yang diisolir memang atas keputusan yang berwenang.</li>
+        </ul>
+
+        <div class="note">
+            <strong>Disimpan enam bulan</strong>
+            Catatan yang lebih lama dari enam bulan dibersihkan otomatis. Bila Anda membutuhkan
+            bukti untuk periode lampau, unduh atau catat sebelum melewati batas itu.
+        </div>
+
+        <h2 id="laporan">Laporan untuk keputusan</h2>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Pertanyaan Anda</th><th>Laporan yang dibuka</th></tr></thead>
+                <tbody>
+                    <tr><td>Berapa uang masuk bulan ini dan dari jalur mana?</td><td>Rekap Pembayaran</td></tr>
+                    <tr><td>Adakah petugas yang menahan setoran?</td><td>Laporan Setoran Petugas</td></tr>
+                    <tr><td>Siapa saja yang menunggak dan berapa nilainya?</td><td>Laporan Tunggakan</td></tr>
+                    <tr><td>Berapa komisi yang harus dibayar?</td><td>Laporan Komisi</td></tr>
+                    <tr><td>Wilayah mana yang penagihannya paling lemah?</td><td>Laporan Per Cluster</td></tr>
+                    <tr><td>Apakah jumlah pelanggan bertumbuh?</td><td>Laporan Pelanggan</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <figure>
+            <img src="screenshots/laporan-per-cluster.png" alt="Laporan per cluster dengan kolom tagihan, terbayar, tingkat penagihan, dan jumlah penunggak">
+            <figcaption>Laporan Per Cluster — membandingkan kinerja wilayah.</figcaption>
+        </figure>
+
+        <figure>
+            <img src="screenshots/laporan-pelanggan.png" alt="Laporan pelanggan dengan pelanggan baru, isolir, berhenti, dan total terdaftar per bulan">
+            <figcaption>Laporan Pelanggan — pertumbuhan basis pelanggan.</figcaption>
+        </figure>
+
+        <p>
+            Semua laporan memakai rentang tanggal dan bisa diunduh sebagai Excel, kecuali
+            <strong>Rekap Pembayaran</strong> yang memang hanya untuk dilihat di layar.
+        </p>
+
+        <h2 id="operasional">Menu operasional</h2>
+        <p>
+            Menu Penagihan dan Master Data bekerja persis sama seperti pada admin. Bila Anda perlu
+            langsung turun tangan — mencatat pembayaran, mengisolir pelanggan, mengubah paket, atau
+            mengatur cluster — ikuti <a href="admin.html">Panduan Admin Penagihan</a>.
+        </p>
+
+        <div class="cards">
+            <a class="card role-card" href="admin.html#tagihan"><h3>Tagihan Bulanan</h3><p>Daftar tagihan &amp; catat pembayaran.</p></a>
+            <a class="card role-card" href="admin.html#setoran"><h3>Setoran Petugas</h3><p>Arti kolom Harus Ditarik, Sisa, dan cara mencatat.</p></a>
+            <a class="card role-card" href="admin.html#cluster"><h3>Master Cluster</h3><p>Membagi wilayah &amp; mengganti petugas PIC.</p></a>
+        </div>
+    </main>
+</div>
+
+<footer class="page-footer">
+    Panduan CEO · Piontech Billing System ·
+    <a href="index.html">Kembali ke ringkasan</a>
+</footer>
+
+</body>
+</html>

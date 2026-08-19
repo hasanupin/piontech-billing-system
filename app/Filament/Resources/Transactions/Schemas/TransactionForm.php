@@ -95,7 +95,10 @@ class TransactionForm
                 DatePicker::make('period')
                     ->label(__('Period'))
                     ->displayFormat('F Y')
-                    ->default(now()->startOfMonth())
+                    // ?period=Y-m dari daftar tagihan per periode; tetap bisa diganti.
+                    ->default(fn ($livewire): Carbon => $livewire instanceof CreateTransaction && filled($livewire->period)
+                        ? Carbon::parse($livewire->period.'-01')->startOfMonth()
+                        : now()->startOfMonth())
                     ->required(),
                 TextInput::make('billed_amount')
                     ->label(__('Billed Amount'))

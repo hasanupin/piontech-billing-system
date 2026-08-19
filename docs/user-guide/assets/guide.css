@@ -1,0 +1,409 @@
+/* Panduan Pengguna Piontech Billing — stylesheet bersama 4 halaman.
+   Light-first (enak dibaca & di-print); mengikuti prefers-color-scheme.
+   Aksen cyan diambil dari tema aplikasi supaya pembaca mengenali produknya. */
+
+:root {
+    --bg: #f7f9fc;
+    --surface: #ffffff;
+    --surface-2: #eef3f9;
+    --ink: #16202e;
+    --ink-soft: #46586e;
+    --ink-dim: #6b7f97;
+    --line: #d9e2ec;
+    --line-soft: #e8eef5;
+
+    --brand: #0e7490;
+    --brand-strong: #0b5c73;
+    --brand-wash: #e6f7fb;
+
+    --ok: #0f7b4f;
+    --ok-wash: #e6f6ee;
+    --warn: #a35c06;
+    --warn-wash: #fdf3e2;
+    --stop: #b3261e;
+    --stop-wash: #fdeceb;
+
+    --radius: 12px;
+    --shadow: 0 1px 2px rgba(16, 32, 46, .06), 0 8px 24px -12px rgba(16, 32, 46, .18);
+
+    --ui: 'Outfit', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #0b1420;
+        --surface: #121e2c;
+        --surface-2: #16273a;
+        --ink: #e8eef6;
+        --ink-soft: #b3c3d6;
+        --ink-dim: #8ba0b8;
+        --line: #24384f;
+        --line-soft: #1b2b3e;
+
+        --brand: #35c6e4;
+        --brand-strong: #7adcf2;
+        --brand-wash: #102a36;
+
+        --ok: #4ad48d;
+        --ok-wash: #102c20;
+        --warn: #f0ab4a;
+        --warn-wash: #2e2110;
+        --stop: #f8837a;
+        --stop-wash: #2f1512;
+
+        --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 30px -14px rgba(0, 0, 0, .7);
+    }
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--ui);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ── Kerangka ────────────────────────────────────────────────────────── */
+
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .75rem 1.25rem;
+    padding: .85rem clamp(1rem, 4vw, 2.5rem);
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+}
+
+.brand {
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    font-weight: 800;
+    letter-spacing: .14em;
+    font-size: .9rem;
+    color: var(--brand);
+    text-decoration: none;
+}
+
+.brand svg { width: 1.4rem; height: 1.4rem; }
+.brand small {
+    display: block;
+    font-size: .5rem;
+    letter-spacing: .2em;
+    color: var(--ink-dim);
+    font-weight: 600;
+}
+
+.topnav { display: flex; flex-wrap: wrap; gap: .4rem; margin-left: auto; }
+
+.topnav a {
+    padding: .35rem .7rem;
+    border-radius: 999px;
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    text-decoration: none;
+    border: 1px solid transparent;
+}
+
+.topnav a:hover { color: var(--brand); background: var(--brand-wash); }
+.topnav a[aria-current='page'] {
+    color: var(--brand);
+    background: var(--brand-wash);
+    border-color: color-mix(in srgb, var(--brand) 35%, transparent);
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 4vw, 2.5rem) 5rem;
+}
+
+@media (min-width: 1024px) {
+    .layout { grid-template-columns: 230px minmax(0, 1fr); gap: 3rem; }
+}
+
+/* ── Daftar isi ──────────────────────────────────────────────────────── */
+
+.toc { align-self: start; }
+
+@media (min-width: 1024px) {
+    .toc { position: sticky; top: 5rem; }
+}
+
+
+.toc h2 {
+    font-size: .7rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin: 0 0 .6rem;
+}
+
+.toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .1rem; }
+
+.toc a {
+    display: block;
+    padding: .3rem .6rem;
+    border-radius: 8px;
+    font-size: .87rem;
+    color: var(--ink-soft);
+    text-decoration: none;
+    border-left: 2px solid transparent;
+}
+
+.toc a:hover { background: var(--surface-2); color: var(--brand); border-left-color: var(--brand); }
+
+/* Di layar kecil daftar isi jangan memakan satu layar penuh sebelum konten. */
+@media (max-width: 1023px) {
+    .toc {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        padding: .85rem 1rem;
+    }
+
+    .toc ol { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: .1rem .5rem; }
+    .toc a { font-size: .82rem; padding: .25rem .4rem; }
+}
+
+/* ── Teks ────────────────────────────────────────────────────────────── */
+
+h1 {
+    font-size: clamp(1.75rem, 4vw, 2.4rem);
+    line-height: 1.15;
+    letter-spacing: -.02em;
+    margin: 0 0 .4rem;
+    text-wrap: balance;
+}
+
+.lede { font-size: 1.05rem; color: var(--ink-soft); margin: 0 0 2rem; max-width: 62ch; }
+
+h2 {
+    font-size: 1.4rem;
+    letter-spacing: -.01em;
+    margin: 3rem 0 .5rem;
+    padding-top: .5rem;
+    border-top: 1px solid var(--line-soft);
+    scroll-margin-top: 5rem;
+}
+
+h3 { font-size: 1.05rem; margin: 1.75rem 0 .4rem; }
+
+p, li { max-width: 74ch; }
+p { margin: 0 0 .9rem; }
+
+a { color: var(--brand); }
+
+code, .mono {
+    font-family: var(--mono);
+    font-size: .88em;
+    background: var(--surface-2);
+    padding: .1rem .35rem;
+    border-radius: 5px;
+}
+
+.muted { color: var(--ink-dim); }
+
+/* ── Komponen ────────────────────────────────────────────────────────── */
+
+.eyebrow {
+    display: inline-block;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--brand);
+    background: var(--brand-wash);
+    padding: .2rem .6rem;
+    border-radius: 999px;
+    margin-bottom: .75rem;
+}
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.25rem;
+    box-shadow: var(--shadow);
+}
+
+.cards { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin: 1.25rem 0; }
+
+.cards .card h3 { margin-top: 0; }
+.cards .card p:last-child { margin-bottom: 0; }
+
+.role-card { display: block; text-decoration: none; color: inherit; transition: border-color .15s, transform .15s; }
+.role-card:hover { border-color: var(--brand); transform: translateY(-2px); }
+.role-card .who { font-size: .78rem; color: var(--ink-dim); }
+
+.note, .warn, .stop {
+    border-left: 3px solid;
+    border-radius: 0 8px 8px 0;
+    padding: .8rem 1rem;
+    margin: 1.1rem 0;
+    font-size: .95rem;
+}
+
+.note { border-color: var(--brand); background: var(--brand-wash); }
+.warn { border-color: var(--warn); background: var(--warn-wash); }
+.stop { border-color: var(--stop); background: var(--stop-wash); }
+
+.note strong, .warn strong, .stop strong { display: block; margin-bottom: .15rem; }
+
+figure { margin: 1.25rem 0 1.75rem; }
+
+figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    background: var(--surface-2);
+}
+
+figure.phone img { max-width: 340px; margin-inline: auto; }
+
+figcaption { font-size: .82rem; color: var(--ink-dim); margin-top: .5rem; text-align: center; }
+
+ol.steps { counter-reset: step; list-style: none; padding: 0; margin: 1rem 0; }
+
+ol.steps > li {
+    counter-increment: step;
+    position: relative;
+    padding: .15rem 0 .15rem 2.4rem;
+    margin-bottom: .55rem;
+}
+
+ol.steps > li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: .15rem;
+    width: 1.65rem;
+    height: 1.65rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--brand);
+    color: #fff;
+    font-family: var(--mono);
+    font-size: .8rem;
+    font-weight: 700;
+}
+
+@media (prefers-color-scheme: dark) {
+    ol.steps > li::before { color: #06202a; }
+}
+
+.table-wrap { overflow-x: auto; margin: 1.25rem 0; border: 1px solid var(--line); border-radius: var(--radius); }
+
+table { border-collapse: collapse; width: 100%; font-size: .9rem; background: var(--surface); }
+
+th, td { padding: .6rem .75rem; text-align: left; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+
+th {
+    background: var(--surface-2);
+    font-size: .72rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    white-space: nowrap;
+}
+
+tbody tr:last-child td { border-bottom: 0; }
+
+td.yes { color: var(--ok); font-weight: 700; }
+td.no { color: var(--stop); font-weight: 700; }
+
+.pill {
+    display: inline-block;
+    padding: .1rem .5rem;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 700;
+    border: 1px solid;
+}
+
+.pill-ok { color: var(--ok); background: var(--ok-wash); border-color: color-mix(in srgb, var(--ok) 35%, transparent); }
+.pill-warn { color: var(--warn); background: var(--warn-wash); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+.pill-stop { color: var(--stop); background: var(--stop-wash); border-color: color-mix(in srgb, var(--stop) 35%, transparent); }
+.pill-brand { color: var(--brand); background: var(--brand-wash); border-color: color-mix(in srgb, var(--brand) 35%, transparent); }
+
+/* Rantai langkah (urutan input data / alur harian) */
+.chain { display: grid; gap: .75rem; margin: 1.5rem 0; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+
+.chain .link {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: .85rem 1rem;
+    box-shadow: var(--shadow);
+}
+
+.chain .link .n {
+    font-family: var(--mono);
+    font-size: .7rem;
+    font-weight: 700;
+    color: var(--brand);
+    letter-spacing: .1em;
+}
+
+.chain .link h4 { margin: .15rem 0 .25rem; font-size: .98rem; }
+.chain .link p { margin: 0; font-size: .82rem; color: var(--ink-dim); }
+.chain .link.optional { border-style: dashed; }
+
+.diagram { margin: 1.5rem 0; overflow-x: auto; }
+.diagram svg { display: block; width: 100%; min-width: 640px; height: auto; }
+
+.svg-box { fill: var(--surface); stroke: var(--line); }
+.svg-box-brand { fill: var(--brand-wash); stroke: var(--brand); }
+.svg-box-ok { fill: var(--ok-wash); stroke: var(--ok); }
+.svg-box-warn { fill: var(--warn-wash); stroke: var(--warn); }
+.svg-lane { fill: var(--surface-2); stroke: none; }
+.svg-text { fill: var(--ink); font-family: var(--ui); font-size: 13px; font-weight: 600; }
+.svg-sub { fill: var(--ink-dim); font-family: var(--ui); font-size: 11px; }
+.svg-lane-label { fill: var(--ink-dim); font-family: var(--ui); font-size: 11px; font-weight: 700; letter-spacing: .1em; }
+.svg-line { stroke: var(--ink-dim); stroke-width: 1.6; fill: none; }
+.svg-arrow { fill: var(--ink-dim); }
+
+footer.page-footer {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 2rem clamp(1rem, 4vw, 2.5rem) 4rem;
+    border-top: 1px solid var(--line-soft);
+    color: var(--ink-dim);
+    font-size: .85rem;
+}
+
+/* ── Cetak / PDF ─────────────────────────────────────────────────────── */
+
+@media print {
+    :root {
+        --bg: #fff; --surface: #fff; --surface-2: #f4f6f9;
+        --ink: #000; --ink-soft: #333; --ink-dim: #555;
+        --line: #bbb; --line-soft: #ddd; --shadow: none;
+    }
+
+    .topbar, .toc, .topnav { display: none; }
+    .layout { display: block; max-width: none; padding: 0; }
+    h2 { break-after: avoid; page-break-after: avoid; }
+    figure, .card, .table-wrap, .note, .warn, .stop { break-inside: avoid; page-break-inside: avoid; }
+    figure img { max-width: 15cm; }
+    a { color: #000; text-decoration: underline; }
+}
