@@ -8,7 +8,6 @@ use App\Filament\Widgets\MonthlyBillingDepositChart;
 use App\Filament\Widgets\MonthlyBillingMethodChart;
 use App\Filament\Widgets\MonthlyBillingSummary;
 use App\Models\Cluster;
-use App\Models\CommissionRecipient;
 use App\Models\Customer;
 use App\Models\OfficerDeposit;
 use App\Models\Transaction;
@@ -252,10 +251,12 @@ class MonthlyBillingPageTest extends TestCase
 
     public function testSummaryShowsCommissionTotalForAdmin(): void
     {
-        $recipient = CommissionRecipient::factory()->create(['commission_percent' => 10]);
-        $customer = Customer::factory()->create(['referral_id' => $recipient->id]);
+        $officer = User::factory()->fieldOfficer()->create(['commission_per_customer' => 10_000]);
+        $cluster = Cluster::factory()->create(['officer_id' => $officer->id]);
+        $customer = Customer::factory()->create(['cluster_id' => $cluster->id]);
         Transaction::factory()->create([
             'customer_id' => $customer->id,
+            'officer_id' => $officer->id,
             'period' => now()->startOfMonth(),
             'billed_amount' => 100_000,
             'paid_amount' => 100_000,

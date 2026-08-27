@@ -54,6 +54,12 @@ class OfficerDeposit extends Model
         return app(BillingService::class)->officerProgress($this->officer_id, $this->period)['target'];
     }
 
+    /** Nominal yang belum berhasil ditarik petugas pada periode setoran ini. */
+    public function uncollected(): float
+    {
+        return app(BillingService::class)->officerProgress($this->officer_id, $this->period)['uncollected'];
+    }
+
     public function officer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'officer_id')->withTrashed();

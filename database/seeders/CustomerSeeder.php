@@ -19,7 +19,7 @@ class CustomerSeeder extends Seeder
         // Paket berharga saja untuk seed — billing_amount ikut harga paketnya.
         $packages = Package::where('is_custom', false)->get(['id', 'default_price']);
 
-        // 50 pelanggan dummy: ~45 active + 5 suspended, tersebar rata di 3 cluster.
+        // 50 pelanggan dummy: ~45 active + 5 suspended, tersebar rata di 3 daerah.
         foreach (range(0, 49) as $i) {
             $package = $packages->random();
 

@@ -228,6 +228,65 @@ class OfficerDepositModuleTest extends TestCase
         $this->assertSame(60_000.0, $progress['remaining']);
     }
 
+    public function testOfficerProgressReportsUncollectedAsTargetMinusCollected(): void
+    {
+        $officer = $this->officerWithProgress();
+
+        // Pelanggan ketiga: ditagih 80rb, belum bayar sepeser pun.
+        Customer::factory()->create([
+            'cluster_id' => $officer->clusters()->value('id'),
+            'billing_amount' => 80_000,
+        ]);
+
+        $progress = app(BillingService::class)->officerProgress($officer->id, now());
+
+        // Harus ditarik naik jadi 180rb (330rb tagihan − 150rb transfer),
+        // tertagih tetap 100rb → belum ditarik 80rb.
+        $this->assertSame(180_000.0, $progress['target']);
+        $this->assertSame(100_000.0, $progress['collected']);
+        $this->assertSame(80_000.0, $progress['uncollected']);
+    }
+
+    public function testBillingProgressReportsUncollectedAcrossAllOfficers(): void
+    {
+        $this->officerWithProgress();
+
+        $progress = app(BillingService::class)->billingProgress(now());
+
+        // Agregat: harus disetor 100rb (250rb − 150rb transfer) − tunai 100rb.
+        $this->assertSame(0.0, $progress['uncollected']);
+    }
+
+    public function testDepositTableShowsUncollectedColumn(): void
+    {
+        $officer = $this->officerWithProgress();
+        Customer::factory()->create([
+            'cluster_id' => $officer->clusters()->value('id'),
+            'billing_amount' => 80_000,
+        ]);
+
+        $this->actingAs(User::factory()->admin()->create());
+
+        Livewire::test(ListOfficerDeposits::class)
+            ->assertTableColumnExists('uncollected')
+            ->assertSee('Rp'."\u{A0}".'80.000');
+    }
+
+    public function testOfficerPanelShowsUncollectedColumn(): void
+    {
+        $officer = $this->officerWithProgress();
+        Customer::factory()->create([
+            'cluster_id' => $officer->clusters()->value('id'),
+            'billing_amount' => 80_000,
+        ]);
+
+        $this->actingAs(User::factory()->admin()->create());
+
+        Livewire::test(OfficerDepositWidget::class, ['pageFilters' => ['period' => now()->format('Y-m')]])
+            ->assertTableColumnExists('uncollected')
+            ->assertSee('Rp 80.000');
+    }
+
     public function testOfficerProgressIgnoresOtherOfficersAndPeriods(): void
     {
         $officer = $this->officerWithProgress();

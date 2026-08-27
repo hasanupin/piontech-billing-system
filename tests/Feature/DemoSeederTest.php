@@ -4,9 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\CustomerStatus;
 use App\Enums\PaymentMethod;
-use App\Enums\RecipientType;
 use App\Models\AuditLog;
-use App\Models\CommissionRecipient;
 use App\Models\Customer;
 use App\Models\OfficerDeposit;
 use App\Models\Transaction;
@@ -84,15 +82,12 @@ class DemoSeederTest extends TestCase
         $this->assertTrue($remaining->contains(fn (float $value): bool => $value > 0));
     }
 
-    public function testHasCommissionRecipientsOfBothTypesWithReferredCustomers(): void
+    public function testCommissionPageHasNonZeroTotal(): void
     {
-        $this->assertGreaterThan(0, CommissionRecipient::where('type', RecipientType::External)->count());
-        $this->assertGreaterThan(0, CommissionRecipient::where('type', RecipientType::Customer)->count());
-
         $this->assertGreaterThan(
             0,
-            Customer::withoutGlobalScopes()->whereNotNull('referral_id')->count(),
-            'Tanpa pelanggan referal, halaman Komisi & Laporan Komisi bernilai 0.',
+            app(BillingService::class)->commissionTotal(now()->startOfMonth()),
+            'Tanpa pelanggan lunas di cluster petugas, halaman Komisi & Laporan Komisi bernilai 0.',
         );
     }
 

@@ -6,7 +6,9 @@ use App\Filament\Resources\Clusters\ClusterResource;
 use App\Filament\Resources\Clusters\Pages\CreateCluster;
 use App\Models\Cluster;
 use App\Models\Customer;
+use App\Models\Transaction;
 use App\Models\User;
+use App\Services\BillingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -67,5 +69,45 @@ class ClusterModuleTest extends TestCase
         $this->assertSame(5, Customer::count());
         $this->actingAs($budi);
         $this->assertSame(0, Customer::count());
+    }
+
+    /**
+     * Satu petugas boleh memegang lebih dari satu daerah: `clusters.officer_id`
+     * sengaja tidak unique. Pelanggan, komisi, dan setoran menggabungkan
+     * seluruh daerah yang dipegangnya.
+     */
+    public function testOneOfficerCanHoldSeveralDaerah(): void
+    {
+        $officer = User::factory()->fieldOfficer()->create(['commission_per_customer' => 4000]);
+        $a = Cluster::factory()->create(['name' => 'Daerah Utara', 'officer_id' => $officer->id]);
+        $b = Cluster::factory()->create(['name' => 'Daerah Selatan', 'officer_id' => $officer->id]);
+
+        foreach ([$a, $b] as $daerah) {
+            $customer = Customer::factory()->create([
+                'cluster_id' => $daerah->id,
+                'billing_amount' => 100_000,
+            ]);
+            Transaction::factory()->create([
+                'customer_id' => $customer->id,
+                'officer_id' => $officer->id,
+                'payment_method' => 'cash',
+                'period' => now()->startOfMonth(),
+                'billed_amount' => 100_000,
+                'paid_amount' => 100_000,
+            ]);
+        }
+
+        $this->assertSame(2, $officer->clusters()->count());
+
+        // Petugas melihat pelanggan dari kedua daerah.
+        $this->actingAs($officer);
+        $this->assertSame(2, Customer::query()->count());
+
+        // Komisi & setoran menjumlahkan kedua daerah.
+        $billing = app(BillingService::class);
+        $this->assertSame(8_000.0, $billing->commissionQuery(now()->startOfMonth())
+            ->find($officer->getKey())->commission_amount);
+        $this->assertSame(200_000.0, $billing->officerProgress($officer->id, now())['target']);
+        $this->assertSame(200_000.0, $billing->officerProgress($officer->id, now())['collected']);
     }
 }

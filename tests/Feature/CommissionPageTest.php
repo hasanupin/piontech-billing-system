@@ -2,10 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Enums\CustomerStatus;
 use App\Filament\Pages\Commission;
 use App\Filament\Widgets\CommissionSummary;
-use App\Models\CommissionRecipient;
+use App\Models\Cluster;
 use App\Models\Customer;
 use App\Models\Transaction;
 use App\Models\User;
@@ -14,6 +13,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
 
+/**
+ * Komisi petugas: jumlah pelanggan LUNAS di cluster petugas x tarif per
+ * pelanggan yang tersimpan di user. Basisnya cluster, BUKAN officer_id
+ * transaksi — pembayaran transfer selalu ber-officer_id NULL.
+ */
 class CommissionPageTest extends TestCase
 {
     use RefreshDatabase;
@@ -23,13 +27,44 @@ class CommissionPageTest extends TestCase
         return app(BillingService::class);
     }
 
-    /** Komisi satu penerima pada periode berjalan. */
-    private function commissionOf(CommissionRecipient $recipient): float
+    /** Komisi satu petugas pada periode berjalan. */
+    private function commissionOf(User $officer): float
     {
         return $this->service()
             ->commissionQuery(now()->startOfMonth())
-            ->find($recipient->getKey())
+            ->find($officer->getKey())
             ->commission_amount;
+    }
+
+    /** Petugas + cluster, tarif komisi bisa ditentukan per test. */
+    private function officer(float $fee = 4000): User
+    {
+        $officer = User::factory()->fieldOfficer()->create(['commission_per_customer' => $fee]);
+        Cluster::factory()->create(['officer_id' => $officer->id]);
+
+        return $officer;
+    }
+
+    /** Pelanggan di cluster petugas, opsional langsung dibayar lunas. */
+    private function customer(User $officer, ?string $method = null, float $amount = 100_000): Customer
+    {
+        $customer = Customer::factory()->create([
+            'cluster_id' => $officer->clusters()->value('id'),
+            'billing_amount' => $amount,
+        ]);
+
+        if ($method !== null) {
+            Transaction::factory()->create([
+                'customer_id' => $customer->id,
+                'officer_id' => $method === 'cash' ? $officer->id : null,
+                'payment_method' => $method,
+                'period' => now()->startOfMonth(),
+                'billed_amount' => $amount,
+                'paid_amount' => $amount,
+            ]);
+        }
+
+        return $customer;
     }
 
     public function testAdminCanAccessCommissionPage(): void
@@ -46,214 +81,160 @@ class CommissionPageTest extends TestCase
         $this->get(Commission::getUrl())->assertForbidden();
     }
 
-    public function testShowsAllRecipientsWithZeroWhenNoPaidTransaction(): void
+    public function testShowsEveryOfficerWithZeroWhenNobodyPaid(): void
     {
-        $recipients = CommissionRecipient::factory()->count(2)->create();
+        $officers = collect([$this->officer(), $this->officer()]);
+        $officers->each(fn (User $o) => $this->customer($o));
+
         $this->actingAs(User::factory()->admin()->create());
 
-        Livewire::test(Commission::class)
-            ->assertCanSeeTableRecords($recipients);
+        Livewire::test(Commission::class)->assertCanSeeTableRecords($officers);
 
-        foreach ($recipients as $recipient) {
-            $this->assertSame(0.0, $this->commissionOf($recipient));
-        }
+        $officers->each(fn (User $o) => $this->assertSame(0.0, $this->commissionOf($o)));
     }
 
-    public function testAccumulatesCommissionAcrossReferredCustomers(): void
+    public function testCountsEachPaidCustomerOnceAtTheOfficerRate(): void
     {
-        $recipient = CommissionRecipient::factory()->create(['commission_percent' => 4]);
+        $officer = $this->officer(4000);
+        $this->customer($officer, 'cash');
+        $this->customer($officer, 'cash');
+        $this->customer($officer); // belum bayar
 
-        foreach ([110_000, 100_000] as $amount) {
-            $customer = Customer::factory()->create(['referral_id' => $recipient->id]);
-            Transaction::factory()->create([
-                'customer_id' => $customer->id,
-                'period' => now()->startOfMonth(),
-                'billed_amount' => $amount,
-                'paid_amount' => $amount,
-            ]);
-        }
-
-        // Pelanggan tanpa referal tidak menambah komisi siapa pun.
-        Transaction::factory()->create([
-            'customer_id' => Customer::factory()->create()->id,
-            'period' => now()->startOfMonth(),
-            'billed_amount' => 999_000,
-            'paid_amount' => 999_000,
-        ]);
-
-        $this->assertSame(8_400.0, $this->commissionOf($recipient));
+        $this->assertSame(8_000.0, $this->commissionOf($officer));
     }
 
-    public function testIgnoresUnpaidPartialAndOtherPeriodTransactions(): void
+    public function testTransferPaymentsStillEarnCommission(): void
     {
-        $recipient = CommissionRecipient::factory()->create(['commission_percent' => 10]);
-        $customer = Customer::factory()->create(['referral_id' => $recipient->id]);
+        // Regresi utama: Transaction::booted() menge-null-kan officer_id untuk
+        // transfer, jadi hitungan berbasis officer_id akan menelan baris ini.
+        $officer = $this->officer(4000);
+        $this->customer($officer, 'transfer');
 
-        // Sebagian → status partial.
+        $this->assertSame(4_000.0, $this->commissionOf($officer));
+    }
+
+    public function testIgnoresPartialUnpaidAndOtherPeriods(): void
+    {
+        $officer = $this->officer(4000);
+
+        $partial = $this->customer($officer);
         Transaction::factory()->create([
-            'customer_id' => $customer->id,
+            'customer_id' => $partial->id,
+            'officer_id' => $officer->id,
+            'payment_method' => 'cash',
             'period' => now()->startOfMonth(),
             'billed_amount' => 100_000,
             'paid_amount' => 40_000,
         ]);
-        // Lunas tapi bulan lain.
+
+        $lastMonth = $this->customer($officer);
         Transaction::factory()->create([
-            'customer_id' => Customer::factory()->create(['referral_id' => $recipient->id])->id,
-            'period' => now()->startOfMonth()->subMonth(),
+            'customer_id' => $lastMonth->id,
+            'officer_id' => $officer->id,
+            'payment_method' => 'cash',
+            'period' => now()->subMonth()->startOfMonth(),
             'billed_amount' => 100_000,
             'paid_amount' => 100_000,
         ]);
 
-        $this->assertSame(0.0, $this->commissionOf($recipient));
+        $this->assertSame(0.0, $this->commissionOf($officer));
     }
 
-    public function testUsesPercentagePerRecipient(): void
+    public function testDoesNotCountOtherOfficersCustomers(): void
     {
-        $small = CommissionRecipient::factory()->create(['commission_percent' => 4]);
-        $big = CommissionRecipient::factory()->create(['commission_percent' => 10]);
+        $mine = $this->officer(4000);
+        $theirs = $this->officer(4000);
+        $this->customer($theirs, 'cash');
 
-        foreach ([$small, $big] as $recipient) {
-            $customer = Customer::factory()->create(['referral_id' => $recipient->id]);
-            Transaction::factory()->create([
-                'customer_id' => $customer->id,
-                'period' => now()->startOfMonth(),
-                'billed_amount' => 100_000,
-                'paid_amount' => 100_000,
-            ]);
-        }
-
-        $this->assertSame(4_000.0, $this->commissionOf($small));
-        $this->assertSame(10_000.0, $this->commissionOf($big));
+        $this->assertSame(0.0, $this->commissionOf($mine));
+        $this->assertSame(4_000.0, $this->commissionOf($theirs));
     }
 
-    public function testCommissionTotalSumsAllRecipients(): void
+    public function testUsesTheRatePerOfficer(): void
     {
-        foreach ([4, 10] as $percent) {
-            $recipient = CommissionRecipient::factory()->create(['commission_percent' => $percent]);
-            $customer = Customer::factory()->create(['referral_id' => $recipient->id]);
-            Transaction::factory()->create([
-                'customer_id' => $customer->id,
-                'period' => now()->startOfMonth(),
-                'billed_amount' => 100_000,
-                'paid_amount' => 100_000,
-            ]);
-        }
+        $murah = $this->officer(4000);
+        $mahal = $this->officer(7500);
+        $this->customer($murah, 'cash');
+        $this->customer($mahal, 'cash');
 
-        $this->assertSame(14_000.0, $this->service()->commissionTotal(now()->startOfMonth()));
+        $this->assertSame(4_000.0, $this->commissionOf($murah));
+        $this->assertSame(7_500.0, $this->commissionOf($mahal));
+        $this->assertSame(11_500.0, $this->service()->commissionTotal(now()->startOfMonth()));
+    }
+
+    public function testEstimateCountsOnlyUnpaidBillableCustomers(): void
+    {
+        $officer = $this->officer(4000);
+        $this->customer($officer, 'cash');   // sudah bayar → bukan estimasi
+        $this->customer($officer);           // belum bayar → estimasi
+        Customer::factory()->terminated()->create([
+            'cluster_id' => $officer->clusters()->value('id'),
+            'billing_amount' => 100_000,
+        ]);
+
+        $estimate = $this->service()
+            ->commissionQuery(now()->startOfMonth())
+            ->find($officer->getKey())
+            ->estimated_commission_amount;
+
+        $this->assertSame(4_000.0, $estimate);
+        $this->assertSame(4_000.0, $this->service()->commissionEstimateTotal(now()->startOfMonth()));
     }
 
     public function testPeriodFilterChangesTheNumbers(): void
     {
-        $recipient = CommissionRecipient::factory()->create(['commission_percent' => 10]);
-        $customer = Customer::factory()->create(['referral_id' => $recipient->id]);
-        // startOfMonth dulu: subMonth pada tanggal 31 melompat balik ke bulan yang sama.
-        $lastMonth = now()->startOfMonth()->subMonth();
+        $officer = $this->officer(4000);
+        $customer = $this->customer($officer);
         Transaction::factory()->create([
             'customer_id' => $customer->id,
-            'period' => $lastMonth,
+            'officer_id' => $officer->id,
+            'payment_method' => 'cash',
+            'period' => now()->subMonth()->startOfMonth(),
             'billed_amount' => 100_000,
             'paid_amount' => 100_000,
         ]);
+
+        $this->assertSame(0.0, $this->service()->commissionTotal(now()->startOfMonth()));
+        $this->assertSame(4_000.0, $this->service()->commissionTotal(now()->subMonth()->startOfMonth()));
+
         $this->actingAs(User::factory()->admin()->create());
 
-        $this->assertSame(0.0, $this->commissionOf($recipient));
-        $this->assertSame(
-            10_000.0,
-            $this->service()->commissionQuery($lastMonth)->find($recipient->getKey())->commission_amount,
-        );
-
-        // Kartu ringkasan mengikuti filter periode halaman.
         Livewire::test(CommissionSummary::class, ['pageFilters' => ['period' => now()->format('Y-m')]])
             ->assertSee('Rp 0');
-        Livewire::test(CommissionSummary::class, ['pageFilters' => ['period' => $lastMonth->format('Y-m')]])
-            ->assertSee('Rp 10.000');
+        Livewire::test(CommissionSummary::class, ['pageFilters' => ['period' => now()->subMonth()->format('Y-m')]])
+            ->assertSee('Rp 4.000');
+    }
+
+    public function testSummaryShowsTotalsAndOfficerCount(): void
+    {
+        $officer = $this->officer(4000);
+        $this->customer($officer, 'cash');
+        $this->customer($officer);
+
+        $this->actingAs(User::factory()->admin()->create());
+
+        Livewire::test(CommissionSummary::class, ['pageFilters' => ['period' => now()->format('Y-m')]])
+            ->assertSee('Rp 4.000')
+            ->assertSee('1');
     }
 
     public function testFilterRendersAboveSummaryAndTable(): void
     {
-        CommissionRecipient::factory()->create(['name' => 'Pak Referal']);
-        $this->actingAs(User::factory()->admin()->create());
-
-        $this->get(Commission::getUrl())->assertSeeInOrder([
-            'filters.period',    // filter halaman
-            'CommissionSummary', // kartu ringkasan
-            'Pak Referal',       // baris tabel
-        ], escape: false);
-    }
-
-    /** Estimasi = tagihan pelanggan referal yang BELUM lunas × persentase penerima. */
-    public function testEstimateCountsOnlyUnpaidBillableReferredCustomers(): void
-    {
-        $recipient = CommissionRecipient::factory()->create(['commission_percent' => 10]);
-
-        // Belum bayar → masuk estimasi.
-        Customer::factory()->create([
-            'referral_id' => $recipient->id,
-            'billing_amount' => 100_000,
-        ]);
-        // Sudah lunas periode ini → tidak masuk estimasi (sudah jadi komisi riil).
-        $paid = Customer::factory()->create([
-            'referral_id' => $recipient->id,
-            'billing_amount' => 200_000,
-        ]);
-        Transaction::factory()->create([
-            'customer_id' => $paid->id,
-            'period' => now()->startOfMonth(),
-            'billed_amount' => 200_000,
-            'paid_amount' => 200_000,
-        ]);
-        // Berhenti berlangganan → tidak ditagih, tidak masuk estimasi.
-        Customer::factory()->create([
-            'referral_id' => $recipient->id,
-            'billing_amount' => 500_000,
-            'status' => CustomerStatus::Terminated,
-        ]);
-        // Tanpa referal → tidak menambah estimasi siapa pun.
-        Customer::factory()->create(['billing_amount' => 900_000]);
-
-        $this->assertSame(
-            10_000.0,
-            $this->service()->commissionQuery(now()->startOfMonth())
-                ->find($recipient->getKey())
-                ->estimated_commission_amount,
-        );
-        $this->assertSame(10_000.0, $this->service()->commissionEstimateTotal(now()->startOfMonth()));
-    }
-
-    public function testSummaryShowsTotalsAndRecipientCounts(): void
-    {
-        $recipient = CommissionRecipient::factory()->create(['commission_percent' => 10]);
-        $customer = Customer::factory()->create([
-            'referral_id' => $recipient->id,
-            'billing_amount' => 100_000,
-        ]);
-        Transaction::factory()->create([
-            'customer_id' => $customer->id,
-            'period' => now()->startOfMonth(),
-            'billed_amount' => 100_000,
-            'paid_amount' => 100_000,
-        ]);
-        // Belum bayar → estimasi 20.000.
-        Customer::factory()->create([
-            'referral_id' => $recipient->id,
-            'billing_amount' => 200_000,
-        ]);
-        CommissionRecipient::factory()->customerType()->create();
+        $officer = $this->officer();
+        $officer->update(['name' => 'Petugas Komisi']);
+        $this->customer($officer, 'cash');
 
         $this->actingAs(User::factory()->admin()->create());
 
-        Livewire::test(CommissionSummary::class, [
-            'pageFilters' => ['period' => now()->format('Y-m')],
-        ])
-            ->assertSuccessful()
-            ->assertSee('Rp 10.000')  // total komisi
-            ->assertSee('Rp 20.000')  // estimasi komisi
-            ->assertSee('1 / 1');     // non pelanggan / pelanggan
+        Livewire::test(Commission::class)
+            ->assertSeeInOrder(['filters.period', 'CommissionSummary', 'Petugas Komisi'], escape: false);
     }
 
     public function testExportStreamsXlsxOfFilteredRows(): void
     {
-        CommissionRecipient::factory()->create();
+        $officer = $this->officer();
+        $this->customer($officer, 'cash');
+
         $this->actingAs(User::factory()->admin()->create());
 
         Livewire::test(Commission::class)

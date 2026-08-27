@@ -21,10 +21,11 @@ class OfficerDepositSummary extends StatsOverviewWidget
 
         // Petugas: hanya sisa (KEKURANGAN SETOR) miliknya bulan ini.
         if ($user?->isRole(Role::FieldOfficer)) {
-            $remaining = $billing->officerRemainingBalance((int) $user->id, $period);
+            $progress = $billing->officerProgress((int) $user->id, $period);
 
             return [
-                Stat::make(__('Remaining To Deposit This Period'), 'Rp '.number_format($remaining, 0, ',', '.')),
+                Stat::make(__('Remaining To Deposit This Period'), 'Rp '.number_format($progress['remaining'], 0, ',', '.')),
+                Stat::make(__('Not Collected Yet'), 'Rp '.number_format($progress['uncollected'], 0, ',', '.')),
             ];
         }
 
@@ -33,6 +34,9 @@ class OfficerDepositSummary extends StatsOverviewWidget
 
         return [
             Stat::make(__('Cash Collected'), 'Rp '.number_format($summary['cash'], 0, ',', '.')),
+            Stat::make(__('Not Collected Yet'), 'Rp '.number_format(
+                $billing->billingProgress($period)['uncollected'], 0, ',', '.',
+            )),
             Stat::make(__('Total Deposited'), 'Rp '.number_format($summary['total_deposited'], 0, ',', '.')),
             Stat::make(__('Held By Officers'), 'Rp '.number_format($summary['held_by_officers'], 0, ',', '.')),
         ];

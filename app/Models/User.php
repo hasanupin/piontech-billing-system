@@ -8,9 +8,11 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -23,6 +25,7 @@ use Illuminate\Notifications\Notifiable;
     'password',
     'role',
     'is_active',
+    'commission_per_customer',
     'created_by',
 ])]
 #[Hidden(['password', 'remember_token'])]
@@ -43,6 +46,7 @@ class User extends Authenticatable implements FilamentUser
             'password' => 'hashed',
             'role' => Role::class,
             'is_active' => 'boolean',
+            'commission_per_customer' => 'decimal:2',
         ];
     }
 
@@ -85,6 +89,39 @@ class User extends Authenticatable implements FilamentUser
     public function auditLogs(): HasMany
     {
         return $this->hasMany(AuditLog::class, 'user_id');
+    }
+
+    /**
+     * Pelanggan yang ditangani petugas ini lewat cluster yang dipegangnya —
+     * dasar seluruh hitungan komisi (BillingService::commissionQuery()).
+     */
+    public function clusterCustomers(): HasManyThrough
+    {
+        return $this->hasManyThrough(Customer::class, Cluster::class, 'officer_id', 'cluster_id');
+    }
+
+    // --- Commission ---
+
+    /**
+     * Komisi periode berjalan = jumlah pelanggan lunas x tarif per pelanggan.
+     * `paid_customers` hanya terisi bila query-nya datang dari
+     * BillingService::commissionQuery(); di tempat lain hasilnya 0.
+     */
+    protected function commissionAmount(): Attribute
+    {
+        return Attribute::get(fn (): float => round(
+            (int) ($this->paid_customers ?? 0) * (float) $this->commission_per_customer,
+            2,
+        ));
+    }
+
+    /** Komisi yang belum jadi hak karena pelanggannya belum bayar. */
+    protected function estimatedCommissionAmount(): Attribute
+    {
+        return Attribute::get(fn (): float => round(
+            (int) ($this->estimated_customers ?? 0) * (float) $this->commission_per_customer,
+            2,
+        ));
     }
 
     // --- Role Helpers ---

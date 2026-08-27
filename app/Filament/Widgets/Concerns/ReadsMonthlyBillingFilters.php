@@ -25,12 +25,17 @@ trait ReadsMonthlyBillingFilters
         return Carbon::parse(($this->pageFilters['period'] ?? now()->format('Y-m')).'-01')->startOfMonth();
     }
 
+    protected function clusterId(): ?string
+    {
+        return $this->pageFilters['cluster_id'] ?? null;
+    }
+
     /**
-     * @return array{billed: int, paid: int, unpaid: int, billed_amount: float, paid_amount: float, outstanding: float, cash: float, transfer: float, must_deposit: float, deposited: float, not_deposited: float}
+     * @return array{billed: int, paid: int, unpaid: int, billed_amount: float, paid_amount: float, outstanding: float, cash: float, transfer: float, must_deposit: float, uncollected: float, deposited: float, not_deposited: float}
      */
     protected function progress(): array
     {
-        $clusterId = $this->pageFilters['cluster_id'] ?? null;
+        $clusterId = $this->clusterId();
         $user = auth()->user();
 
         // Setoran mengikuti PIC cluster terpilih; tanpa filter cluster,

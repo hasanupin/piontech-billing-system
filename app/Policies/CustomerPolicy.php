@@ -20,20 +20,14 @@ class CustomerPolicy
 
     public function create(User $user): bool
     {
-        // Petugas boleh mendaftarkan pelanggan baru; clusternya divalidasi
-        // ScopeService::authorizeCustomerCluster di halaman Create.
-        return $user->isRole(Role::Admin, Role::FieldOfficer);
+        // Pendaftaran pelanggan kembali jadi wewenang admin (PRD §6).
+        return $user->isRole(Role::Admin);
     }
 
     public function update(User $user, Customer $customer): bool
     {
-        if ($user->isRole(Role::Admin)) {
-            return true;
-        }
-
-        // Petugas hanya boleh mengubah pelanggan di cluster yang dia pegang.
-        return $user->isRole(Role::FieldOfficer)
-            && $customer->cluster?->officer_id === $user->id;
+        // Petugas read-only atas data pelanggan (PRD §6).
+        return $user->isRole(Role::Admin);
     }
 
     public function delete(User $user, Customer $customer): bool

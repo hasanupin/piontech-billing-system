@@ -5,7 +5,6 @@ namespace App\Providers\Filament;
 use App\Filament\Auth\Login;
 use App\Filament\Pages\Dashboard;
 use App\Http\Middleware\LogPageVisit;
-use App\Http\Middleware\SetLocale;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -120,12 +119,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                SetLocale::class,
             ])
-            ->renderHook(
-                PanelsRenderHook::USER_MENU_PROFILE_AFTER,
-                fn (): string => view('filament.locale-switcher')->render(),
-            )
             // Backdrop grid + glow di halaman login (layout simple).
             ->renderHook(
                 PanelsRenderHook::SIMPLE_LAYOUT_START,

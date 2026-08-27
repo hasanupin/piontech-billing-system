@@ -4,9 +4,8 @@ namespace App\Filament\Pages;
 
 use App\Enums\Role;
 use App\Filament\Actions\ExportTableAction;
-use App\Filament\Resources\CommissionRecipients\Tables\CommissionRecipientsTable;
 use App\Filament\Widgets\CommissionSummary;
-use App\Models\CommissionRecipient;
+use App\Models\User;
 use App\Services\BillingService;
 use BackedEnum;
 use Carbon\Carbon;
@@ -26,9 +25,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * Komisi per penerima untuk satu periode. Dasar hitungnya paid_amount transaksi
- * LUNAS milik pelanggan yang direferalkan (BillingService::commissionQuery());
- * penerima tanpa transaksi tetap tampil dengan komisi 0.
+ * Komisi per petugas untuk satu periode: jumlah pelanggan LUNAS di cluster
+ * yang dipegangnya x tarif komisi petugas itu (BillingService::commissionQuery()).
+ * Petugas tanpa pelanggan lunas tetap tampil dengan komisi 0.
  */
 class Commission extends Page implements HasTable
 {
@@ -93,22 +92,16 @@ class Commission extends Page implements HasTable
             ExportTableAction::make(
                 'komisi_'.$this->periodStart()->format('Y_m'),
                 [
-                    __('Name'),
-                    __('Type'),
-                    __('WhatsApp'),
-                    __('Paid Transactions'),
-                    __('Commission Base'),
-                    __('Commission Percentage'),
+                    __('Officer'),
+                    __('Paid Customers'),
+                    __('Commission Per Customer'),
                     __('Commission Amount'),
                     __('Estimated Commission'),
                 ],
-                fn (CommissionRecipient $record): array => [
-                    $record->display_name ?? '',
-                    $record->type->getLabel(),
-                    $record->display_whatsapp ?? '',
-                    (int) $record->paid_count,
-                    (float) ($record->paid_base ?? 0),
-                    (float) $record->commission_percent,
+                fn (User $record): array => [
+                    $record->name,
+                    (int) $record->paid_customers,
+                    (float) $record->commission_per_customer,
                     $record->commission_amount,
                     $record->estimated_commission_amount,
                 ],
@@ -127,42 +120,39 @@ class Commission extends Page implements HasTable
             ->query(fn (): Builder => app(BillingService::class)->commissionQuery($this->periodStart()))
             ->defaultSort('commission_amount', 'desc')
             ->columns([
-                // Kolom mirror (nama & WA) dipakai bersama tabel master Penerima Komisi.
-                CommissionRecipientsTable::nameColumn(),
-                TextColumn::make('type')
-                    ->label(__('Type'))
-                    ->badge(),
-                CommissionRecipientsTable::whatsappColumn()
-                    ->toggleable(),
-                TextColumn::make('paid_count')
-                    ->label(__('Paid Transactions'))
+                TextColumn::make('name')
+                    ->label(__('Officer'))
+                    ->searchable()
                     ->sortable(),
-                TextColumn::make('paid_base')
-                    ->label(__('Commission Base'))
-                    ->state(fn (CommissionRecipient $record): float => (float) ($record->paid_base ?? 0))
+                TextColumn::make('clusters_count')
+                    ->label(__('Clusters'))
+                    ->counts('clusters')
+                    ->toggleable(),
+                TextColumn::make('paid_customers')
+                    ->label(__('Paid Customers'))
+                    ->sortable(),
+                TextColumn::make('commission_per_customer')
+                    ->label(__('Commission Per Customer'))
                     ->money('IDR')
                     ->sortable(),
-                TextColumn::make('commission_percent')
-                    ->label(__('Commission Percentage'))
-                    ->suffix('%'),
                 TextColumn::make('commission_amount')
                     ->label(__('Commission Amount'))
-                    ->state(fn (CommissionRecipient $record): float => $record->commission_amount)
+                    ->state(fn (User $record): float => $record->commission_amount)
                     ->money('IDR')
                     ->weight('bold')
-                    // Komisi bukan kolom tabel — urutkan lewat basis × persentase.
+                    // Komisi bukan kolom tabel — urutkan lewat jumlah x tarif.
                     ->sortable(query: fn (Builder $query, string $direction): Builder => $query
-                        ->orderByRaw("COALESCE(paid_base, 0) * commission_percent {$direction}")),
+                        ->orderByRaw("COALESCE(paid_customers, 0) * commission_per_customer {$direction}")),
                 TextColumn::make('estimated_commission_amount')
                     ->label(__('Estimated Commission'))
-                    ->state(fn (CommissionRecipient $record): float => $record->estimated_commission_amount)
+                    ->state(fn (User $record): float => $record->estimated_commission_amount)
                     ->money('IDR')
                     ->color('warning')
                     ->sortable(query: fn (Builder $query, string $direction): Builder => $query
-                        ->orderByRaw("COALESCE(estimated_base, 0) * commission_percent {$direction}")),
+                        ->orderByRaw("COALESCE(estimated_customers, 0) * commission_per_customer {$direction}")),
             ])
             ->filters([
-                // Semua penerima tampil secara default; filter ini cara membatasi
+                // Semua petugas tampil secara default; filter ini cara membatasi
                 // ke yang aktif saja.
                 TernaryFilter::make('is_active')
                     ->label(__('Active')),

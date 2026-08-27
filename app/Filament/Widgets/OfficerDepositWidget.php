@@ -50,6 +50,12 @@ class OfficerDepositWidget extends TableWidget
                     ->state(fn (User $record): string => BillingStatsOverview::rupiah(
                         $this->progressOf($record)['collected'],
                     )),
+                TextColumn::make('uncollected')
+                    ->label(__('Not Collected Yet'))
+                    ->fontFamily(FontFamily::Mono)
+                    ->state(fn (User $record): float => $this->progressOf($record)['uncollected'])
+                    ->formatStateUsing(fn (float $state): string => BillingStatsOverview::rupiah($state))
+                    ->color(fn (float $state): string => $state > 0 ? 'danger' : 'success'),
                 TextColumn::make('deposited')
                     ->label(__('Total Deposited'))
                     ->fontFamily(FontFamily::Mono)
@@ -68,7 +74,7 @@ class OfficerDepositWidget extends TableWidget
             ->paginated(false);
     }
 
-    /** @return array{target: float, collected: float, deposited: float, remaining: float} */
+    /** @return array{target: float, collected: float, uncollected: float, deposited: float, remaining: float} */
     private function progressOf(User $officer): array
     {
         return app(BillingService::class)->officerProgress($officer->id, $this->periodStart());
