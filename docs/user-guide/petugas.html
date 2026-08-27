@@ -39,8 +39,6 @@
             <li><a href="#harian">Alur kerja harian</a></li>
             <li><a href="#dashboard">Dashboard</a></li>
             <li><a href="#pelanggan">Data Pelanggan</a></li>
-            <li><a href="#daftar-baru">Mendaftarkan pelanggan</a></li>
-            <li><a href="#foto-lokasi">Foto rumah &amp; titik lokasi</a></li>
             <li><a href="#transaksi">Transaksi per periode</a></li>
             <li><a href="#catat">Mencatat pembayaran</a></li>
             <li><a href="#pengaturan">Pengaturan &amp; setoran</a></li>
@@ -62,22 +60,22 @@
             <div class="card">
                 <h3>Yang Anda kerjakan</h3>
                 <p>
-                    Menagih pelanggan di cluster Anda, mencatat pembayaran tunai, mendaftarkan
-                    pelanggan baru, serta melengkapi foto rumah dan titik lokasi.
+                    Menagih pelanggan di daerah Anda dan mencatat pembayaran, baik
+                    <strong>tunai</strong> maupun <strong>transfer</strong>.
                 </p>
             </div>
             <div class="card">
                 <h3>Yang bukan wewenang Anda</h3>
                 <p>
-                    Mengisolir atau memulihkan pelanggan, menghapus data, mengisi kolom Referal,
+                    Mengisolir atau memulihkan pelanggan, menghapus data,
                     mengubah transaksi yang sudah tercatat, dan mencatat setoran. Semua itu tugas admin.
                 </p>
             </div>
         </div>
 
         <div class="note">
-            <strong>Anda hanya melihat cluster sendiri</strong>
-            Semua daftar sudah otomatis tersaring: pelanggan cluster petugas lain tidak akan muncul,
+            <strong>Anda hanya melihat daerah sendiri</strong>
+            Semua daftar sudah otomatis tersaring: pelanggan daerah petugas lain tidak akan muncul,
             walaupun Anda mencarinya. Ini normal, bukan data hilang.
         </div>
 
@@ -124,10 +122,10 @@
         </div>
 
         <h2 id="dashboard">Dashboard</h2>
-        <p>Halaman pertama saat masuk. Isinya tiga angka utama dan daftar tagihan hari ini.</p>
+        <p>Halaman pertama saat masuk. Isinya empat angka utama dan daftar tagihan hari ini.</p>
 
         <figure class="phone">
-            <img src="screenshots/petugas-dashboard.png" alt="Dashboard petugas: tiga kartu angka dan daftar pelanggan jatuh tempo hari ini">
+            <img src="screenshots/petugas-dashboard.png" alt="Dashboard petugas: empat kartu angka dan daftar pelanggan jatuh tempo hari ini">
             <figcaption>Dashboard petugas.</figcaption>
         </figure>
 
@@ -138,6 +136,7 @@
                     <tr><td><strong>Jatuh Tempo Hari Ini</strong></td><td>Jumlah pelanggan yang tanggal tagihnya hari ini.</td></tr>
                     <tr><td><strong>Cash di Tangan</strong></td><td>Uang tunai yang sudah Anda tarik tetapi belum diserahkan ke admin. <strong>Angka ini harus sama dengan uang di kantong Anda.</strong></td></tr>
                     <tr><td><strong>Belum Bayar</strong></td><td>Jumlah pelanggan Anda yang belum melunasi bulan ini.</td></tr>
+                    <tr><td><strong>Komisi Bulan Ini</strong></td><td>Upah Anda bulan berjalan: jumlah pelanggan Anda yang sudah lunas dikali tarif komisi per pelanggan pada akun Anda. Pelanggan yang membayar lewat transfer <strong>tetap</strong> dihitung.</td></tr>
                 </tbody>
             </table>
         </div>
@@ -154,7 +153,7 @@
         <div class="note">
             <strong>Tombol abu-abu tidak bisa ditekan</strong>
             Kalau ikon pin atau foto berwarna pudar, berarti pelanggan itu belum punya titik lokasi
-            atau foto rumah. Anda bisa melengkapinya lewat menu Penagihan → pilih pelanggan → Ubah.
+            atau foto rumah. Mintakan ke admin untuk melengkapinya.
         </div>
 
         <div class="warn">
@@ -166,7 +165,7 @@
         <h2 id="pelanggan">Data Pelanggan</h2>
         <p>
             Tekan menu <strong>Penagihan</strong> di bawah, lalu pilih tab <strong>Data Pelanggan</strong>.
-            Semua pelanggan di cluster Anda tampil sebagai kartu.
+            Semua pelanggan di daerah Anda tampil sebagai kartu.
         </p>
 
         <figure class="phone">
@@ -176,77 +175,8 @@
 
         <ul>
             <li><strong>Cari</strong> — ketik sebagian nama pelanggan, daftar langsung menyaring.</li>
-            <li><strong>Ikon corong</strong> — saring berdasarkan status (Aktif / Isolir) atau tampilkan hanya yang jatuh tempo hari ini.</li>
-            <li><strong>Ubah</strong> — memperbaiki data pelanggan, misalnya menambahkan nomor WhatsApp atau foto rumah.</li>
+            <li><strong>Ikon corong</strong> — saring berdasarkan status (Aktif / Isolir), tampilkan hanya yang jatuh tempo hari ini, atau pilih <strong>Daerah</strong> bila Anda memegang lebih dari satu.</li>
         </ul>
-
-        <h2 id="daftar-baru">Mendaftarkan pelanggan baru</h2>
-        <p>Dari halaman Data Pelanggan, tekan tombol <strong>Buat Pelanggan</strong> di bagian atas.</p>
-
-        <figure class="phone">
-            <img src="screenshots/petugas-form-pelanggan.png" alt="Form pelanggan baru bagian Identitas dan Penugasan dan Paket">
-            <figcaption>Form pelanggan baru.</figcaption>
-        </figure>
-
-        <ol class="steps">
-            <li><strong>Nama</strong> — nama panggilan yang dikenal di lapangan. Wajib diisi.</li>
-            <li><strong>Nama Lengkap</strong> — sesuai KTP, boleh dikosongkan.</li>
-            <li><strong>No. WhatsApp</strong> — tanpa angka 0 di depan. Contoh: <code>81234567890</code>.</li>
-            <li><strong>Cluster</strong> — sudah terisi cluster Anda. Bila Anda memegang beberapa cluster, pilih yang benar.</li>
-            <li><strong>Paket</strong> — pilih paket; <strong>Nominal Tagihan</strong> akan terisi otomatis.</li>
-            <li><strong>Tgl Tagih</strong> — tanggal 1–31, dipakai sistem untuk menentukan kapan pelanggan muncul di Dashboard Anda.</li>
-            <li>Lengkapi <strong>Alamat</strong>, foto rumah, dan titik lokasi (lihat bagian berikutnya).</li>
-            <li>Tekan <strong>Buat</strong>.</li>
-        </ol>
-
-        <div class="note">
-            <strong>Harga khusus</strong>
-            Bila pelanggan mendapat harga berbeda dari daftar paket, ketik saja angkanya di
-            <strong>Nominal Tagihan</strong>. Sistem otomatis menandainya sebagai paket Custom.
-        </div>
-
-        <div class="warn">
-            <strong>Kolom Status dan Referal tidak ada di layar Anda</strong>
-            Pelanggan baru otomatis berstatus Aktif. Penentuan ISOLIR dan pengisian Referal
-            adalah wewenang admin — bukan kesalahan tampilan.
-        </div>
-
-        <h2 id="foto-lokasi">Foto rumah &amp; titik lokasi</h2>
-        <p>
-            Bagian <strong>Lokasi (Referensi)</strong> di form pelanggan sangat membantu penagihan
-            berikutnya — apalagi kalau nanti pelanggan ditagih petugas lain.
-        </p>
-
-        <figure class="phone">
-            <img src="screenshots/petugas-form-lokasi.png" alt="Bagian Lokasi pada form: kolom Alamat, URL Maps dengan ikon pin, dan unggah Foto Rumah">
-            <figcaption>Bagian Lokasi: alamat, titik koordinat, dan foto rumah.</figcaption>
-        </figure>
-
-        <h3>Mengambil titik koordinat</h3>
-        <ol class="steps">
-            <li>Berdiri di depan rumah pelanggan.</li>
-            <li>Tekan <strong>ikon pin</strong> di ujung kanan kolom <strong>URL Maps</strong>.</li>
-            <li>Bila browser meminta izin lokasi, pilih <strong>Izinkan</strong>.</li>
-            <li>Kolom akan terisi otomatis berupa tautan Google Maps.</li>
-        </ol>
-
-        <p>
-            Bisa juga secara manual: buka Google Maps, tekan lokasi rumah, pilih <em>Bagikan</em>,
-            salin tautannya, lalu tempel ke kolom <strong>URL Maps</strong>.
-        </p>
-
-        <h3>Memotret rumah</h3>
-        <ol class="steps">
-            <li>Tekan area <strong>Foto Rumah</strong>.</li>
-            <li>Pilih <strong>Kamera</strong> pada menu yang muncul, lalu potret bagian depan rumah.</li>
-            <li>Pastikan nomor rumah atau ciri khasnya terlihat.</li>
-        </ol>
-
-        <div class="warn">
-            <strong>Izin lokasi ditolak?</strong>
-            Kalau muncul pesan lokasi tidak tersedia, aktifkan izin lokasi untuk browser di
-            pengaturan HP, lalu coba lagi. Bila tetap gagal, tempel tautan Maps secara manual.
-        </div>
 
         <h2 id="transaksi">Transaksi per periode</h2>
         <p>
@@ -286,7 +216,7 @@
 
         <ol class="steps">
             <li>Periksa <strong>Pelanggan</strong> dan <strong>Periode</strong> sudah benar.</li>
-            <li><strong>Metode Bayar</strong> terkunci <strong>Tunai</strong> — memang hanya itu yang Anda catat.</li>
+            <li><strong>Metode Bayar</strong> — pilih <strong>Tunai</strong> bila uangnya Anda terima langsung, atau <strong>Transfer</strong> bila pelanggan mentransfer sendiri ke rekening Pion Tech.</li>
             <li>Sesuaikan <strong>Nominal Bayar</strong> bila pelanggan membayar sebagian.</li>
             <li><strong>Waktu Bayar</strong> terisi waktu sekarang; ubah bila mencatat menyusul.</li>
             <li>Tekan <strong>Buat</strong>.</li>
@@ -306,16 +236,16 @@
         </div>
 
         <h2 id="pengaturan">Pengaturan &amp; setoran</h2>
-        <p>Menu <strong>Pengaturan</strong> berisi data akun Anda, cluster yang dipegang, dan riwayat setoran.</p>
+        <p>Menu <strong>Pengaturan</strong> berisi data akun Anda, daerah yang dipegang, dan riwayat setoran.</p>
 
         <figure class="phone">
-            <img src="screenshots/petugas-pengaturan.png" alt="Halaman pengaturan: kartu profil, daftar cluster hanya lihat, riwayat Setoran Saya, tombol Keluar">
+            <img src="screenshots/petugas-pengaturan.png" alt="Halaman pengaturan: kartu profil, daftar daerah hanya lihat, riwayat Setoran Saya, tombol Keluar">
             <figcaption>Pengaturan petugas.</figcaption>
         </figure>
 
         <ul>
             <li><strong>Profil</strong> — nama, email, dan peran Anda.</li>
-            <li><strong>Cluster</strong> — wilayah yang Anda pegang beserta jumlah pelanggannya. Hanya bisa dilihat; perubahan cluster dilakukan CEO atau admin.</li>
+            <li><strong>Daerah</strong> — wilayah yang Anda pegang beserta jumlah pelanggannya. Hanya bisa dilihat; perubahan daerah dilakukan CEO atau admin.</li>
             <li><strong>Panduan Pengguna</strong> — membuka kembali panduan ini kapan saja dari dalam aplikasi.</li>
             <li><strong>Setoran Saya</strong> — riwayat uang yang sudah Anda serahkan ke admin.</li>
             <li><strong>Keluar</strong> — mengakhiri sesi. Gunakan bila HP dipakai bergantian.</li>
@@ -334,7 +264,7 @@
             <table>
                 <thead><tr><th>Keadaan</th><th>Yang perlu dilakukan</th></tr></thead>
                 <tbody>
-                    <tr><td>Pelanggan tidak ketemu saat dicari</td><td>Pastikan ejaan namanya benar. Kalau tetap tidak ada, kemungkinan pelanggan itu ada di cluster petugas lain.</td></tr>
+                    <tr><td>Pelanggan tidak ketemu saat dicari</td><td>Pastikan ejaan namanya benar. Kalau tetap tidak ada, kemungkinan pelanggan itu ada di daerah petugas lain.</td></tr>
                     <tr><td>Tombol Tagih tidak muncul</td><td>Pelanggan itu sudah lunas untuk periode tersebut.</td></tr>
                     <tr><td>Salah memasukkan nominal</td><td>Hubungi admin — hanya admin yang bisa memperbaiki transaksi.</td></tr>
                     <tr><td>Halaman menolak dengan tulisan "Forbidden"</td><td>Menu itu bukan untuk petugas. Kembali ke Dashboard lewat menu di bawah.</td></tr>

@@ -15,7 +15,6 @@ use App\Filament\Pages\CustomerGrowthReport;
 use App\Filament\Pages\OfficerDepositReport;
 use App\Filament\Pages\PaymentRecapReport;
 use App\Models\Cluster;
-use App\Models\CommissionRecipient;
 use App\Models\Customer;
 use App\Models\OfficerDeposit;
 use App\Models\Package;
@@ -198,24 +197,29 @@ class ReportPageTest extends TestCase
         $this->assertCount(3, $rows);
     }
 
-    public function testCommissionReportSumsPaidReferralsInRange(): void
+    public function testCommissionReportCountsPaidCustomersInRange(): void
     {
         $this->actingAs(User::factory()->admin()->create());
 
-        $recipient = CommissionRecipient::factory()->create([
-            'name' => 'Referal Satu',
-            'commission_percent' => 10,
+        $officer = User::factory()->fieldOfficer()->create([
+            'name' => 'Petugas Satu',
+            'commission_per_customer' => 5000,
         ]);
-        $customer = Customer::factory()->create(['referral_id' => $recipient->id]);
+        $cluster = Cluster::factory()->create(['officer_id' => $officer->id]);
+        $customer = Customer::factory()->create(['cluster_id' => $cluster->id]);
 
         Transaction::factory()->create([
             'customer_id' => $customer->id,
+            'officer_id' => $officer->id,
             'billed_amount' => 500_000,
             'paid_amount' => 500_000,
             'paid_at' => now(),
         ]);
+        // Di luar rentang — tidak boleh menambah hitungan.
+        $outside = Customer::factory()->create(['cluster_id' => $cluster->id]);
         Transaction::factory()->create([
-            'customer_id' => $customer->id,
+            'customer_id' => $outside->id,
+            'officer_id' => $officer->id,
             'period' => now()->subMonths(3)->startOfMonth(),
             'billed_amount' => 900_000,
             'paid_amount' => 900_000,
@@ -223,26 +227,25 @@ class ReportPageTest extends TestCase
         ]);
 
         $rows = (new CommissionReportExport(now()->startOfMonth(), now()->endOfMonth()))->rows();
-        $row = collect($rows)->firstWhere(0, 'Referal Satu');
+        $row = collect($rows)->firstWhere(0, 'Petugas Satu');
 
         $this->assertNotNull($row);
-        $this->assertSame(1, $row[4]);
-        // Basis 500rb (transaksi di luar rentang tidak ikut) × 10% = 50rb.
-        $this->assertStringContainsString('500.000', (string) $row[5]);
-        $this->assertStringContainsString('50.000', (string) $row[6]);
-        $this->assertStringNotContainsString('900.000', collect($rows)->flatten()->implode('|'));
+        // 1 pelanggan lunas dalam rentang x Rp 5.000.
+        $this->assertSame(1, $row[1]);
+        $this->assertStringContainsString('5.000', (string) $row[2]);
+        $this->assertStringContainsString('5.000', (string) $row[3]);
     }
 
-    public function testCommissionReportKeepsRecipientsWithoutTransactions(): void
+    public function testCommissionReportKeepsOfficersWithoutPaidCustomers(): void
     {
         $this->actingAs(User::factory()->admin()->create());
-        CommissionRecipient::factory()->create(['name' => 'Belum Dapat']);
+        User::factory()->fieldOfficer()->create(['name' => 'Belum Dapat']);
 
         $rows = (new CommissionReportExport(now()->startOfMonth(), now()->endOfMonth()))->rows();
         $row = collect($rows)->firstWhere(0, 'Belum Dapat');
 
         $this->assertNotNull($row);
-        $this->assertSame(0, $row[4]);
+        $this->assertSame(0, $row[1]);
     }
 
     public function testClusterReportShowsPerClusterCollection(): void

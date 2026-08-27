@@ -228,6 +228,11 @@
     grid-column: 1 / -1;
 }
 
+/* Tile keempat (Komisi) yatim di grid 2 kolom — biarkan penuh selebar. */
+.fi-field-stat:nth-child(4) {
+    grid-column: 1 / -1;
+}
+
 .dark .fi-field-stat {
     background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(7, 11, 20, 0.92));
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
@@ -249,6 +254,10 @@
 
 .fi-field-stat-danger::after {
     background: linear-gradient(90deg, transparent, var(--color-danger-500) 30%, var(--color-danger-500) 70%, transparent);
+}
+
+.fi-field-stat-success::after {
+    background: linear-gradient(90deg, transparent, var(--color-success-500) 30%, var(--color-success-500) 70%, transparent);
 }
 
 .fi-field-stat-label {
@@ -278,6 +287,10 @@
 
 .fi-field-stat-danger .fi-field-stat-value {
     color: var(--color-danger-500);
+}
+
+.fi-field-stat-success .fi-field-stat-value {
+    color: var(--color-success-500);
 }
 
 .fi-field-stat-foot {

@@ -40,11 +40,11 @@ class MonthlyBillingSummary extends StatsOverviewWidget
                 ->color('warning'),
         ];
 
-        // Komisi mengikuti hak akses halaman Komisi (CEO + admin) dan sengaja
-        // mengabaikan filter cluster — penerima komisi tidak terikat cluster.
+        // Komisi mengikuti hak akses halaman Komisi (CEO + admin). Sejak komisi
+        // jadi milik petugas, angkanya terikat cluster — jadi ikut filter cluster.
         if (auth()->user()?->isRole(Role::SuperAdmin, Role::Admin)) {
             $stats[] = Stat::make(__('Commission'), BillingStatsOverview::rupiah(
-                app(BillingService::class)->commissionTotal($this->periodStart()),
+                app(BillingService::class)->commissionTotal($this->periodStart(), $this->clusterId()),
             ))
                 ->description($this->periodStart()->translatedFormat('F Y'))
                 ->icon('heroicon-o-receipt-percent')

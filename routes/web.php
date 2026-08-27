@@ -1,7 +1,6 @@
 <?php
 
 use App\Enums\Role;
-use App\Http\Middleware\SetLocale;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect(
@@ -12,14 +11,6 @@ Route::get('/', fn () => redirect(
 // fallback Laravel untuk panel /petugas yang tidak punya halaman login sendiri.
 Route::redirect('/login', '/admin/login')->name('login');
 Route::redirect('/petugas/login', '/admin/login');
-
-Route::get('/locale/{locale}', function (string $locale) {
-    abort_unless(in_array($locale, SetLocale::SUPPORTED, true), 404);
-
-    session(['locale' => $locale]);
-
-    return redirect()->back(fallback: '/admin');
-})->name('locale.switch');
 
 /*
  * Panduan pengguna (docs/user-guide/) disajikan lewat aplikasi, bukan dari

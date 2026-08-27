@@ -32,6 +32,11 @@ class OfficerDepositsTable
                     ->label(__('Must Collect'))
                     ->state(fn (OfficerDeposit $record): float => $record->mustCollect())
                     ->money('IDR'),
+                TextColumn::make('uncollected')
+                    ->label(__('Not Collected Yet'))
+                    ->state(fn (OfficerDeposit $record): float => $record->uncollected())
+                    ->money('IDR')
+                    ->color(fn (float $state): string => $state > 0 ? 'danger' : 'success'),
                 TextColumn::make('receiver.name')
                     ->label(__('Received By')),
                 TextColumn::make('deposited_at')

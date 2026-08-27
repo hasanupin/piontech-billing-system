@@ -45,7 +45,7 @@ class BusinessStatsOverview extends StatsOverviewWidget
                 BillingStatsOverview::rupiah(app(BillingService::class)->commissionTotal($period)),
             )
                 // Description wajib ada: warna kartu hanya ter-render lewatnya.
-                ->description(__('Payable on paid referrals'))
+                ->description(__('Payable to field officers'))
                 ->icon('heroicon-o-receipt-percent')
                 ->color('success'),
             Stat::make(__('New Customers'), $baru)

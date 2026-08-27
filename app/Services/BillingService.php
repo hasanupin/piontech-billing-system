@@ -3,11 +3,12 @@
 namespace App\Services;
 
 use App\Enums\PaymentMethod;
+use App\Enums\Role;
 use App\Enums\TransactionStatus;
-use App\Models\CommissionRecipient;
 use App\Models\Customer;
 use App\Models\OfficerDeposit;
 use App\Models\Transaction;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class BillingService
 {
-    /** @var array<string, array{target: float, collected: float, deposited: float, remaining: float}> */
+    /** @var array<string, array{target: float, collected: float, uncollected: float, deposited: float, remaining: float}> */
     private array $officerProgress = [];
 
     /** Dipanggil saat setoran/transaksi berubah — memo di bawah jadi basi. */
@@ -93,7 +94,7 @@ class BillingService
      * $clusterId membatasi ke satu cluster, $officerId membatasi angka setoran.
      * Pelanggan sudah auto-terscope cluster petugas via global scope Customer.
      *
-     * @return array{billed: int, paid: int, unpaid: int, billed_amount: float, paid_amount: float, outstanding: float, cash: float, transfer: float, must_deposit: float, deposited: float, not_deposited: float}
+     * @return array{billed: int, paid: int, unpaid: int, billed_amount: float, paid_amount: float, outstanding: float, cash: float, transfer: float, must_deposit: float, uncollected: float, deposited: float, not_deposited: float}
      */
     public function billingProgress(Carbon $period, ?string $clusterId = null, ?int $officerId = null): array
     {
@@ -126,6 +127,7 @@ class BillingService
         // satu petugas memegang beberapa cluster, angka ini adalah setoran petugasnya,
         // bukan setoran cluster itu saja.
         $deposited = $this->monthlySummary($p, $officerId)['total_deposited'];
+        $cash = (float) $paidTransactions()->cash()->sum('paid_amount');
 
         return [
             'billed' => $billed,
@@ -136,77 +138,87 @@ class BillingService
             'outstanding' => (float) $customers()
                 ->whereDoesntHave('transactions', $paidInPeriod)
                 ->sum('billing_amount'),
-            'cash' => (float) $paidTransactions()->cash()->sum('paid_amount'),
+            'cash' => $cash,
             'transfer' => $transfer,
             'must_deposit' => $mustDeposit,
+            // Belum ditarik = tagihan non-transfer yang belum berhasil ditagih.
+            // Beda dari not_deposited (sudah ditarik tapi belum disetor).
+            'uncollected' => $mustDeposit - $cash,
             'deposited' => $deposited,
             'not_deposited' => $mustDeposit - $deposited,
         ];
     }
 
     /**
-     * Penerima komisi + dasar hitungannya untuk satu periode: total paid_amount
-     * transaksi LUNAS milik pelanggan yang direferalkan (alias paid_base).
-     * Penerima tanpa transaksi tetap ikut dengan paid_base NULL → komisi 0.
+     * Komisi per petugas untuk satu periode: jumlah pelanggan LUNAS di cluster
+     * yang dipegangnya (paid_customers), dikali tarif `commission_per_customer`
+     * milik petugas itu — lihat User::commissionAmount().
      *
-     * Dipakai bersama tabel halaman Komisi dan chart-nya — jangan duplikasi
-     * formulanya di dua tempat.
+     * Basisnya CLUSTER, bukan `officer_id` transaksi: Transaction::booted()
+     * menge-null-kan officer_id untuk pembayaran TRANSFER, jadi hitungan
+     * berbasis officer_id akan menelan seluruh pelanggan yang setor sendiri.
+     *
+     * Dipakai bersama tabel halaman Komisi, kartu ringkasannya, dashboard, dan
+     * panel petugas — jangan duplikasi formulanya di tempat lain.
      */
-    public function commissionQuery(Carbon $period): Builder
+    public function commissionQuery(Carbon $period, ?string $clusterId = null): Builder
     {
         $paidInPeriod = fn (Builder $query): Builder => $query
             ->forPeriod($period->copy()->startOfMonth())
-            // Qualified: relasi through ikut menarik tabel customers yang juga
-            // punya kolom status.
+            // Qualified: relasi through ikut menarik tabel clusters/customers.
             ->where('transactions.status', TransactionStatus::Paid);
 
-        return CommissionRecipient::query()
-            ->withSum(['referredTransactions as paid_base' => $paidInPeriod], 'paid_amount')
-            ->withCount(['referredTransactions as paid_count' => $paidInPeriod])
-            // Dasar estimasi: tagihan pelanggan referal yang belum lunas periode ini —
-            // komisi yang belum jadi hak karena uangnya belum masuk.
-            ->withSum(['referredCustomers as estimated_base' => fn (Builder $query): Builder => $query
-                ->billable()
-                ->whereDoesntHave('transactions', $paidInPeriod)], 'billing_amount');
+        $inScope = fn (Builder $query): Builder => $query->billable()
+            ->when($clusterId, fn (Builder $q) => $q->where('customers.cluster_id', $clusterId));
+
+        return User::query()
+            ->where('role', Role::FieldOfficer)
+            ->withCount(['clusterCustomers as paid_customers' => fn (Builder $query): Builder => $inScope($query)
+                ->whereHas('transactions', $paidInPeriod)])
+            // Dasar estimasi: pelanggan yang belum lunas periode ini — komisi
+            // yang belum jadi hak karena uangnya belum masuk.
+            ->withCount(['clusterCustomers as estimated_customers' => fn (Builder $query): Builder => $inScope($query)
+                ->whereDoesntHave('transactions', $paidInPeriod)]);
     }
 
     /**
      * Komisi versi rentang tanggal — basis paid_at aktual, sama seperti laporan
-     * lain. Tanpa estimated_base: estimasi hanya bermakna per periode tagihan.
+     * lain. Tanpa estimasi: estimasi hanya bermakna per periode tagihan.
      */
     public function commissionRangeQuery(Carbon $from, Carbon $until): Builder
     {
         $paidInRange = fn (Builder $query): Builder => $query
-            // Qualified: relasi through ikut menarik tabel customers.
             ->whereBetween('transactions.paid_at', [$from->copy()->startOfDay(), $until->copy()->endOfDay()])
             ->where('transactions.status', TransactionStatus::Paid);
 
-        return CommissionRecipient::query()
-            ->with('customer')
-            ->withSum(['referredTransactions as paid_base' => $paidInRange], 'paid_amount')
-            ->withCount(['referredTransactions as paid_count' => $paidInRange]);
+        return User::query()
+            ->where('role', Role::FieldOfficer)
+            ->withCount(['clusterCustomers as paid_customers' => fn (Builder $query): Builder => $query
+                ->billable()
+                ->whereHas('transactions', $paidInRange)]);
     }
 
-    /** Total komisi seluruh penerima pada satu periode. */
-    public function commissionTotal(Carbon $period): float
+    /** Total komisi seluruh petugas pada satu periode. */
+    public function commissionTotal(Carbon $period, ?string $clusterId = null): float
     {
-        return (float) $this->commissionQuery($period)->get()->sum('commission_amount');
+        return (float) $this->commissionQuery($period, $clusterId)->get()->sum('commission_amount');
     }
 
-    /** Total estimasi komisi (pelanggan referal yang belum bayar) satu periode. */
-    public function commissionEstimateTotal(Carbon $period): float
+    /** Total estimasi komisi (pelanggan yang belum bayar) satu periode. */
+    public function commissionEstimateTotal(Carbon $period, ?string $clusterId = null): float
     {
-        return (float) $this->commissionQuery($period)->get()->sum('estimated_commission_amount');
+        return (float) $this->commissionQuery($period, $clusterId)->get()->sum('estimated_commission_amount');
     }
 
     /**
      * Progres satu petugas pada satu periode:
-     * - target    : yang HARUS ditarik = tagihan pelanggan di cluster-nya − yang dibayar transfer
-     * - collected : tunai yang sudah masuk ke petugas
+     * - target     : yang HARUS ditarik = tagihan pelanggan di cluster-nya − yang dibayar transfer
+     * - collected  : tunai yang sudah masuk ke petugas
+     * - uncollected: yang belum berhasil ditarik (target − collected)
      * - deposited : yang sudah disetor ke admin
      * - remaining : uang yang masih di tangan petugas (collected − deposited)
      *
-     * @return array{target: float, collected: float, deposited: float, remaining: float}
+     * @return array{target: float, collected: float, uncollected: float, deposited: float, remaining: float}
      */
     public function officerProgress(int $officerId, Carbon $period): array
     {
@@ -233,9 +245,12 @@ class BillingService
             $deposited = (float) OfficerDeposit::where('officer_id', $officerId)
                 ->whereDate('period', $p)->sum('amount');
 
+            $target = (float) $customers()->sum('billing_amount') - $transfer;
+
             return [
-                'target' => (float) $customers()->sum('billing_amount') - $transfer,
+                'target' => $target,
                 'collected' => $collected,
+                'uncollected' => $target - $collected,
                 'deposited' => $deposited,
                 'remaining' => $collected - $deposited,
             ];

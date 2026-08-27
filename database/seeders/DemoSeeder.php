@@ -4,10 +4,8 @@ namespace Database\Seeders;
 
 use App\Enums\CustomerStatus;
 use App\Enums\PaymentMethod;
-use App\Enums\RecipientType;
 use App\Enums\Role;
 use App\Enums\TransactionStatus;
-use App\Models\CommissionRecipient;
 use App\Models\Customer;
 use App\Models\OfficerDeposit;
 use App\Models\Transaction;
@@ -41,9 +39,9 @@ class DemoSeeder extends Seeder
         // seluruh isi seeder ini juga menghasilkan jejak di Log Aktivitas.
         Auth::login($admin);
 
+        $this->varyOfficerCommissionRates($officers);
         $this->varyCustomerStatuses();
         $this->attachPhotosAndMaps();
-        $this->createCommissionRecipients();
         $this->createTransactions($officers, $admin);
         $this->createDeposits($officers, $admin);
         $this->scheduleTodaysCollections($officers);
@@ -119,43 +117,16 @@ class DemoSeeder extends Seeder
     }
 
     /**
-     * Dua jenis penerima: Non Pelanggan (data sendiri) dan Pelanggan (mirror).
-     * Sebagian pelanggan diberi referal supaya Komisi & Laporan Komisi berisi.
+     * Tarif komisi berbeda per petugas supaya halaman Komisi tidak seragam.
+     * Petugas baru tetap memakai default kolom (Rp 4.000).
      */
-    private function createCommissionRecipients(): void
+    private function varyOfficerCommissionRates($officers): void
     {
-        if (CommissionRecipient::exists()) {
-            return;
-        }
+        $rates = [4000, 5000, 4500];
 
-        $external = collect([
-            ['name' => 'Warung Pak Slamet', 'address' => 'Jl. Melati No. 8', 'whatsapp_number' => '628123456701', 'commission_percent' => 5],
-            ['name' => 'Toko Berkah Jaya', 'address' => 'Jl. Kenanga No. 21', 'whatsapp_number' => '628123456702', 'commission_percent' => 4],
-        ])->map(fn (array $data) => CommissionRecipient::create([
-            ...$data,
-            'type' => RecipientType::External,
-            'is_active' => true,
+        $officers->each(fn (User $officer, int $index) => $officer->update([
+            'commission_per_customer' => $rates[$index % count($rates)],
         ]));
-
-        // Tipe Pelanggan = mirror: nama/alamat/WA sengaja NULL, dibaca dari pelanggannya.
-        $mirrored = Customer::withoutGlobalScopes()->billable()->take(2)->get()
-            ->map(fn (Customer $customer) => CommissionRecipient::create([
-                'type' => RecipientType::Customer,
-                'customer_id' => $customer->getKey(),
-                'commission_percent' => 4,
-                'is_active' => true,
-            ]));
-
-        $recipients = $external->concat($mirrored);
-
-        Customer::withoutGlobalScopes()
-            ->billable()
-            ->whereNull('referral_id')
-            ->take(14)
-            ->get()
-            ->each(fn (Customer $customer, int $index) => $customer->update([
-                'referral_id' => $recipients[$index % $recipients->count()]->getKey(),
-            ]));
     }
 
     /**

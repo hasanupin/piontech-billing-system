@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\Tables;
 
 use App\Enums\Role;
+use App\Models\User;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -37,6 +38,14 @@ class UsersTable
                 TextColumn::make('phone')
                     ->label(__('Phone Number'))
                     ->searchable()
+                    ->toggleable(),
+                TextColumn::make('commission_per_customer')
+                    ->label(__('Commission Per Customer'))
+                    // Hanya bermakna untuk petugas; role lain memakai default DB.
+                    ->state(fn (User $record): ?float => $record->isRole(Role::FieldOfficer)
+                        ? (float) $record->commission_per_customer
+                        : null)
+                    ->money('IDR')
                     ->toggleable(),
                 TextColumn::make('role')
                     ->label(__('Role'))

@@ -5,8 +5,6 @@ namespace App\Filament\Resources\Customers\Schemas;
 use App\Enums\CustomerStatus;
 use App\Enums\Role;
 use App\Models\Cluster;
-use App\Models\CommissionRecipient;
-use App\Models\Customer;
 use App\Models\Package;
 use App\Services\ScopeService;
 use Filament\Actions\Action;
@@ -108,30 +106,6 @@ class CustomerForm
                             ->minValue(1)
                             ->maxValue(31)
                             ->required(),
-                        Select::make('referral_id')
-                            ->label(__('Referral'))
-                            // Referal/komisi urusan admin — petugas tidak melihatnya,
-                            // dan payload forged tidak ikut tersimpan (dehydrated).
-                            ->visible(fn (): bool => ! (auth()->user()?->isRole(Role::FieldOfficer) ?? true))
-                            ->dehydrated(fn (): bool => ! (auth()->user()?->isRole(Role::FieldOfficer) ?? true))
-                            ->relationship(
-                                'referral',
-                                'name',
-                                // Hanya penerima aktif, dan pelanggan ini tidak boleh
-                                // jadi referal dirinya sendiri.
-                                fn (Builder $query, ?Customer $record): Builder => $query
-                                    ->active()
-                                    ->when($record, fn (Builder $q) => $q->where(
-                                        fn (Builder $inner) => $inner
-                                            ->whereNull('customer_id')
-                                            ->orWhere('customer_id', '!=', $record->getKey()),
-                                    )),
-                            )
-                            // Label tipe Pelanggan datang dari mirror, bukan kolom name.
-                            ->getOptionLabelFromRecordUsing(fn (CommissionRecipient $record): ?string => $record->display_name)
-                            ->searchable()
-                            ->preload()
-                            ->helperText(__('Leave empty if there is no commission')),
                     ])->columns(),
                 Section::make(__('Location (Reference)'))
                     ->schema([

@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Closure;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Utilities\Get;
@@ -76,13 +77,23 @@ class TransactionForm
                             $fail(__('A transaction for this customer and period already exists.'));
                         }
                     }),
+                // Alamat pelanggan supaya petugas tahu ke mana harus datang;
+                // customer_id sudah live(), jadi ikut berubah tanpa apa-apa lagi.
+                Placeholder::make('customer_address')
+                    ->label(__('Address'))
+                    ->content(fn (Get $get): string => filled($get('customer_id'))
+                        ? (Customer::find($get('customer_id'))?->address ?: '—')
+                        : '—'),
                 Select::make('payment_method')
                     ->label(__('Payment Method'))
                     ->live()
-                    // Petugas tidak melihat opsi transfer.
-                    ->options(fn (): array => auth()->user()?->isRole(Role::SuperAdmin, Role::Admin)
-                        ? [PaymentMethod::Cash->value => __('Cash (via Officer)'), PaymentMethod::Transfer->value => __('Direct Transfer')]
-                        : [PaymentMethod::Cash->value => __('Cash')])
+                    // Petugas ikut boleh mencatat transfer (menyimpang dari PRD §6 atas
+                    // permintaan pemilik produk). Aturan uangnya tidak berubah:
+                    // Transaction::booted() tetap menge-null-kan officer_id untuk transfer.
+                    ->options([
+                        PaymentMethod::Cash->value => __('Cash (via Officer)'),
+                        PaymentMethod::Transfer->value => __('Direct Transfer'),
+                    ])
                     ->default(PaymentMethod::Cash->value)
                     ->required(),
                 Select::make('officer_id')

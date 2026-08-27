@@ -2,8 +2,8 @@
 
 namespace App\Filament\Widgets;
 
-use App\Enums\RecipientType;
-use App\Models\CommissionRecipient;
+use App\Enums\Role;
+use App\Models\User;
 use App\Services\BillingService;
 use Carbon\Carbon;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
@@ -12,8 +12,9 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 /**
  * Kartu angka halaman Komisi: komisi yang harus dibayar periode ini, estimasi
- * komisi dari pelanggan referal yang belum bayar, dan jumlah penerima per jenis.
- * Penerima non-aktif tetap ikut — sama seperti tabel & commissionTotal().
+ * komisi dari pelanggan yang belum bayar, dan jumlah petugas aktif.
+ * Petugas non-aktif tetap ikut di dua kartu pertama — sama seperti tabel
+ * & commissionTotal().
  */
 class CommissionSummary extends StatsOverviewWidget
 {
@@ -35,15 +36,14 @@ class CommissionSummary extends StatsOverviewWidget
                 ->icon('heroicon-o-receipt-percent')
                 ->color('success'),
             Stat::make(__('Estimated Commission'), BillingStatsOverview::rupiah($service->commissionEstimateTotal($period)))
-                ->description(__('Referred customers not yet paid'))
+                ->description(__('Customers not yet paid'))
                 ->icon('heroicon-o-clock')
                 ->color('warning'),
             Stat::make(
-                __('Recipients'),
-                CommissionRecipient::where('type', RecipientType::External)->count()
-                    .' / '.CommissionRecipient::where('type', RecipientType::Customer)->count(),
+                __('Officers'),
+                (string) User::where('role', Role::FieldOfficer)->where('is_active', true)->count(),
             )
-                ->description(__('Non-Customer / Customer'))
+                ->description(__('Active field officers'))
                 ->icon('heroicon-o-users')
                 ->color('info'),
         ];

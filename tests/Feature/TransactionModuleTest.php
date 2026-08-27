@@ -248,7 +248,7 @@ class TransactionModuleTest extends TestCase
         $this->assertSame('100000.00', Transaction::first()->billed_amount);
     }
 
-    public function testHidesTransferOptionFromFieldOfficer(): void
+    public function testFieldOfficerCanChooseTransfer(): void
     {
         $officer = User::factory()->fieldOfficer()->create();
         Cluster::factory()->create(['officer_id' => $officer->id]);
@@ -256,7 +256,8 @@ class TransactionModuleTest extends TestCase
 
         Livewire::test(CreateTransaction::class)
             ->assertFormFieldExists('payment_method', function ($field): bool {
-                return array_keys($field->getOptions()) === [PaymentMethod::Cash->value];
+                return array_keys($field->getOptions())
+                    === [PaymentMethod::Cash->value, PaymentMethod::Transfer->value];
             });
     }
 

@@ -4,6 +4,7 @@ namespace App\Filament\Field\Pages;
 
 use App\Enums\Role;
 use App\Enums\TransactionStatus;
+use App\Filament\Field\Resources\Customers\FieldCustomerResource;
 use App\Filament\Field\Resources\Transactions\FieldTransactionResource;
 use App\Filament\Pages\Dashboard as AdminDashboard;
 use App\Models\Customer;
@@ -58,13 +59,18 @@ class Transactions extends Page implements HasTable
     public function filtersForm(Schema $schema): Schema
     {
         return $schema
-            ->columns(2)
+            // Periode · Daerah · Status Bayar sejajar; di HP tetap menumpuk.
+            ->columns(3)
             ->components([
                 Select::make('period')
                     ->label(__('Period'))
                     ->options(AdminDashboard::periodOptions())
                     ->default(now()->format('Y-m'))
                     ->selectablePlaceholder(false),
+                Select::make('cluster_id')
+                    ->label(__('Cluster'))
+                    ->placeholder(__('All'))
+                    ->options(fn (): array => FieldCustomerResource::daerahOptions()),
                 Select::make('payment_status')
                     ->label(__('Payment Status'))
                     ->placeholder(__('All'))
@@ -118,6 +124,10 @@ class Transactions extends Page implements HasTable
             ->query(fn (): Builder => Customer::query()
                 ->billable()
                 ->when(
+                    $this->filters['cluster_id'] ?? null,
+                    fn (Builder $query, string $clusterId): Builder => $query->where('cluster_id', $clusterId),
+                )
+                ->when(
                     $this->filters['payment_status'] ?? null,
                     fn (Builder $query, string $status): Builder => $status === 'paid'
                         ? $query->whereHas('transactions', $this->paidInPeriod(...))
@@ -135,6 +145,9 @@ class Transactions extends Page implements HasTable
                             ->money('IDR')
                             ->grow(false),
                     ]),
+                    TextColumn::make('address')
+                        ->label(__('Address'))
+                        ->color('gray'),
                     Split::make([
                         TextColumn::make('payment_status')
                             ->label(__('Payment Status'))

@@ -24,7 +24,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Beranda petugas: 3 angka utama + daftar pelanggan jatuh tempo hari ini
+ * Beranda petugas: 4 angka utama + daftar pelanggan jatuh tempo hari ini
  * dengan tombol Tagih menuju form transaksi terprefill.
  */
 class Dashboard extends Page implements HasTable
@@ -61,10 +61,14 @@ class Dashboard extends Page implements HasTable
     }
 
     /**
-     * @return array{due_today: int, cash_on_hand: float, unpaid: int, total: int}
+     * @return array{due_today: int, cash_on_hand: float, unpaid: int, total: int, commission: float, paid: int}
      */
     public function stats(): array
     {
+        $officer = app(BillingService::class)->commissionQuery(now())
+            ->whereKey(auth()->id())
+            ->first();
+
         // Global scope cluster membatasi query Customer ke cluster petugas.
         return [
             'due_today' => Customer::query()->dueToday()->count(),
@@ -74,6 +78,10 @@ class Dashboard extends Page implements HasTable
                 ->whereDoesntHave('transactions', $this->paidThisMonth(...))
                 ->count(),
             'total' => Customer::query()->billable()->count(),
+            // Dibaca dari query komisi yang sama dengan panel admin — jangan
+            // hitung ulang di sini, formulanya cuma boleh hidup di satu tempat.
+            'commission' => (float) ($officer?->commission_amount ?? 0),
+            'paid' => (int) ($officer?->paid_customers ?? 0),
         ];
     }
 

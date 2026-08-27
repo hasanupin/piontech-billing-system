@@ -17,7 +17,7 @@ class ClusterFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => 'Cluster '.fake()->unique()->lexify('??'),
+            'name' => 'Daerah '.fake()->unique()->lexify('??'),
             'officer_id' => User::factory()->fieldOfficer(),
             'is_active' => true,
         ];

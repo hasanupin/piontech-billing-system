@@ -30,7 +30,7 @@ class CommissionReport extends AbstractRangeReportPage
         [$from, $until] = $this->resolvedRange();
         $total = (new CommissionReportExport($from, $until))->total();
 
-        return __('Commission per recipient based on paid referrals').' — '
+        return __('Commission per officer based on paid customers').' — '
             .__('Total Commission').': '.BillingStatsOverview::rupiah($total);
     }
 

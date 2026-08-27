@@ -8,7 +8,6 @@ use App\Filament\Widgets\DueTodayWidget;
 use App\Filament\Widgets\OfficerDepositWidget;
 use App\Filament\Widgets\RevenueTrendChart;
 use App\Models\Cluster;
-use App\Models\CommissionRecipient;
 use App\Models\Customer;
 use App\Models\OfficerDeposit;
 use App\Models\Transaction;
@@ -154,18 +153,20 @@ class DashboardWidgetTest extends TestCase
     {
         $this->actingAs(User::factory()->admin()->create());
 
-        $recipient = CommissionRecipient::factory()->create(['commission_percent' => 10]);
+        $officer = User::factory()->fieldOfficer()->create(['commission_per_customer' => 30_000]);
+        $cluster = Cluster::factory()->create(['officer_id' => $officer->id]);
         $customer = Customer::factory()->create([
-            'referral_id' => $recipient->id,
+            'cluster_id' => $cluster->id,
             'registered_at' => now(),
         ]);
         Transaction::factory()->create([
             'customer_id' => $customer->id,
+            'officer_id' => $officer->id,
             'billed_amount' => 300_000,
             'paid_amount' => 300_000,
         ]);
 
-        // Komisi 10% × 300rb = 30rb; 1 pelanggan baru bulan ini.
+        // 1 pelanggan lunas × Rp 30.000; 1 pelanggan baru bulan ini.
         Livewire::test(BusinessStatsOverview::class)
             ->assertSee('Rp 30.000')
             ->assertSee(__('New Customers'));

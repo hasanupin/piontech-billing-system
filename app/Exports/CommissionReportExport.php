@@ -2,12 +2,12 @@
 
 namespace App\Exports;
 
-use App\Models\CommissionRecipient;
+use App\Models\User;
 use App\Services\BillingService;
 
 /**
- * Komisi per penerima dalam rentang tanggal (basis paid_at, beda dari halaman
- * Komisi yang berbasis periode tagihan). Semua penerima tampil, termasuk yang
+ * Komisi per petugas dalam rentang tanggal (basis paid_at, beda dari halaman
+ * Komisi yang berbasis periode tagihan). Semua petugas tampil, termasuk yang
  * belum menghasilkan komisi.
  */
 class CommissionReportExport extends BaseExport
@@ -15,29 +15,23 @@ class CommissionReportExport extends BaseExport
     public function rows(): array
     {
         $rows = [[
-            __('Name'),
-            __('Type'),
-            __('WhatsApp'),
-            __('Commission Percentage'),
-            __('Paid Transactions'),
-            __('Commission Base'),
+            __('Officer'),
+            __('Paid Customers'),
+            __('Commission Per Customer'),
             __('Commission Amount'),
         ]];
 
-        $recipients = app(BillingService::class)
+        $officers = app(BillingService::class)
             ->commissionRangeQuery($this->from, $this->until)
             ->get()
             ->sortByDesc('commission_amount');
 
-        foreach ($recipients as $recipient) {
+        foreach ($officers as $officer) {
             $rows[] = [
-                $recipient->display_name ?? '',
-                $recipient->type->getLabel(),
-                $recipient->display_whatsapp ?? '',
-                (float) $recipient->commission_percent.'%',
-                (int) $recipient->paid_count,
-                $this->rupiah((float) ($recipient->paid_base ?? 0)),
-                $this->rupiah($recipient->commission_amount),
+                $officer->name,
+                (int) $officer->paid_customers,
+                $this->rupiah((float) $officer->commission_per_customer),
+                $this->rupiah($officer->commission_amount),
             ];
         }
 
@@ -50,6 +44,6 @@ class CommissionReportExport extends BaseExport
         return (float) app(BillingService::class)
             ->commissionRangeQuery($this->from, $this->until)
             ->get()
-            ->sum(fn (CommissionRecipient $recipient): float => $recipient->commission_amount);
+            ->sum(fn (User $officer): float => $officer->commission_amount);
     }
 }

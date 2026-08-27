@@ -95,7 +95,6 @@ class ListCustomers extends ListRecords
                     __('Billing Day'),
                     __('WhatsApp'),
                     __('Status'),
-                    __('Referral'),
                     __('Maps'),
                 ],
                 fn (Customer $record): array => [
@@ -108,7 +107,6 @@ class ListCustomers extends ListRecords
                     $record->billing_day,
                     $record->whatsapp_number ?? '',
                     $record->status->getLabel(),
-                    $record->referral?->display_name ?? '',
                     $record->maps_url ?? '',
                 ],
             ),

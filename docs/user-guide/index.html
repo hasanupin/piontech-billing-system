@@ -57,7 +57,7 @@
             <a class="card role-card" href="ceo.html">
                 <h3>CEO <span class="pill pill-brand">Akses penuh</span></h3>
                 <p class="who">Pemilik / pimpinan</p>
-                <p>Melihat seluruh angka bisnis, mengelola akun pengguna, mengatur persentase komisi, dan memeriksa log aktivitas.</p>
+                <p>Melihat seluruh angka bisnis, mengelola akun pengguna, mengatur tarif komisi petugas, dan memeriksa log aktivitas.</p>
             </a>
             <a class="card role-card" href="admin.html">
                 <h3>Admin Penagihan</h3>
@@ -67,7 +67,7 @@
             <a class="card role-card" href="petugas.html">
                 <h3>Petugas Lapangan</h3>
                 <p class="who">Penagih di lapangan — pakai HP</p>
-                <p>Menagih pelanggan di clusternya, mencatat pembayaran tunai, dan mendaftarkan pelanggan baru.</p>
+                <p>Menagih pelanggan di daerahnya dan mencatat pembayaran, tunai maupun transfer.</p>
             </a>
         </div>
 
@@ -84,7 +84,7 @@
                     Admin mendaftarkan pelanggan dan paket. Setiap bulan muncul daftar tagihan.
                     Pelanggan membayar tunai lewat petugas atau transfer langsung ke kantor.
                     Uang tunai disetorkan petugas kepada admin. Semua pembayaran masuk ke laporan,
-                    dan pelanggan hasil referal menghasilkan komisi.
+                    dan setiap pelanggan yang lunas menghasilkan komisi untuk petugasnya.
                 </desc>
 
                 <defs>
@@ -104,7 +104,7 @@
                 <!-- Baris admin -->
                 <rect class="svg-box-brand" x="150" y="34" width="150" height="56" rx="9" stroke-width="1.4"/>
                 <text class="svg-text" x="225" y="58" text-anchor="middle">Data Pelanggan</text>
-                <text class="svg-sub" x="225" y="76" text-anchor="middle">nama, paket, cluster</text>
+                <text class="svg-sub" x="225" y="76" text-anchor="middle">nama, paket, daerah</text>
 
                 <rect class="svg-box-brand" x="350" y="34" width="150" height="56" rx="9" stroke-width="1.4"/>
                 <text class="svg-text" x="425" y="58" text-anchor="middle">Tagihan Bulanan</text>
@@ -167,7 +167,7 @@
             <div class="link">
                 <span class="n">LANGKAH 1</span>
                 <h4>Pengguna</h4>
-                <p>Buat akun petugas dan admin. Wajib duluan: cluster butuh petugas, setoran butuh admin penerima.</p>
+                <p>Buat akun petugas dan admin. Wajib duluan: daerah butuh petugas, setoran butuh admin penerima.</p>
             </div>
             <div class="link">
                 <span class="n">LANGKAH 2</span>
@@ -176,23 +176,18 @@
             </div>
             <div class="link">
                 <span class="n">LANGKAH 3</span>
-                <h4>Cluster</h4>
-                <p>Wilayah penagihan. Setiap cluster wajib punya satu petugas penanggung jawab.</p>
+                <h4>Daerah</h4>
+                <p>Wilayah penagihan. Setiap daerah wajib punya satu petugas penanggung jawab.</p>
             </div>
             <div class="link">
                 <span class="n">LANGKAH 4</span>
                 <h4>Pelanggan</h4>
-                <p>Wajib memilih cluster. Paket boleh dikosongkan bila nominal tagihan diisi manual.</p>
+                <p>Wajib memilih daerah. Paket boleh dikosongkan bila nominal tagihan diisi manual.</p>
             </div>
             <div class="link optional">
                 <span class="n">OPSIONAL</span>
-                <h4>Penerima Komisi</h4>
-                <p>Bila ada program referal. Setelah dibuat, isi kolom <em>Referal</em> di data pelanggan.</p>
-            </div>
-            <div class="link optional">
-                <span class="n">OPSIONAL</span>
-                <h4>Pengaturan</h4>
-                <p>Persentase komisi default untuk penerima komisi baru.</p>
+                <h4>Komisi Petugas</h4>
+                <p>Saat membuat akun petugas, isi <em>Komisi per Pelanggan</em>. Default Rp 4.000, bisa berbeda tiap petugas.</p>
             </div>
         </div>
 
@@ -223,8 +218,8 @@
 
         <div class="warn">
             <strong>Kenapa urutannya tidak boleh dibalik</strong>
-            Cluster tidak bisa dibuat sebelum ada akun petugas, dan pelanggan tidak bisa disimpan
-            tanpa memilih cluster. Kalau langsung mengisi pelanggan, Anda akan tertahan di langkah ini.
+            Daerah tidak bisa dibuat sebelum ada akun petugas, dan pelanggan tidak bisa disimpan
+            tanpa memilih daerah. Kalau langsung mengisi pelanggan, Anda akan tertahan di langkah ini.
         </div>
 
         <h2 id="hak-akses">Siapa boleh apa</h2>
@@ -238,18 +233,17 @@
                 <tbody>
                     <tr><td>Dashboard &amp; angka bisnis</td><td class="yes">Ya</td><td class="yes">Ya</td><td class="yes">Versi ringkas</td></tr>
                     <tr><td>Tagihan Bulanan</td><td class="yes">Ya</td><td class="yes">Ya</td><td class="yes">Versi HP</td></tr>
-                    <tr><td>Data Pelanggan — lihat &amp; tambah</td><td class="yes">Ya</td><td class="yes">Ya</td><td class="yes">Cluster sendiri</td></tr>
+                    <tr><td>Data Pelanggan — lihat</td><td class="yes">Ya</td><td class="yes">Ya</td><td class="yes">Daerah sendiri</td></tr>
+                    <tr><td>Tambah / ubah pelanggan</td><td class="yes">Ya</td><td class="yes">Ya</td><td class="no">Tidak</td></tr>
                     <tr><td>Ubah status pelanggan (ISOLIR / Pulihkan)</td><td class="yes">Ya</td><td class="yes">Ya</td><td class="no">Tidak</td></tr>
                     <tr><td>Hapus pelanggan</td><td class="yes">Ya</td><td class="yes">Ya</td><td class="no">Tidak</td></tr>
-                    <tr><td>Isi kolom Referal</td><td class="yes">Ya</td><td class="yes">Ya</td><td class="no">Tidak</td></tr>
-                    <tr><td>Catat pembayaran</td><td class="yes">Ya</td><td class="yes">Ya</td><td class="yes">Tunai saja</td></tr>
+                    <tr><td>Catat pembayaran</td><td class="yes">Ya</td><td class="yes">Ya</td><td class="yes">Tunai &amp; transfer</td></tr>
                     <tr><td>Ubah / hapus transaksi</td><td class="yes">Ya</td><td class="yes">Ya</td><td class="no">Tidak</td></tr>
                     <tr><td>Catat setoran petugas</td><td class="yes">Ya</td><td class="yes">Ya</td><td class="no">Lihat riwayat saja</td></tr>
                     <tr><td>Import &amp; Export Excel</td><td class="yes">Ya</td><td class="yes">Ya</td><td class="no">Tidak</td></tr>
-                    <tr><td>Master Paket, Cluster, Penerima Komisi</td><td class="yes">Ya</td><td class="yes">Ya</td><td class="no">Tidak</td></tr>
+                    <tr><td>Master Paket &amp; Daerah</td><td class="yes">Ya</td><td class="yes">Ya</td><td class="no">Tidak</td></tr>
                     <tr><td>Laporan (6 jenis)</td><td class="yes">Ya</td><td class="yes">Ya</td><td class="no">Tidak</td></tr>
                     <tr><td>Pengguna (akun)</td><td class="yes">Ya</td><td class="no">Tidak</td><td class="no">Tidak</td></tr>
-                    <tr><td>Pengaturan</td><td class="yes">Ya</td><td class="no">Tidak</td><td class="no">Tidak</td></tr>
                     <tr><td>Log Aktivitas</td><td class="yes">Ya</td><td class="no">Tidak</td><td class="no">Tidak</td></tr>
                 </tbody>
             </table>
@@ -260,13 +254,14 @@
             <table>
                 <thead><tr><th>Istilah</th><th>Artinya</th></tr></thead>
                 <tbody>
-                    <tr><td><strong>Cluster</strong></td><td>Wilayah penagihan. Setiap cluster dipegang satu petugas; petugas hanya melihat pelanggan di clusternya.</td></tr>
+                    <tr><td><strong>Daerah</strong></td><td>Wilayah penagihan. Setiap daerah dipegang satu petugas; petugas hanya melihat pelanggan di daerahnya.</td></tr>
                     <tr><td><strong>Periode</strong></td><td>Bulan tagihan, misalnya Agustus 2026. Satu pelanggan hanya boleh punya satu transaksi per periode.</td></tr>
                     <tr><td><strong>ISOLIR</strong></td><td>Layanan dihentikan sementara karena menunggak. Pelanggan ISOLIR <em>masih</em> ditagih.</td></tr>
                     <tr><td><strong>Berhenti</strong></td><td>Pelanggan sudah tidak berlangganan. Tidak lagi masuk daftar tagihan.</td></tr>
-                    <tr><td><strong>Harus Ditarik</strong></td><td>Total tagihan pelanggan di cluster petugas, dikurangi yang sudah dibayar lewat transfer.</td></tr>
+                    <tr><td><strong>Harus Ditarik</strong></td><td>Total tagihan pelanggan di daerah petugas, dikurangi yang sudah dibayar lewat transfer.</td></tr>
                     <tr><td><strong>Sisa / Cash di Tangan</strong></td><td>Uang tunai yang sudah ditarik petugas tetapi belum disetorkan ke admin.</td></tr>
-                    <tr><td><strong>Referal</strong></td><td>Pihak yang mengajak pelanggan berlangganan dan berhak atas komisi dari pembayaran pelanggan itu.</td></tr>
+                    <tr><td><strong>Belum Ditarik</strong></td><td>Bagian dari Harus Ditarik yang belum berhasil ditagih petugas. Berbeda dari Cash di Tangan, yang sudah tertagih tetapi belum disetor.</td></tr>
+                    <tr><td><strong>Komisi</strong></td><td>Upah petugas: jumlah pelanggan yang lunas di daerah-nya dikali tarif Komisi per Pelanggan pada akun petugas itu.</td></tr>
                 </tbody>
             </table>
         </div>

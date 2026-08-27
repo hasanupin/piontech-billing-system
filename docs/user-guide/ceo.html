@@ -39,7 +39,6 @@
             <li><a href="#dashboard">Membaca Dashboard</a></li>
             <li><a href="#rutin">Pemeriksaan rutin</a></li>
             <li><a href="#pengguna">Pengguna (akun)</a></li>
-            <li><a href="#pengaturan">Pengaturan</a></li>
             <li><a href="#log">Log Aktivitas</a></li>
             <li><a href="#laporan">Laporan untuk keputusan</a></li>
             <li><a href="#operasional">Menu operasional</a></li>
@@ -51,7 +50,7 @@
         <h1>Panduan CEO</h1>
         <p class="lede">
             Anda memiliki akses ke seluruh sistem. Panduan ini menekankan tiga hal yang hanya bisa
-            Anda lakukan — mengelola akun, mengatur komisi, dan memeriksa log aktivitas — serta
+            Anda lakukan — mengelola akun, mengatur tarif komisi petugas, dan memeriksa log aktivitas — serta
             cara membaca angka untuk mengambil keputusan.
         </p>
 
@@ -60,8 +59,8 @@
             <div class="card">
                 <h3>Khusus CEO</h3>
                 <p>
-                    <strong>Pengguna</strong> (membuat &amp; menonaktifkan akun),
-                    <strong>Pengaturan</strong> (persentase komisi default), dan
+                    <strong>Pengguna</strong> (membuat &amp; menonaktifkan akun, sekaligus menentukan
+                    <em>Komisi per Pelanggan</em> tiap petugas) dan
                     <strong>Log Aktivitas</strong> (jejak perubahan data).
                 </p>
             </div>
@@ -75,7 +74,7 @@
         </div>
 
         <figure>
-            <img src="screenshots/menu-ceo.png" alt="Menu samping CEO lengkap dengan grup Penagihan, Laporan, dan Master Data termasuk Pengguna, Pengaturan, dan Log Aktivitas">
+            <img src="screenshots/menu-ceo.png" alt="Menu samping CEO lengkap dengan grup Penagihan, Laporan, dan Master Data termasuk Pengguna dan Log Aktivitas">
             <figcaption>Menu CEO — tiga menu terbawah tidak terlihat oleh admin.</figcaption>
         </figure>
 
@@ -98,7 +97,7 @@
             </div>
             <div class="link">
                 <span class="n">LANGKAH 3</span>
-                <h4>Cluster</h4>
+                <h4>Daerah</h4>
                 <p>Bagi wilayah, tentukan petugasnya.</p>
             </div>
             <div class="link">
@@ -108,8 +107,8 @@
             </div>
             <div class="link optional">
                 <span class="n">LANGKAH 5</span>
-                <h4>Komisi</h4>
-                <p>Atur persentase default, lalu daftarkan penerima komisi.</p>
+                <h4>Komisi Petugas</h4>
+                <p>Isi <em>Komisi per Pelanggan</em> pada akun tiap petugas. Default Rp 4.000.</p>
             </div>
         </div>
 
@@ -131,7 +130,7 @@
                     <tr><td><strong>Belum Bayar</strong></td><td>Bila terus membesar menjelang akhir bulan, penagihan sedang tertinggal.</td></tr>
                     <tr><td><strong>Kekurangan Setor</strong></td><td>Uang perusahaan yang masih ada di tangan petugas. <strong>Angka ini seharusnya mendekati nol setiap akhir hari.</strong></td></tr>
                     <tr><td><strong>Masuk via Transfer</strong></td><td>Porsi pembayaran yang langsung ke rekening — makin besar, makin kecil risiko uang tunai di jalan.</td></tr>
-                    <tr><td><strong>Total Komisi</strong></td><td>Kewajiban komisi atas pembayaran yang sudah lunas.</td></tr>
+                    <tr><td><strong>Total Komisi</strong></td><td>Kewajiban komisi ke petugas atas pelanggan yang sudah lunas bulan itu.</td></tr>
                     <tr><td><strong>Pelanggan Baru</strong> · <strong>Isolir / Berhenti</strong></td><td>Pertumbuhan bersih. Bila Berhenti melampaui Pelanggan Baru, basis pelanggan sedang menyusut.</td></tr>
                     <tr><td><strong>Tren Pemasukan 12 Bulan</strong></td><td>Grafik batang tunai vs transfer per bulan, untuk melihat arah jangka panjang.</td></tr>
                 </tbody>
@@ -151,9 +150,9 @@
                 <thead><tr><th>Kapan</th><th>Yang diperiksa</th><th>Tanda bahaya</th></tr></thead>
                 <tbody>
                     <tr><td>Harian</td><td>Kekurangan Setor di Dashboard</td><td>Terus naik beberapa hari — uang menumpuk di petugas.</td></tr>
-                    <tr><td>Mingguan</td><td>Tingkat Penagihan &amp; Laporan Tunggakan</td><td>Tunggakan menumpuk di satu cluster tertentu.</td></tr>
-                    <tr><td>Bulanan</td><td>Rekap Pembayaran &amp; Laporan Per Cluster</td><td>Satu cluster tingkat penagihannya jauh di bawah yang lain.</td></tr>
-                    <tr><td>Bulanan</td><td>Laporan Komisi</td><td>Komisi membesar tanpa diikuti pertambahan pelanggan.</td></tr>
+                    <tr><td>Mingguan</td><td>Tingkat Penagihan &amp; Laporan Tunggakan</td><td>Tunggakan menumpuk di satu daerah tertentu.</td></tr>
+                    <tr><td>Bulanan</td><td>Rekap Pembayaran &amp; Laporan Per Daerah</td><td>Satu daerah tingkat penagihannya jauh di bawah yang lain.</td></tr>
+                    <tr><td>Bulanan</td><td>Laporan Komisi</td><td>Komisi membesar tanpa diikuti pertambahan pelanggan lunas.</td></tr>
                     <tr><td>Sesekali</td><td>Log Aktivitas</td><td>Perubahan data di luar jam kerja atau oleh akun tak terduga.</td></tr>
                 </tbody>
             </table>
@@ -190,28 +189,13 @@
         </div>
 
         <div class="stop">
-            <strong>Petugas terikat pada cluster</strong>
-            Sebelum menonaktifkan seorang petugas, pindahkan dulu clusternya ke petugas lain lewat
-            Master Cluster. Cluster wajib punya penanggung jawab, dan pelanggannya ikut berpindah
+            <strong>Petugas terikat pada daerah</strong>
+            Sebelum menonaktifkan seorang petugas, pindahkan dulu daerahnya ke petugas lain lewat
+            Master Daerah. Daerah wajib punya penanggung jawab, dan pelanggannya ikut berpindah
             begitu PIC diganti.
         </div>
 
         <p class="muted">Saat mengedit akun, kolom kata sandi yang dibiarkan kosong berarti kata sandi lama tidak diubah.</p>
-
-        <h2 id="pengaturan">Pengaturan</h2>
-        <p>Berisi <strong>Komisi Default (%)</strong> — persentase yang otomatis terisi saat membuat penerima komisi baru.</p>
-
-        <figure>
-            <img src="screenshots/pengaturan.png" alt="Halaman pengaturan dengan kolom komisi default dalam persen">
-            <figcaption>Pengaturan.</figcaption>
-        </figure>
-
-        <div class="note">
-            <strong>Hanya berlaku untuk penerima baru</strong>
-            Mengubah nilai ini <strong>tidak</strong> mengubah penerima komisi yang sudah ada,
-            karena persentase disimpan pada masing-masing penerima. Untuk mengubah yang lama,
-            sunting satu per satu di Master Data → Penerima Komisi.
-        </div>
 
         <h2 id="log">Log Aktivitas</h2>
         <p>
@@ -246,15 +230,15 @@
                     <tr><td>Adakah petugas yang menahan setoran?</td><td>Laporan Setoran Petugas</td></tr>
                     <tr><td>Siapa saja yang menunggak dan berapa nilainya?</td><td>Laporan Tunggakan</td></tr>
                     <tr><td>Berapa komisi yang harus dibayar?</td><td>Laporan Komisi</td></tr>
-                    <tr><td>Wilayah mana yang penagihannya paling lemah?</td><td>Laporan Per Cluster</td></tr>
+                    <tr><td>Wilayah mana yang penagihannya paling lemah?</td><td>Laporan Per Daerah</td></tr>
                     <tr><td>Apakah jumlah pelanggan bertumbuh?</td><td>Laporan Pelanggan</td></tr>
                 </tbody>
             </table>
         </div>
 
         <figure>
-            <img src="screenshots/laporan-per-cluster.png" alt="Laporan per cluster dengan kolom tagihan, terbayar, tingkat penagihan, dan jumlah penunggak">
-            <figcaption>Laporan Per Cluster — membandingkan kinerja wilayah.</figcaption>
+            <img src="screenshots/laporan-per-cluster.png" alt="Laporan per daerah dengan kolom tagihan, terbayar, tingkat penagihan, dan jumlah penunggak">
+            <figcaption>Laporan Per Daerah — membandingkan kinerja wilayah.</figcaption>
         </figure>
 
         <figure>
@@ -271,13 +255,13 @@
         <p>
             Menu Penagihan dan Master Data bekerja persis sama seperti pada admin. Bila Anda perlu
             langsung turun tangan — mencatat pembayaran, mengisolir pelanggan, mengubah paket, atau
-            mengatur cluster — ikuti <a href="admin.html">Panduan Admin Penagihan</a>.
+            mengatur daerah — ikuti <a href="admin.html">Panduan Admin Penagihan</a>.
         </p>
 
         <div class="cards">
             <a class="card role-card" href="admin.html#tagihan"><h3>Tagihan Bulanan</h3><p>Daftar tagihan &amp; catat pembayaran.</p></a>
             <a class="card role-card" href="admin.html#setoran"><h3>Setoran Petugas</h3><p>Arti kolom Harus Ditarik, Sisa, dan cara mencatat.</p></a>
-            <a class="card role-card" href="admin.html#cluster"><h3>Master Cluster</h3><p>Membagi wilayah &amp; mengganti petugas PIC.</p></a>
+            <a class="card role-card" href="admin.html#daerah"><h3>Master Daerah</h3><p>Membagi wilayah &amp; mengganti petugas PIC.</p></a>
         </div>
     </main>
 </div>

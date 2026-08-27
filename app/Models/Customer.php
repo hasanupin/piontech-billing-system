@@ -21,7 +21,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'whatsapp_number',
     'cluster_id',
     'package_id',
-    'referral_id',
     'billing_amount',
     'address',
     'maps_url',
@@ -105,12 +104,6 @@ class Customer extends Model
     public function package(): BelongsTo
     {
         return $this->belongsTo(Package::class);
-    }
-
-    /** Penerima komisi atas referal pelanggan ini — nullable. */
-    public function referral(): BelongsTo
-    {
-        return $this->belongsTo(CommissionRecipient::class, 'referral_id');
     }
 
     public function transactions(): HasMany

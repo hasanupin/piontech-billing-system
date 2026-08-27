@@ -4,13 +4,11 @@ namespace App\Filament\Field\Resources\Customers;
 
 use App\Enums\CustomerStatus;
 use App\Enums\Role;
-use App\Filament\Field\Resources\Customers\Pages\CreateFieldCustomer;
-use App\Filament\Field\Resources\Customers\Pages\EditFieldCustomer;
 use App\Filament\Field\Resources\Customers\Pages\ListFieldCustomers;
 use App\Filament\Resources\Customers\Schemas\CustomerForm;
+use App\Models\Cluster;
 use App\Models\Customer;
 use App\Services\ScopeService;
-use Filament\Actions\EditAction;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
@@ -23,8 +21,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * Data Pelanggan versi mobile petugas — form dipakai bersama dengan panel
- * admin (CustomerForm), list-nya kartu ber-search nama.
+ * Data Pelanggan versi mobile petugas — READ-ONLY: petugas hanya melihat dan
+ * menyaring, tidak boleh menambah atau menyunting (PRD §6). Konsekuensi yang
+ * disengaja: foto rumah & titik koordinat kini hanya bisa diisi admin.
  */
 class FieldCustomerResource extends Resource
 {
@@ -50,6 +49,21 @@ class FieldCustomerResource extends Resource
     public static function canAccess(): bool
     {
         return auth()->user()?->isRole(Role::FieldOfficer) ?? false;
+    }
+
+    /**
+     * Daerah yang dipegang petugas login — dipakai bersama filter di list ini
+     * dan di halaman Transaksi. Lewat ScopeService, satu pintu scoping daerah.
+     *
+     * @return array<string, string>
+     */
+    public static function daerahOptions(): array
+    {
+        return app(ScopeService::class)
+            ->scopeClustersForUser(Cluster::query(), auth()->user())
+            ->orderBy('name')
+            ->pluck('name', 'id')
+            ->all();
     }
 
     public static function getEloquentQuery(): Builder
@@ -110,18 +124,17 @@ class FieldCustomerResource extends Resource
                 Filter::make('due_today')
                     ->label(__('Due Today'))
                     ->query(fn (Builder $query): Builder => $query->dueToday()),
-            ])
-            ->recordActions([
-                EditAction::make(),
+                SelectFilter::make('cluster_id')
+                    ->label(__('Cluster'))
+                    ->options(fn (): array => self::daerahOptions()),
             ]);
+        // Sengaja tanpa recordActions(): petugas read-only atas data pelanggan (PRD §6).
     }
 
     public static function getPages(): array
     {
         return [
             'index' => ListFieldCustomers::route('/'),
-            'create' => CreateFieldCustomer::route('/create'),
-            'edit' => EditFieldCustomer::route('/{record}/edit'),
         ];
     }
 }

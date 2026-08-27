@@ -8,7 +8,6 @@ use App\Filament\Field\Pages\Transactions;
 use App\Filament\Field\Resources\Customers\FieldCustomerResource;
 use App\Filament\Field\Resources\Transactions\FieldTransactionResource;
 use App\Http\Middleware\LogPageVisit;
-use App\Http\Middleware\SetLocale;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -104,7 +103,6 @@ class FieldPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                SetLocale::class,
             ])
             ->renderHook(
                 PanelsRenderHook::SIMPLE_LAYOUT_START,
